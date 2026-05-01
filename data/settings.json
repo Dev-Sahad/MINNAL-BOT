@@ -1,15 +1,21 @@
 {
   "bot": {
     "name": "MINNAL",
-    "tagline": "The Lightning Engine",
+    "tagline": "The Lightning Engine ⚡",
     "developer": "@sxhd_sha",
-    "embed_color": "#9b59b6"
+    "embed_color": "#9b59b6",
+    "prefix": "/"
   },
   "welcome": {
     "enabled": true,
     "channel_id": "1463854523935359115",
-    "title": "**`#———————————————————————————————#`** ✨ **WELCOME TO THE {server}**",
-    "message": "**`|`** 👋 **IDENTITY:** {member}\n**`|`** 📑 **REGISTRY:** `Member #{member guild.member_count}`\n**`|`** 📡 **LOCATION:** `{member guild.name}`\n**`#———————————————————————————————#`**\n\n**`|`** 📜 **CORE PROTOCOLS:**\n**`|`** 1️⃣ Respect the ` Community`.\n**`|`** 2️⃣ Stay active and have ` Fun `.\n**`|`** 3️⃣ Enjoy your ` Stay `\n\n**`#———————————————————————————————#`**\n**` STATUS: ACCESS GRANTED `**"
+    "title": "# WELCOME TO THE {server} ⚡",
+    "message": "**`|`** 👋 **IDENTITY:** {member}\n**`|`** 📑 **REGISTRY:** `Member #{member guild.member_count}`\n**`|`** 📡 **LOCATION:** `{member guild.name}`\n\n**`|`** 📜 **CORE PROTOCOLS:**\n**`|`** 1️⃣ Respect the ` Community`.\n**`|`** 2️⃣ Stay active and have ` Fun `.\n**`|`** 3️⃣ Enjoy your ` Stay `\n\n**` STATUS: ACCESS GRANTED `**",
+    "image_url": "",
+    "leave_enabled": true,
+    "leave_channel_id": "",
+    "leave_message": "# A MEMBER HAS DEPARTED 💔\n\n**`|`** 👤 **IDENTITY:** `{member.name}`\n**`|`** 🆔 **SERIAL:** `{member.id}`\n**`|`** 📉 **CAPACITY:** `{member guild.member_count}`\n\n**`|`** 🕊️ *Safe travels through the network...*\n**`|`** *We hope to see you back soon.* ✨\n\n**` STATUS: SESSION TERMINATED `**\n",
+    "leave_image_url": ""
   },
   "summon": {
     "enabled": true,
@@ -93,5 +99,77 @@
     "enabled": true,
     "default_source": "soundcloud",
     "max_queue_size": 50
+  },
+  "channels": {
+    "welcome_channel_id": "",
+    "leave_channel_id": "",
+    "music_channel_id": "",
+    "ticket_channel_id": "",
+    "game_update_channel_id": "",
+    "meme_channel_id": "",
+    "log_channel_id": "",
+    "announcement_channel_id": "",
+    "giveaway_channel_id": "",
+    "default_voice_channel_id": "",
+    "announcement_voice_channel_id": ""
+  },
+  "roles": {
+    "verified_role_id": "1499465467402653767",
+    "unverified_role_id": "1499465138011504692",
+    "staff_role_id": "1459134621596782662, 1499490549621850184",
+    "muted_role_id": "",
+    "bot_role_id": "1465847775991169250",
+    "member_role_id": "1467757383844626585"
+  },
+  "dm_join": {
+    "enabled": true,
+    "message": "# > **`💠`** **SYSTEM ACCESS GRANTED**\n****\n**ID:**  {member}\n**DOMAIN:** {server}\n****\n**`|`** <a:pikachu_wave:1457775314233987134>  Welcome to the network.\n**`|`** 📜 Review the  <#1463854868379865233>\n**`|`** ⚡ Status:  Connected <a:online:785231363715760208> \n****"
+  },
+  "verify": {
+    "enabled": true,
+    "channel_id": "1465673172656586873",
+    "verified_role_id": "1499465467402653767",
+    "unverified_role_id": "1499465138011504692",
+    "message": "Click the button below to verify!",
+    "button_label": "✅ Verify"
+  },
+  "tickets": {
+    "enabled": true,
+    "channel_id": "1463953874019680276",
+    "staff_role_id": "1459134621596782662, 1499490549621850184",
+    "category_id": "1478672082169630841",
+    "log_channel_id": "1499449737047314543",
+    "welcome_message": "Hello {user}! Our staff will assist you shortly.",
+    "close_message": "Ticket closed."
+  },
+  "autorole": {
+    "enabled": false,
+    "role_ids": [],
+    "bot_role_id": ""
+  },
+  "giveaways": {
+    "enabled": true,
+    "manager_role_id": "1459134621596782662",
+    "default_duration_hours": 24,
+    "default_winners": 1
+  },
+  "sentinel": {
+    "enabled": true,
+    "log_channel_id": "1499449737047314543",
+    "anti_spam": true,
+    "anti_raid": true,
+    "anti_link": true,
+    "warn_limit": 3,
+    "mute_duration_minutes": 10
+  },
+  "ghost_ping": {
+    "enabled": true,
+    "log_channel_id": "1499449737047314543",
+    "alert_message": "👻 {user} ghost pinged {target}!"
+  },
+  "codepilot": {
+    "enabled": true,
+    "allowed_channel_ids": [],
+    "max_response_length": 2000
   }
 }
