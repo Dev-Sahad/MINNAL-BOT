@@ -123,6 +123,11 @@ class AdminCog(commands.Cog):
     async def clear(self, interaction: discord.Interaction, amount: int):
         await interaction.channel.purge(limit=amount)
         await interaction.response.send_message(f"⚡ Purged `{amount}` messages.", ephemeral=True)
+    
+    @app_commands.command(name="hidden_command", description="This is a hidden command", hidden=True)
+    @is_admin()
+    async def hidden_command(self, interaction: discord.Interaction):
+        await interaction.response.send_message("You found the hidden command!", ephemeral=True)
 
 async def setup(bot):
     await bot.add_cog(AdminCog(bot))
