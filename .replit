@@ -29,8 +29,8 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "PORT=5000 python discord_bot.py"
-waitForPort = 5000
+args = "PORT=6000 python discord_bot.py"
+waitForPort = 6000
 
 [agent]
 stack = "PNPM_WORKSPACE"
@@ -43,6 +43,10 @@ timeoutMs = 20000
 [[ports]]
 localPort = 5000
 externalPort = 5000
+
+[[ports]]
+localPort = 6000
+externalPort = 6000
 
 [[ports]]
 localPort = 8000

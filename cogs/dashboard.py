@@ -20,8 +20,23 @@ DATA_DIR = "data"
 SETTINGS_FILE = os.path.join(DATA_DIR, "settings.json")
 
 DEFAULT_SETTINGS = {
-    "bot": {"name": "MINNAL", "tagline": "The Lightning Engine", "developer": "Sahad", "embed_color": "#9b59b6"},
-    "welcome": {"enabled": True, "channel_id": "", "title": "Welcome!", "message": "Hey {member}!", "image_url": ""},
+    "bot": {"name": "MINNAL", "tagline": "The Lightning Engine", "developer": "Sahad", "embed_color": "#9b59b6", "prefix": "/"},
+    "channels": {
+        "welcome_channel_id": "", "leave_channel_id": "", "music_channel_id": "",
+        "ticket_channel_id": "", "game_update_channel_id": "", "meme_channel_id": "",
+        "log_channel_id": "", "announcement_channel_id": "", "giveaway_channel_id": "",
+        "default_voice_channel_id": "", "announcement_voice_channel_id": ""
+    },
+    "roles": {
+        "verified_role_id": "", "unverified_role_id": "", "staff_role_id": "",
+        "muted_role_id": "", "bot_role_id": "", "member_role_id": ""
+    },
+    "welcome": {"enabled": True, "channel_id": "", "title": "Welcome!", "message": "Hey {member}!", "image_url": "", "leave_enabled": True, "leave_message": "Goodbye {member}!", "leave_image_url": ""},
+    "dm_join": {"enabled": True, "message": "👋 Hey **{member}**, welcome to **{server}**!\n\nPlease verify your account to join the fam! 🎉"},
+    "verify": {"enabled": True, "channel_id": "", "verified_role_id": "", "unverified_role_id": "", "message": "Click the button below to verify!", "button_label": "✅ Verify"},
+    "tickets": {"enabled": True, "channel_id": "", "staff_role_id": "", "category_id": "", "welcome_message": "Hello {user}! Our staff will assist you shortly.", "close_message": "Ticket closed.", "log_channel_id": ""},
+    "autorole": {"enabled": False, "role_ids": [], "bot_role_id": ""},
+    "giveaways": {"enabled": True, "manager_role_id": "", "default_duration_hours": 24, "default_winners": 1},
     "summon": {"enabled": True, "trigger_channel_id": "", "domain_names": ["Minnal Cave", "Sukuna's Shrine", "Gojo's Infinity"]},
     "voices": {"enabled": True, "voice_list": [
         {"spell": "Domain Expansion!", "anime": "Sukuna", "voice_text": "Domain Expansion!", "audio_file": ""},
@@ -29,8 +44,11 @@ DEFAULT_SETTINGS = {
     ]},
     "bio": {"rotation_minutes": 5, "statuses": [{"type": "watching", "name": "Server"}]},
     "memes": {"enabled": True, "channel_id": "", "troll_messages": ["{target} got trolled!"]},
-    "economy": {"currency_name": "Coins", "currency_symbol": "⚡", "starting_balance": 100, "daily_reward": 100, "weekly_reward": 1000},
-    "music": {"enabled": True, "default_source": "soundcloud", "max_queue_size": 50}
+    "economy": {"currency_name": "Coins", "currency_symbol": "⚡", "starting_balance": 100, "daily_reward": 100, "weekly_reward": 1000, "rob_enabled": True, "gamble_enabled": True},
+    "music": {"enabled": True, "default_source": "soundcloud", "max_queue_size": 50, "channel_id": "", "dj_role_id": "", "volume": 100},
+    "sentinel": {"enabled": True, "log_channel_id": "", "anti_spam": True, "anti_raid": True, "anti_link": False, "warn_limit": 3, "mute_duration_minutes": 10},
+    "ghost_ping": {"enabled": True, "log_channel_id": "", "alert_message": "👻 {user} ghost pinged {target}!"},
+    "codepilot": {"enabled": True, "allowed_channel_ids": [], "max_response_length": 2000}
 }
 
 
@@ -100,7 +118,7 @@ class Dashboard(commands.Cog):
         self.bg_task = self.bot.loop.create_task(self.run_server())
 
     async def run_server(self):
-        PORT = int(os.getenv('PORT', 8080))
+        PORT = int(os.getenv('PORT', 6000))
         config = uvicorn.Config(app, host="0.0.0.0", port=PORT, log_level="error")
         server = uvicorn.Server(config)
         try:

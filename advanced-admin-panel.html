@@ -1,415 +1,929 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MINNAL Admin</title>
+<title>MINNAL Admin Panel</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,sans-serif;background:#f0f0f5;color:#111;min-height:100vh;padding:16px}
-input,textarea,select{width:100%;padding:10px 12px;border:1.5px solid #ccc;border-radius:8px;font-size:14px;background:#fff;color:#111;font-family:inherit;margin-bottom:10px}
-input:focus,textarea:focus{outline:none;border-color:#007aff}
-label{display:block;font-size:13px;font-weight:600;margin-bottom:4px;color:#333}
-.btn{background:#007aff;color:#fff;border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600;width:100%;display:block}
-.btn-sm{padding:7px 12px;font-size:12px;width:auto;display:inline-block}
-.btn-red{background:#ff3b30}.btn-green{background:#34c759}.btn-gray{background:#e0e0e5;color:#333}
-.card{background:#fff;border-radius:12px;padding:18px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.07)}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.tabs{display:flex;gap:0;margin-bottom:14px;overflow-x:auto;background:#fff;border-radius:10px;padding:4px;box-shadow:0 1px 4px rgba(0,0,0,0.07)}
-.tab{flex:0 0 auto;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;color:#888;border:none;background:none}
-.tab.active{background:#007aff;color:#fff}
-.pg{display:none}.pg.on{display:block}
-.tog{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.tog input{width:auto;margin:0}
-.lst{background:#f5f5f7;border-radius:8px;padding:10px;max-height:280px;overflow-y:auto;margin-bottom:8px}
-.row2{display:flex;gap:6px;align-items:center;background:#fff;border-radius:6px;padding:6px;margin-bottom:5px}
-.row2 input{flex:1;margin:0;padding:6px 8px;font-size:13px}
-.empty{text-align:center;color:#999;padding:14px;font-size:13px}
-.vrow{background:#fff;border:1px solid #e0e0e5;border-radius:8px;padding:12px;margin-bottom:8px}
-.vrow input{margin-bottom:5px}
-.vbottom{display:flex;gap:6px;align-items:center}
-.vbottom input{flex:1;margin:0}
-.badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;margin-left:5px}
-.ba{background:#d1f4d1;color:#198038}.bt{background:#fff4d1;color:#b87000}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:#111;color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;z-index:999;transition:transform 0.3s}
-.toast.show{transform:translateX(-50%) translateY(0)}
-.toast.err{background:#ff3b30}
-.info{background:#e8f4ff;border-left:3px solid #007aff;padding:10px 12px;border-radius:6px;font-size:12px;color:#005bb5;margin-bottom:12px}
-.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-radius:50%;border-top-color:#fff;animation:spin 0.8s linear infinite;margin-right:6px;vertical-align:middle}
+:root{
+  --bg:#0e0e14;--surface:#16161f;--card:#1c1c28;--border:#2a2a3a;
+  --accent:#7c5cfc;--accent2:#5c9afc;--green:#2ecc71;--red:#e74c3c;--yellow:#f39c12;
+  --text:#e8e8f0;--muted:#7a7a9a;--input:#12121c;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+input,textarea,select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--input);color:var(--text);font-family:inherit;margin-bottom:10px;transition:border .2s}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+select option{background:var(--card)}
+.btn{background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:opacity .15s,transform .1s}
+.btn:hover{opacity:.85}
+.btn:active{transform:scale(.97)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-full{width:100%;display:block;padding:11px}
+.btn-red{background:var(--red)}
+.btn-green{background:var(--green)}
+.btn-gray{background:var(--border);color:var(--text)}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px}
+.card h3{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.tog{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 14px;background:var(--surface);border-radius:8px;border:1px solid var(--border)}
+.tog label{margin:0;text-transform:none;font-size:13px;font-weight:600;color:var(--text);cursor:pointer}
+.tog input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.tog-desc{font-size:11px;color:var(--muted);margin-left:28px;margin-top:-10px;margin-bottom:10px}
+
+/* Sidebar layout */
+#app{display:flex;min-height:100vh}
+#sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+#sidebar-logo{padding:20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+#sidebar-logo .icon{font-size:24px}
+#sidebar-logo .title{font-weight:700;font-size:15px}
+#sidebar-logo .sub{font-size:11px;color:var(--muted)}
+.nav-group{padding:8px 0}
+.nav-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:6px 16px 3px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);border-radius:0;transition:background .15s,color .15s;border-left:3px solid transparent}
+.nav-item:hover{background:var(--card);color:var(--text)}
+.nav-item.active{background:rgba(124,92,252,.12);color:var(--accent);border-left-color:var(--accent);font-weight:600}
+.nav-item .ni{font-size:16px;width:20px;text-align:center}
+
+#content{flex:1;overflow-y:auto}
+#topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12;position:sticky;top:0;z-index:10}
+#topbar-title{font-weight:700;font-size:15px}
+#topbar-actions{display:flex;gap:8px;align-items:center}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:5px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+#main-area{padding:24px;max-width:860px}
+.pg{display:none}
+.pg.on{display:block}
+
+/* Stats bar */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.stat .sv{font-size:20px;font-weight:700;color:var(--accent)}
+.stat .sl{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* List items */
+.lst{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px;max-height:260px;overflow-y:auto;margin-bottom:10px}
+.lst-item{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;margin-bottom:4px;background:var(--card);border:1px solid var(--border)}
+.lst-item input{flex:1;margin:0;padding:6px 8px;font-size:12px}
+.lst-item:last-child{margin-bottom:0}
+.empty-lst{text-align:center;color:var(--muted);padding:16px;font-size:12px}
+
+/* Voice entries */
+.vcard{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px}
+.vcard-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.badge{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700}
+.badge-audio{background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3)}
+.badge-tts{background:rgba(243,156,18,.15);color:var(--yellow);border:1px solid rgba(243,156,18,.3)}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--border);color:var(--text);padding:12px 18px;border-radius:10px;font-size:13px;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok::before{content:'✅';font-size:16px}
+.toast.err::before{content:'❌';font-size:16px}
+.toast.info::before{content:'ℹ️';font-size:16px}
+
+/* Info box */
+.info-box{background:rgba(92,154,252,.08);border:1px solid rgba(92,154,252,.25);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--accent2);margin-bottom:14px}
+.warn-box{background:rgba(243,156,18,.08);border:1px solid rgba(243,156,18,.25);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--yellow);margin-bottom:14px}
+
+/* Login */
+#loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:36px;width:360px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.login-card h2{font-size:20px;margin-bottom:6px}
+.login-card p{color:var(--muted);font-size:13px;margin-bottom:24px}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#fff;animation:spin .7s linear infinite;margin-right:6px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:400px){.row{grid-template-columns:1fr}}
+
+/* Divider */
+.divider{height:1px;background:var(--border);margin:16px 0}
+.section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+
+/* Tag/chip input */
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:var(--input);border:1.5px solid var(--border);border-radius:8px;min-height:40px;margin-bottom:10px;cursor:text}
+.chip{background:rgba(124,92,252,.2);color:var(--accent);border:1px solid rgba(124,92,252,.3);border-radius:4px;padding:3px 8px;font-size:12px;display:flex;align-items:center;gap:5px}
+.chip button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:0;line-height:1}
+.chip-input{border:none;background:none;outline:none;color:var(--text);font-size:13px;min-width:80px;flex:1}
+
+@media(max-width:700px){
+  #sidebar{display:none}
+  .row2,.row3{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
 
-<div id="loginPage" style="max-width:380px;margin:40px auto">
-  <div class="card" style="text-align:center">
+<!-- LOGIN -->
+<div id="loginPage">
+  <div class="login-card">
     <div style="font-size:44px;margin-bottom:12px">⚡</div>
-    <h2 style="margin-bottom:6px">MINNAL Admin</h2>
-    <p style="color:#666;margin-bottom:20px;font-size:14px">Bot Configuration</p>
+    <h2>MINNAL Admin</h2>
+    <p>Bot Configuration Panel</p>
     <label>Password</label>
     <div style="position:relative">
-      <input type="password" id="pwdIn" placeholder="Enter password" style="padding-right:44px">
-      <button onclick="togglePwd()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;padding:4px;margin:0;width:auto" id="eyeBtn">👁️</button>
+      <input type="password" id="pwdIn" placeholder="Enter admin password" style="padding-right:42px;margin-bottom:14px">
+      <button onclick="togglePwd()" style="position:absolute;right:10px;top:9px;background:none;border:none;cursor:pointer;font-size:17px;padding:0">👁️</button>
     </div>
-    <button class="btn" id="loginBtn" onclick="tryLogin()">Login</button>
-    <div id="loginErr" style="color:#ff3b30;font-size:13px;margin-top:10px;min-height:18px"></div>
-    <div style="margin-top:14px;padding:10px;background:#f5f5f7;border-radius:8px;font-size:12px;color:#666">
-      Password: <strong>MINNAL@2025</strong>
-    </div>
+    <button class="btn btn-full" id="loginBtn" onclick="tryLogin()">Login</button>
+    <div id="loginErr" style="color:var(--red);font-size:12px;margin-top:10px;min-height:16px"></div>
   </div>
 </div>
 
-<div id="mainPage" style="display:none;max-width:780px;margin:0 auto">
-  <div class="card">
-    <h2 style="margin-bottom:4px">⚡ MINNAL Admin</h2>
-    <p style="color:#666;font-size:13px;margin-bottom:12px">Configuration Panel</p>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button class="btn btn-sm btn-gray" onclick="doExport()">📥 Export</button>
-      <button class="btn btn-sm btn-gray" onclick="document.getElementById('impFile').click()">📤 Import</button>
-      <input type="file" id="impFile" accept=".json" style="display:none" onchange="doImport(event)">
-      <button class="btn btn-sm btn-red" onclick="doLogout()">Logout</button>
+<!-- APP -->
+<div id="app" style="display:none">
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div id="sidebar-logo">
+      <div class="icon">⚡</div>
+      <div><div class="title">MINNAL</div><div class="sub">Admin Panel</div></div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Overview</div>
+      <div class="nav-item active" data-pg="dashboard"><span class="ni">📊</span>Dashboard</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Server Setup</div>
+      <div class="nav-item" data-pg="channels"><span class="ni">📢</span>Channels</div>
+      <div class="nav-item" data-pg="roles"><span class="ni">🏷️</span>Roles</div>
+      <div class="nav-item" data-pg="bot"><span class="ni">🤖</span>Bot Identity</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Member System</div>
+      <div class="nav-item" data-pg="welcome"><span class="ni">👋</span>Welcome / Leave</div>
+      <div class="nav-item" data-pg="dm_join"><span class="ni">📩</span>DM on Join</div>
+      <div class="nav-item" data-pg="verify"><span class="ni">✅</span>Verification</div>
+      <div class="nav-item" data-pg="autorole"><span class="ni">🎖️</span>Auto-Role</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Moderation</div>
+      <div class="nav-item" data-pg="tickets"><span class="ni">🎫</span>Tickets</div>
+      <div class="nav-item" data-pg="sentinel"><span class="ni">🛡️</span>Sentinel</div>
+      <div class="nav-item" data-pg="ghost_ping"><span class="ni">👻</span>Ghost Ping</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Features</div>
+      <div class="nav-item" data-pg="giveaways"><span class="ni">🎉</span>Giveaways</div>
+      <div class="nav-item" data-pg="economy"><span class="ni">💰</span>Economy</div>
+      <div class="nav-item" data-pg="music"><span class="ni">🎵</span>Music</div>
+      <div class="nav-item" data-pg="memes"><span class="ni">🎌</span>Memes</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Custom</div>
+      <div class="nav-item" data-pg="voices"><span class="ni">🎤</span>Voice Spells</div>
+      <div class="nav-item" data-pg="summon"><span class="ni">🔮</span>Summon</div>
+      <div class="nav-item" data-pg="bio"><span class="ni">💫</span>Bot Status</div>
+      <div class="nav-item" data-pg="codepilot"><span class="ni">🤖</span>CodePilot AI</div>
+    </div>
+
+    <div style="padding:12px;margin-top:auto;border-top:1px solid var(--border)">
+      <button class="btn btn-full btn-gray" style="margin-bottom:6px" onclick="doExport()">📥 Export JSON</button>
+      <button class="btn btn-full btn-red" onclick="doLogout()">Logout</button>
     </div>
   </div>
 
-  <div class="info">Edit → Save → Export JSON → Upload to GitHub at <strong>data/settings.json</strong></div>
-
-  <div class="tabs" id="tabBar">
-    <button class="tab active" data-t="bot">Bot</button>
-    <button class="tab" data-t="welcome">Welcome</button>
-    <button class="tab" data-t="summon">Summon</button>
-    <button class="tab" data-t="voices">Voices</button>
-    <button class="tab" data-t="bio">Bio</button>
-    <button class="tab" data-t="memes">Memes</button>
-    <button class="tab" data-t="economy">Economy</button>
-    <button class="tab" data-t="music">Music</button>
-  </div>
-
-  <div class="pg on" id="pg-bot">
-    <div class="card">
-      <h3 style="margin-bottom:14px">🤖 Bot</h3>
-      <div class="row">
-        <div><label>Name</label><input id="bName"></div>
-        <div><label>Tagline</label><input id="bTag"></div>
-        <div><label>Developer</label><input id="bDev"></div>
-        <div><label>Color</label><input id="bColor"></div>
+  <!-- Main Content -->
+  <div id="content">
+    <div id="topbar">
+      <div id="topbar-title">Dashboard</div>
+      <div id="topbar-actions">
+        <span id="botStatus" style="font-size:12px;color:var(--muted)">Connecting...</span>
+        <button class="btn btn-sm btn-gray" onclick="document.getElementById('impFile').click()">📤 Import</button>
+        <input type="file" id="impFile" accept=".json" style="display:none" onchange="doImport(event)">
       </div>
-      <button class="btn" onclick="save('bot')">💾 Save Bot</button>
     </div>
-  </div>
 
-  <div class="pg" id="pg-welcome">
-    <div class="card">
-      <h3 style="margin-bottom:14px">👋 Welcome</h3>
-      <div class="tog"><input type="checkbox" id="wcOn"><label for="wcOn">Enable</label></div>
-      <label>Channel ID</label><input id="wcCh">
-      <label>Title</label><input id="wcTi">
-      <label>Message</label><textarea id="wcMsg" style="height:70px;margin-bottom:10px"></textarea>
-      <button class="btn" onclick="save('welcome')">💾 Save Welcome</button>
-    </div>
-  </div>
+    <div id="main-area">
 
-  <div class="pg" id="pg-summon">
-    <div class="card">
-      <h3 style="margin-bottom:14px">⚡ Summon</h3>
-      <div class="tog"><input type="checkbox" id="smOn"><label for="smOn">Enable</label></div>
-      <label>Trigger Channel ID</label><input id="smCh">
-      <label>Domain Names</label>
-      <div class="lst" id="domLst"></div>
-      <div style="display:flex;gap:6px">
-        <input id="newDom" placeholder="Domain name" style="margin:0">
-        <button class="btn btn-sm btn-green" onclick="addDom()">Add</button>
+      <!-- DASHBOARD -->
+      <div class="pg on" id="pg-dashboard">
+        <div class="stats-row" id="statsRow">
+          <div class="stat"><div class="sv" id="st-latency">—</div><div class="sl">Latency</div></div>
+          <div class="stat"><div class="sv" id="st-uptime">—</div><div class="sl">Uptime</div></div>
+          <div class="stat"><div class="sv" id="st-guilds">—</div><div class="sl">Servers</div></div>
+          <div class="stat"><div class="sv" id="st-users">—</div><div class="sl">Members</div></div>
+        </div>
+        <div class="stats-row">
+          <div class="stat"><div class="sv" id="st-cpu">—</div><div class="sl">CPU</div></div>
+          <div class="stat"><div class="sv" id="st-ram">—</div><div class="sl">RAM</div></div>
+          <div class="stat"><div class="sv" style="color:var(--green)" id="st-online">—</div><div class="sl">Status</div></div>
+          <div class="stat"><div class="sv" style="font-size:14px" id="st-ping">—</div><div class="sl">Ping</div></div>
+        </div>
+        <div class="card">
+          <h3>⚡ Quick Actions</h3>
+          <div class="row2">
+            <button class="btn btn-green" onclick="loadStats()">↻ Refresh Stats</button>
+            <button class="btn btn-gray" onclick="doExport()">📥 Export Config</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>📋 Config Summary</h3>
+          <div id="cfgSummary" style="font-size:12px;color:var(--muted);line-height:1.8"></div>
+        </div>
       </div>
-      <button class="btn" style="margin-top:12px" onclick="save('summon')">💾 Save Summon</button>
-    </div>
-  </div>
 
-  <div class="pg" id="pg-voices">
-    <div class="card">
-      <h3 style="margin-bottom:14px">🎤 Voices</h3>
-      <div class="tog"><input type="checkbox" id="voOn"><label for="voOn">Enable</label></div>
-      <div id="voiceLst"></div>
-      <div class="card" style="background:#f5f5f7;margin-top:10px">
-        <strong style="display:block;margin-bottom:8px">Add Voice</strong>
-        <label>Spell</label><input id="nVsp">
-        <label>Character</label><input id="nVan">
-        <label>TTS text</label><input id="nVtx">
-        <label>Audio file (optional)</label><input id="nVfi" placeholder="sukuna.mp3">
-        <button class="btn btn-green" onclick="addVoice()">Add Voice</button>
+      <!-- CHANNELS -->
+      <div class="pg" id="pg-channels">
+        <div class="card">
+          <h3>📢 Channel IDs</h3>
+          <div class="info-box">Right-click a channel in Discord → Copy Channel ID. Enable Developer Mode: User Settings → Advanced → Developer Mode.</div>
+          <div class="section-title">Text Channels</div>
+          <div class="row2">
+            <div><label>Welcome Channel</label><input id="ch-welcome" placeholder="Channel ID"></div>
+            <div><label>Leave Channel</label><input id="ch-leave" placeholder="Channel ID"></div>
+            <div><label>Music Channel</label><input id="ch-music" placeholder="Channel ID"></div>
+            <div><label>Ticket Channel</label><input id="ch-ticket" placeholder="Channel ID"></div>
+            <div><label>Game Updates</label><input id="ch-game" placeholder="Channel ID"></div>
+            <div><label>Meme Channel</label><input id="ch-meme" placeholder="Channel ID"></div>
+            <div><label>Log Channel</label><input id="ch-log" placeholder="Channel ID"></div>
+            <div><label>Announcement Channel</label><input id="ch-announcement" placeholder="Channel ID"></div>
+            <div><label>Giveaway Channel</label><input id="ch-giveaway" placeholder="Channel ID"></div>
+          </div>
+          <div class="divider"></div>
+          <div class="section-title">Voice Channels</div>
+          <div class="row2">
+            <div><label>Default Voice Channel</label><input id="ch-voice-default" placeholder="Channel ID or leave blank"></div>
+            <div><label>Announcement Voice</label><input id="ch-voice-announcement" placeholder="Channel ID"></div>
+          </div>
+          <button class="btn btn-full" style="margin-top:4px" onclick="save('channels')">💾 Save Channels</button>
+        </div>
       </div>
-      <button class="btn" style="margin-top:12px" onclick="save('voices')">💾 Save Voices</button>
-    </div>
-  </div>
 
-  <div class="pg" id="pg-bio">
-    <div class="card">
-      <h3 style="margin-bottom:14px">💫 Bio</h3>
-      <label>Rotation (minutes)</label><input type="number" id="biRot">
-      <label>Statuses</label>
-      <div class="lst" id="bioLst"></div>
-      <select id="nBt" style="margin-bottom:6px">
-        <option value="watching">Watching</option>
-        <option value="playing">Playing</option>
-        <option value="listening">Listening</option>
-        <option value="competing">Competing</option>
-      </select>
-      <div style="display:flex;gap:6px">
-        <input id="nBn" placeholder="Status text" style="margin:0">
-        <button class="btn btn-sm btn-green" onclick="addBio()">Add</button>
+      <!-- ROLES -->
+      <div class="pg" id="pg-roles">
+        <div class="card">
+          <h3>🏷️ Role IDs</h3>
+          <div class="info-box">Right-click a role in Discord → Copy Role ID. Enable Developer Mode first.</div>
+          <div class="section-title">Member Roles</div>
+          <div class="row2">
+            <div><label>Verified Role</label><input id="rl-verified" placeholder="Role ID"></div>
+            <div><label>Unverified Role</label><input id="rl-unverified" placeholder="Role ID (given on join)"></div>
+            <div><label>Member Role</label><input id="rl-member" placeholder="Role ID"></div>
+            <div><label>Muted Role</label><input id="rl-muted" placeholder="Role ID"></div>
+          </div>
+          <div class="divider"></div>
+          <div class="section-title">Staff Roles</div>
+          <div class="row2">
+            <div><label>Staff / Admin Role</label><input id="rl-staff" placeholder="Role ID"></div>
+            <div><label>Bot Role</label><input id="rl-bot" placeholder="Role ID for bots"></div>
+          </div>
+          <button class="btn btn-full" style="margin-top:4px" onclick="save('roles')">💾 Save Roles</button>
+        </div>
       </div>
-      <button class="btn" style="margin-top:12px" onclick="save('bio')">💾 Save Bio</button>
-    </div>
-  </div>
 
-  <div class="pg" id="pg-memes">
-    <div class="card">
-      <h3 style="margin-bottom:14px">🎌 Memes</h3>
-      <div class="tog"><input type="checkbox" id="mmOn"><label for="mmOn">Enable</label></div>
-      <label>Channel ID</label><input id="mmCh">
-      <label>Troll Messages ({target})</label>
-      <div class="lst" id="trolLst"></div>
-      <div style="display:flex;gap:6px">
-        <input id="nTr" placeholder="{target} got trolled!" style="margin:0">
-        <button class="btn btn-sm btn-green" onclick="addTrol()">Add</button>
-      </div>
-      <button class="btn" style="margin-top:12px" onclick="save('memes')">💾 Save Memes</button>
-    </div>
-  </div>
-
-  <div class="pg" id="pg-economy">
-    <div class="card">
-      <h3 style="margin-bottom:14px">💰 Economy</h3>
-      <div class="row">
-        <div><label>Currency</label><input id="ecNm"></div>
-        <div><label>Symbol</label><input id="ecSy"></div>
-        <div><label>Starting</label><input type="number" id="ecSt"></div>
-        <div><label>Daily</label><input type="number" id="ecDa"></div>
-        <div><label>Weekly</label><input type="number" id="ecWk"></div>
-      </div>
-      <button class="btn" onclick="save('economy')">💾 Save Economy</button>
-    </div>
-  </div>
-
-  <div class="pg" id="pg-music">
-    <div class="card">
-      <h3 style="margin-bottom:14px">🎵 Music</h3>
-      <div class="tog"><input type="checkbox" id="muOn"><label for="muOn">Enable</label></div>
-      <label>Source</label>
-      <select id="muSrc" style="margin-bottom:10px"><option value="soundcloud">SoundCloud</option></select>
-      <label>Max Queue</label><input type="number" id="muQ">
-      <button class="btn" onclick="save('music')">💾 Save Music</button>
-    </div>
-  </div>
+      <!-- BOT IDENTITY -->
+      <div class="pg" id="pg-bot">
+        <div class="card">
+          <h3>🤖 Bot Identity</h3>
+          <div class="row2">
+            <div><label>Bot Name</label><input id="b-name"></div>
+            <div><label>Tagline</label><input id="b-tag"></div>
+            <div><label>Developer</label><input id="b-dev"></div>
+            <div><label>Command Prefix</label><input id="b-prefix" placeholder="/">
 </div>
+          </div>
+          <label>Embed Color</label>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+            <input type="color" id="b-color-picker" style="width:44px;height:38px;padding:2px;margin:0;cursor:pointer">
+            <input id="b-color" placeholder="#9b59b6" style="flex:1;margin:0">
+          </div>
+          <button class="btn btn-full" onclick="save('bot')">💾 Save Bot Identity</button>
+        </div>
+      </div>
+
+      <!-- WELCOME / LEAVE -->
+      <div class="pg" id="pg-welcome">
+        <div class="card">
+          <h3>👋 Welcome Messages</h3>
+          <div class="tog"><input type="checkbox" id="wc-on"><label for="wc-on">Enable Welcome Messages</label></div>
+          <div class="row2">
+            <div><label>Welcome Channel ID</label><input id="wc-ch" placeholder="Channel ID"></div>
+            <div><label>Title</label><input id="wc-title" placeholder="Welcome!"></div>
+          </div>
+          <label>Welcome Message</label>
+          <textarea id="wc-msg" style="height:80px;margin-bottom:10px" placeholder="Hey {member}, welcome to {server}! 🎉&#10;&#10;Variables: {member}, {server}, {count}"></textarea>
+          <label>Banner Image URL (optional)</label>
+          <input id="wc-img" placeholder="https://...">
+        </div>
+        <div class="card">
+          <h3>👋 Leave Messages</h3>
+          <div class="tog"><input type="checkbox" id="lv-on"><label for="lv-on">Enable Leave Messages</label></div>
+          <div><label>Leave Channel ID</label><input id="lv-ch" placeholder="Channel ID (uses leave channel if blank)"></div>
+          <label>Leave Message</label>
+          <textarea id="lv-msg" style="height:70px;margin-bottom:10px" placeholder="Goodbye {member}... 👋&#10;&#10;Variables: {member}, {server}, {count}"></textarea>
+          <label>Leave Image URL (optional)</label>
+          <input id="lv-img" placeholder="https://...">
+          <button class="btn btn-full" onclick="save('welcome')">💾 Save Welcome & Leave</button>
+        </div>
+      </div>
+
+      <!-- DM JOIN -->
+      <div class="pg" id="pg-dm_join">
+        <div class="card">
+          <h3>📩 DM on Join</h3>
+          <div class="info-box">Bot will DM new members when they join the server. Variables: {member}, {server}</div>
+          <div class="tog"><input type="checkbox" id="dm-on"><label for="dm-on">Enable DM on Join</label></div>
+          <label>DM Message</label>
+          <textarea id="dm-msg" style="height:120px;margin-bottom:10px" placeholder="👋 Hey {member}, welcome to {server}!..."></textarea>
+          <button class="btn btn-full" onclick="save('dm_join')">💾 Save DM Settings</button>
+        </div>
+      </div>
+
+      <!-- VERIFY -->
+      <div class="pg" id="pg-verify">
+        <div class="card">
+          <h3>✅ Verification System</h3>
+          <div class="tog"><input type="checkbox" id="vr-on"><label for="vr-on">Enable Verification</label></div>
+          <div class="row2">
+            <div><label>Verify Channel ID</label><input id="vr-ch" placeholder="Channel ID"></div>
+            <div><label>Button Label</label><input id="vr-btn" placeholder="✅ Verify"></div>
+            <div><label>Verified Role ID</label><input id="vr-vrole" placeholder="Role given after verify"></div>
+            <div><label>Unverified Role ID</label><input id="vr-urole" placeholder="Role given on join"></div>
+          </div>
+          <label>Verification Message</label>
+          <textarea id="vr-msg" style="height:80px;margin-bottom:10px" placeholder="Click the button below to verify and gain access!"></textarea>
+          <button class="btn btn-full" onclick="save('verify')">💾 Save Verify</button>
+        </div>
+      </div>
+
+      <!-- AUTO-ROLE -->
+      <div class="pg" id="pg-autorole">
+        <div class="card">
+          <h3>🎖️ Auto-Role</h3>
+          <div class="info-box">Roles automatically given to new members when they join.</div>
+          <div class="tog"><input type="checkbox" id="ar-on"><label for="ar-on">Enable Auto-Role</label></div>
+          <label>Auto-Role IDs (one per line)</label>
+          <textarea id="ar-roles" style="height:100px;margin-bottom:10px" placeholder="Role ID 1&#10;Role ID 2&#10;Role ID 3"></textarea>
+          <label>Bot Auto-Role ID (given to bots joining)</label>
+          <input id="ar-botrole" placeholder="Role ID for bots">
+          <button class="btn btn-full" onclick="save('autorole')">💾 Save Auto-Role</button>
+        </div>
+      </div>
+
+      <!-- TICKETS -->
+      <div class="pg" id="pg-tickets">
+        <div class="card">
+          <h3>🎫 Ticket System</h3>
+          <div class="tog"><input type="checkbox" id="tk-on"><label for="tk-on">Enable Tickets</label></div>
+          <div class="row2">
+            <div><label>Ticket Panel Channel</label><input id="tk-ch" placeholder="Where Open Ticket button goes"></div>
+            <div><label>Staff Role ID</label><input id="tk-staff" placeholder="Role that can see tickets"></div>
+            <div><label>Ticket Category ID</label><input id="tk-cat" placeholder="Category for ticket channels"></div>
+            <div><label>Log Channel ID</label><input id="tk-log" placeholder="Where closed tickets are logged"></div>
+          </div>
+          <div class="divider"></div>
+          <label>Welcome Message (when ticket opens)</label>
+          <textarea id="tk-welcome" style="height:80px;margin-bottom:10px" placeholder="Hello {user}! Our staff will assist you shortly. Please describe your issue.&#10;Variables: {user}, {ticket_id}"></textarea>
+          <label>Close Message</label>
+          <textarea id="tk-close" style="height:60px;margin-bottom:10px" placeholder="This ticket has been closed."></textarea>
+          <button class="btn btn-full" onclick="save('tickets')">💾 Save Tickets</button>
+        </div>
+      </div>
+
+      <!-- SENTINEL -->
+      <div class="pg" id="pg-sentinel">
+        <div class="card">
+          <h3>🛡️ Sentinel Auto-Mod</h3>
+          <div class="tog"><input type="checkbox" id="sn-on"><label for="sn-on">Enable Sentinel</label></div>
+          <div><label>Log Channel ID</label><input id="sn-log" placeholder="Channel to send moderation logs"></div>
+          <div class="section-title" style="margin-top:4px">Protection Modules</div>
+          <div class="tog"><input type="checkbox" id="sn-spam"><label for="sn-spam">Anti-Spam — Block message flooding</label></div>
+          <div class="tog"><input type="checkbox" id="sn-raid"><label for="sn-raid">Anti-Raid — Block mass join attacks</label></div>
+          <div class="tog"><input type="checkbox" id="sn-link"><label for="sn-link">Anti-Link — Block invite & external links</label></div>
+          <div class="divider"></div>
+          <div class="row2">
+            <div><label>Max Warnings before action</label><input type="number" id="sn-warn" placeholder="3" min="1" max="10"></div>
+            <div><label>Auto-Mute Duration (minutes)</label><input type="number" id="sn-mute" placeholder="10" min="1"></div>
+          </div>
+          <button class="btn btn-full" onclick="save('sentinel')">💾 Save Sentinel</button>
+        </div>
+      </div>
+
+      <!-- GHOST PING -->
+      <div class="pg" id="pg-ghost_ping">
+        <div class="card">
+          <h3>👻 Ghost Ping Detection</h3>
+          <div class="tog"><input type="checkbox" id="gp-on"><label for="gp-on">Enable Ghost Ping Detection</label></div>
+          <div><label>Log / Alert Channel ID</label><input id="gp-log" placeholder="Channel ID where alerts are sent"></div>
+          <label>Alert Message</label>
+          <input id="gp-msg" placeholder="👻 {user} ghost pinged {target}!">
+          <div class="info-box" style="margin-top:4px">Variables: {user} (who pinged), {target} (who was pinged), {channel}</div>
+          <button class="btn btn-full" style="margin-top:8px" onclick="save('ghost_ping')">💾 Save Ghost Ping</button>
+        </div>
+      </div>
+
+      <!-- GIVEAWAYS -->
+      <div class="pg" id="pg-giveaways">
+        <div class="card">
+          <h3>🎉 Giveaway Settings</h3>
+          <div class="tog"><input type="checkbox" id="gw-on"><label for="gw-on">Enable Giveaways</label></div>
+          <div class="row2">
+            <div><label>Giveaway Manager Role ID</label><input id="gw-role" placeholder="Role that can create giveaways"></div>
+            <div><label>Default Channel ID</label><input id="gw-ch" placeholder="giveaway_channel_id from Channels tab"></div>
+            <div><label>Default Duration (hours)</label><input type="number" id="gw-dur" placeholder="24" min="1"></div>
+            <div><label>Default Winners</label><input type="number" id="gw-win" placeholder="1" min="1"></div>
+          </div>
+          <button class="btn btn-full" onclick="save('giveaways')">💾 Save Giveaways</button>
+        </div>
+      </div>
+
+      <!-- ECONOMY -->
+      <div class="pg" id="pg-economy">
+        <div class="card">
+          <h3>💰 Economy System</h3>
+          <div class="row2">
+            <div><label>Currency Name</label><input id="ec-name" placeholder="Coins"></div>
+            <div><label>Currency Symbol</label><input id="ec-sym" placeholder="⚡"></div>
+            <div><label>Starting Balance</label><input type="number" id="ec-start" placeholder="100"></div>
+            <div><label>Daily Reward</label><input type="number" id="ec-daily" placeholder="100"></div>
+            <div><label>Weekly Reward</label><input type="number" id="ec-weekly" placeholder="1000"></div>
+          </div>
+          <div class="section-title" style="margin-top:4px">Features</div>
+          <div class="tog"><input type="checkbox" id="ec-rob"><label for="ec-rob">Enable Rob command</label></div>
+          <div class="tog"><input type="checkbox" id="ec-gamble"><label for="ec-gamble">Enable Gamble command</label></div>
+          <button class="btn btn-full" onclick="save('economy')">💾 Save Economy</button>
+        </div>
+      </div>
+
+      <!-- MUSIC -->
+      <div class="pg" id="pg-music">
+        <div class="card">
+          <h3>🎵 Music System</h3>
+          <div class="tog"><input type="checkbox" id="mu-on"><label for="mu-on">Enable Music</label></div>
+          <div class="row2">
+            <div><label>Music Channel ID</label><input id="mu-ch" placeholder="Restrict music to channel (blank = any)"></div>
+            <div><label>DJ Role ID</label><input id="mu-dj" placeholder="Role that controls music (blank = everyone)"></div>
+          </div>
+          <div class="row2">
+            <div>
+              <label>Default Source</label>
+              <select id="mu-src" style="margin-bottom:10px">
+                <option value="soundcloud">SoundCloud</option>
+                <option value="youtube">YouTube</option>
+                <option value="spotify">Spotify</option>
+              </select>
+            </div>
+            <div><label>Max Queue Size</label><input type="number" id="mu-queue" placeholder="50"></div>
+            <div><label>Default Volume (%)</label><input type="number" id="mu-vol" placeholder="100" min="1" max="200"></div>
+          </div>
+          <button class="btn btn-full" onclick="save('music')">💾 Save Music</button>
+        </div>
+      </div>
+
+      <!-- MEMES -->
+      <div class="pg" id="pg-memes">
+        <div class="card">
+          <h3>🎌 Meme System</h3>
+          <div class="tog"><input type="checkbox" id="mm-on"><label for="mm-on">Enable Meme System</label></div>
+          <div><label>Meme Channel ID</label><input id="mm-ch" placeholder="Channel ID"></div>
+          <label>Troll Messages <span style="color:var(--muted);font-weight:400">(use {target} for the victim)</span></label>
+          <div class="lst" id="trolLst"></div>
+          <div style="display:flex;gap:8px">
+            <input id="newTrol" placeholder="{target} got absolutely destroyed! 💀" style="margin:0">
+            <button class="btn btn-green btn-sm" onclick="addTrol()">Add</button>
+          </div>
+          <button class="btn btn-full" style="margin-top:12px" onclick="save('memes')">💾 Save Memes</button>
+        </div>
+      </div>
+
+      <!-- VOICES -->
+      <div class="pg" id="pg-voices">
+        <div class="card">
+          <h3>🎤 Voice Spells</h3>
+          <div class="tog"><input type="checkbox" id="vo-on"><label for="vo-on">Enable Voice Spells</label></div>
+          <div id="voiceList"></div>
+          <div class="card" style="background:var(--surface);margin-top:10px">
+            <div class="section-title">Add New Voice</div>
+            <div class="row2">
+              <div><label>Spell Trigger</label><input id="nv-spell" placeholder="Domain Expansion!"></div>
+              <div><label>Character</label><input id="nv-char" placeholder="Sukuna"></div>
+            </div>
+            <label>TTS Text</label><input id="nv-tts" placeholder="Text to speak">
+            <label>Audio File (optional)</label><input id="nv-file" placeholder="sukuna.mp3 (leave blank for TTS)">
+            <button class="btn btn-green btn-full" onclick="addVoice()">➕ Add Voice</button>
+          </div>
+          <button class="btn btn-full" style="margin-top:10px" onclick="save('voices')">💾 Save Voices</button>
+        </div>
+      </div>
+
+      <!-- SUMMON -->
+      <div class="pg" id="pg-summon">
+        <div class="card">
+          <h3>🔮 Summon System</h3>
+          <div class="tog"><input type="checkbox" id="sm-on"><label for="sm-on">Enable Summon</label></div>
+          <div><label>Trigger Channel ID</label><input id="sm-ch" placeholder="Channel where summon is activated"></div>
+          <label>Domain Names</label>
+          <div class="lst" id="domLst"></div>
+          <div style="display:flex;gap:8px">
+            <input id="newDom" placeholder="Minnal Cave" style="margin:0">
+            <button class="btn btn-green btn-sm" onclick="addDom()">Add</button>
+          </div>
+          <button class="btn btn-full" style="margin-top:12px" onclick="save('summon')">💾 Save Summon</button>
+        </div>
+      </div>
+
+      <!-- BIO / STATUS -->
+      <div class="pg" id="pg-bio">
+        <div class="card">
+          <h3>💫 Bot Status Rotation</h3>
+          <div><label>Rotation Interval (minutes)</label><input type="number" id="bi-rot" placeholder="5" min="1"></div>
+          <label>Statuses</label>
+          <div class="lst" id="bioLst"></div>
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <select id="nb-type" style="margin:0;width:140px;flex-shrink:0">
+              <option value="watching">Watching</option>
+              <option value="playing">Playing</option>
+              <option value="listening">Listening</option>
+              <option value="competing">Competing</option>
+              <option value="streaming">Streaming</option>
+            </select>
+            <input id="nb-name" placeholder="Status text" style="margin:0;flex:1">
+            <button class="btn btn-green btn-sm" onclick="addBio()">Add</button>
+          </div>
+          <button class="btn btn-full" style="margin-top:12px" onclick="save('bio')">💾 Save Status</button>
+        </div>
+      </div>
+
+      <!-- CODEPILOT -->
+      <div class="pg" id="pg-codepilot">
+        <div class="card">
+          <h3>🤖 CodePilot AI</h3>
+          <div class="tog"><input type="checkbox" id="cp-on"><label for="cp-on">Enable CodePilot AI</label></div>
+          <div class="info-box">CodePilot answers code questions in Discord. Restrict it to specific channels by adding Channel IDs below.</div>
+          <label>Allowed Channel IDs (one per line, blank = all channels)</label>
+          <textarea id="cp-channels" style="height:100px;margin-bottom:10px" placeholder="Leave blank to allow in all channels&#10;Or add Channel IDs:&#10;1234567890&#10;0987654321"></textarea>
+          <div><label>Max Response Length (characters)</label><input type="number" id="cp-maxlen" placeholder="2000" min="100" max="4000"></div>
+          <button class="btn btn-full" onclick="save('codepilot')">💾 Save CodePilot</button>
+        </div>
+      </div>
+
+    </div><!-- /main-area -->
+  </div><!-- /content -->
+</div><!-- /app -->
 
 <div class="toast" id="toast"></div>
 
 <script>
-// =====================================================
-// LOGIN - TWO METHODS (tries API first, falls back to offline)
-// =====================================================
+// ───────────────────────────────────────────
+// AUTH
+// ───────────────────────────────────────────
 const PWD = "MINNAL@2025";
+let token = "";
+let C = {};
 
 function togglePwd(){
   const i=document.getElementById('pwdIn');
-  const b=document.getElementById('eyeBtn');
-  if(i.type==='password'){i.type='text';b.textContent='🙈';}
-  else{i.type='password';b.textContent='👁️';}
+  i.type = i.type==='password'?'text':'password';
 }
+document.getElementById('pwdIn').onkeypress = e => { if(e.key==='Enter') tryLogin(); };
 
 async function tryLogin(){
   const pwd = document.getElementById('pwdIn').value.trim();
-  const errEl = document.getElementById('loginErr');
-  const btn = document.getElementById('loginBtn');
-
-  if(!pwd){ errEl.textContent='Enter password'; return; }
-
-  // First check password locally - NO WAITING!
-  if(pwd !== PWD){
-    errEl.textContent='Wrong password';
-    return;
-  }
-
-  // Password is correct - show dashboard immediately!
-  showDashboard();
-
-  // Then try to load config from server in background
-  btn.innerHTML='<span class="spin"></span>Loading...';
-  try{
-    const r = await fetch('/api/config', {
-      headers:{'Authorization':'Bearer '+pwd}
-    });
-    if(r.ok){
-      const data = await r.json();
-      C = data.config;
-      fillUI();
-      toast('Connected to bot!');
-    }
-  }catch(e){
-    // Server not available - use local config
-    toast('Using local config');
-  }
-}
-
-function showDashboard(){
+  const err = document.getElementById('loginErr');
+  if(!pwd){ err.textContent='Enter password'; return; }
+  if(pwd !== PWD){ err.textContent='Wrong password'; return; }
+  token = pwd;
   document.getElementById('loginPage').style.display='none';
-  document.getElementById('mainPage').style.display='block';
-  loadConfig();
-  toast('Welcome!');
+  document.getElementById('app').style.display='flex';
+  await loadConfig();
+  loadStats();
+  setInterval(loadStats, 15000);
 }
-
-document.getElementById('pwdIn').onkeypress = function(e){
-  if(e.key==='Enter') tryLogin();
-};
 
 function doLogout(){
-  document.getElementById('mainPage').style.display='none';
-  document.getElementById('loginPage').style.display='block';
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
   document.getElementById('pwdIn').value='';
   document.getElementById('loginErr').textContent='';
-  document.getElementById('loginBtn').innerHTML='Login';
 }
 
-// =====================================================
-// CONFIG - saves locally AND tries to save to server
-// =====================================================
+// ───────────────────────────────────────────
+// NAVIGATION
+// ───────────────────────────────────────────
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+    el.classList.add('active');
+    const pg = document.getElementById('pg-'+el.dataset.pg);
+    if(pg) pg.classList.add('on');
+    document.getElementById('topbar-title').textContent = el.querySelector('span+*')?.textContent || el.textContent;
+  });
+});
+
+// ───────────────────────────────────────────
+// DEFAULTS
+// ───────────────────────────────────────────
 const DEF = {
-  bot:{name:"MINNAL",tagline:"The Lightning Engine",developer:"Sahad",embed_color:"#9b59b6"},
-  welcome:{enabled:true,channel_id:"",title:"Welcome!",message:"Hey {member}!"},
-  summon:{enabled:true,trigger_channel_id:"",domain_names:["Minnal Cave","Sukuna Shrine","Gojo Infinity","Itadori Pit","Megumi Realm"]},
-  voices:{enabled:true,voice_list:[
-    {spell:"Domain Expansion!",anime:"Sukuna",voice_text:"Domain Expansion!",audio_file:""},
-    {spell:"Rasengan!",anime:"Naruto",voice_text:"Rasengan!",audio_file:""},
-    {spell:"Kamehameha!",anime:"Goku",voice_text:"Kamehameha!",audio_file:""}
-  ]},
+  bot:{name:"MINNAL",tagline:"The Lightning Engine",developer:"Sahad",embed_color:"#9b59b6",prefix:"/"},
+  channels:{welcome_channel_id:"",leave_channel_id:"",music_channel_id:"",ticket_channel_id:"",game_update_channel_id:"",meme_channel_id:"",log_channel_id:"",announcement_channel_id:"",giveaway_channel_id:"",default_voice_channel_id:"",announcement_voice_channel_id:""},
+  roles:{verified_role_id:"",unverified_role_id:"",staff_role_id:"",muted_role_id:"",bot_role_id:"",member_role_id:""},
+  welcome:{enabled:true,channel_id:"",title:"Welcome!",message:"Hey {member}, welcome to {server}! 🎉",image_url:"",leave_enabled:true,leave_message:"Goodbye {member}... 👋",leave_image_url:""},
+  dm_join:{enabled:true,message:"👋 Hey **{member}**, welcome to **{server}**!\n\nPlease verify your account to join the fam! 🎉"},
+  verify:{enabled:true,channel_id:"",verified_role_id:"",unverified_role_id:"",message:"Click the button below to verify!",button_label:"✅ Verify"},
+  tickets:{enabled:true,channel_id:"",staff_role_id:"",category_id:"",welcome_message:"Hello {user}! Our staff will assist you shortly.",close_message:"Ticket closed.",log_channel_id:""},
+  autorole:{enabled:false,role_ids:[],bot_role_id:""},
+  giveaways:{enabled:true,manager_role_id:"",default_duration_hours:24,default_winners:1},
+  summon:{enabled:true,trigger_channel_id:"",domain_names:["Minnal Cave","Sukuna's Shrine","Gojo's Infinity"]},
+  voices:{enabled:true,voice_list:[{spell:"Domain Expansion!",anime:"Sukuna",voice_text:"Domain Expansion!",audio_file:""},{spell:"Rasengan!",anime:"Naruto",voice_text:"Rasengan!",audio_file:""}]},
   bio:{rotation_minutes:5,statuses:[{type:"watching",name:"Server"},{type:"playing",name:"/help | MINNAL"}]},
   memes:{enabled:true,channel_id:"",troll_messages:["{target} got trolled! 💀"]},
-  economy:{currency_name:"Coins",currency_symbol:"⚡",starting_balance:100,daily_reward:100,weekly_reward:1000},
-  music:{enabled:true,default_source:"soundcloud",max_queue_size:50}
+  economy:{currency_name:"Coins",currency_symbol:"⚡",starting_balance:100,daily_reward:100,weekly_reward:1000,rob_enabled:true,gamble_enabled:true},
+  music:{enabled:true,default_source:"soundcloud",max_queue_size:50,channel_id:"",dj_role_id:"",volume:100},
+  sentinel:{enabled:true,log_channel_id:"",anti_spam:true,anti_raid:true,anti_link:false,warn_limit:3,mute_duration_minutes:10},
+  ghost_ping:{enabled:true,log_channel_id:"",alert_message:"👻 {user} ghost pinged {target}!"},
+  codepilot:{enabled:true,allowed_channel_ids:[],max_response_length:2000}
 };
 
-let C = {};
-let token = PWD;
-
-function loadConfig(){
-  try{
-    const s=localStorage.getItem('mcfg');
-    C=s?JSON.parse(s):JSON.parse(JSON.stringify(DEF));
-    for(const k in DEF) if(!C[k]) C[k]=DEF[k];
-  }catch(e){ C=JSON.parse(JSON.stringify(DEF)); }
+// ───────────────────────────────────────────
+// CONFIG LOAD / FILL
+// ───────────────────────────────────────────
+async function loadConfig(){
+  try {
+    const r = await fetch('/api/config',{headers:{Authorization:'Bearer '+token}});
+    if(r.ok){ const d = await r.json(); C = d.config; }
+    else throw new Error();
+  } catch(e) {
+    const s = localStorage.getItem('minnalcfg');
+    C = s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEF));
+  }
+  for(const k in DEF) if(!C[k]) C[k] = JSON.parse(JSON.stringify(DEF[k]));
   fillUI();
+  updateSummary();
 }
 
-function writeLocal(){
-  try{ localStorage.setItem('mcfg',JSON.stringify(C)); }catch(e){}
-}
-
-function esc(s){ if(!s)return''; return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function gv(id){ return document.getElementById(id).value; }
-function sv(id,v){ document.getElementById(id).value=v==null?'':v; }
-function gc(id){ return document.getElementById(id).checked; }
-function sc(id,v){ document.getElementById(id).checked=v!==false; }
+function g(id){ return (document.getElementById(id)||{}).value||''; }
+function s(id,v){ const el=document.getElementById(id); if(el) el.value=v==null?'':v; }
+function gc(id){ return !!(document.getElementById(id)||{}).checked; }
+function sc(id,v){ const el=document.getElementById(id); if(el) el.checked=!!v; }
 
 function fillUI(){
-  sv('bName',C.bot.name); sv('bTag',C.bot.tagline); sv('bDev',C.bot.developer); sv('bColor',C.bot.embed_color);
-  sc('wcOn',C.welcome.enabled); sv('wcCh',C.welcome.channel_id); sv('wcTi',C.welcome.title); sv('wcMsg',C.welcome.message);
-  sc('smOn',C.summon.enabled); sv('smCh',C.summon.trigger_channel_id); rDoms();
-  sc('voOn',C.voices.enabled); rVoices();
-  sv('biRot',C.bio.rotation_minutes); rBio();
-  sc('mmOn',C.memes.enabled); sv('mmCh',C.memes.channel_id); rTrols();
-  sv('ecNm',C.economy.currency_name); sv('ecSy',C.economy.currency_symbol);
-  sv('ecSt',C.economy.starting_balance); sv('ecDa',C.economy.daily_reward); sv('ecWk',C.economy.weekly_reward);
-  sc('muOn',C.music.enabled); sv('muSrc',C.music.default_source); sv('muQ',C.music.max_queue_size);
+  const b=C.bot||DEF.bot;
+  s('b-name',b.name); s('b-tag',b.tagline); s('b-dev',b.developer); s('b-color',b.embed_color); s('b-prefix',b.prefix||'/');
+  s('b-color-picker',b.embed_color);
+
+  const ch=C.channels||DEF.channels;
+  s('ch-welcome',ch.welcome_channel_id); s('ch-leave',ch.leave_channel_id); s('ch-music',ch.music_channel_id);
+  s('ch-ticket',ch.ticket_channel_id); s('ch-game',ch.game_update_channel_id); s('ch-meme',ch.meme_channel_id);
+  s('ch-log',ch.log_channel_id); s('ch-announcement',ch.announcement_channel_id); s('ch-giveaway',ch.giveaway_channel_id);
+  s('ch-voice-default',ch.default_voice_channel_id); s('ch-voice-announcement',ch.announcement_voice_channel_id);
+
+  const rl=C.roles||DEF.roles;
+  s('rl-verified',rl.verified_role_id); s('rl-unverified',rl.unverified_role_id); s('rl-staff',rl.staff_role_id);
+  s('rl-muted',rl.muted_role_id); s('rl-bot',rl.bot_role_id); s('rl-member',rl.member_role_id);
+
+  const wc=C.welcome||DEF.welcome;
+  sc('wc-on',wc.enabled); s('wc-ch',wc.channel_id); s('wc-title',wc.title); s('wc-msg',wc.message); s('wc-img',wc.image_url);
+  sc('lv-on',wc.leave_enabled); s('lv-ch',wc.leave_channel_id||''); s('lv-msg',wc.leave_message||''); s('lv-img',wc.leave_image_url||'');
+
+  const dm=C.dm_join||DEF.dm_join;
+  sc('dm-on',dm.enabled); s('dm-msg',dm.message);
+
+  const vr=C.verify||DEF.verify;
+  sc('vr-on',vr.enabled); s('vr-ch',vr.channel_id); s('vr-btn',vr.button_label); s('vr-vrole',vr.verified_role_id); s('vr-urole',vr.unverified_role_id); s('vr-msg',vr.message);
+
+  const tk=C.tickets||DEF.tickets;
+  sc('tk-on',tk.enabled); s('tk-ch',tk.channel_id); s('tk-staff',tk.staff_role_id); s('tk-cat',tk.category_id); s('tk-log',tk.log_channel_id); s('tk-welcome',tk.welcome_message); s('tk-close',tk.close_message);
+
+  const ar=C.autorole||DEF.autorole;
+  sc('ar-on',ar.enabled); s('ar-roles',(ar.role_ids||[]).join('\n')); s('ar-botrole',ar.bot_role_id||'');
+
+  const gw=C.giveaways||DEF.giveaways;
+  sc('gw-on',gw.enabled); s('gw-role',gw.manager_role_id); s('gw-dur',gw.default_duration_hours); s('gw-win',gw.default_winners);
+
+  const sn=C.sentinel||DEF.sentinel;
+  sc('sn-on',sn.enabled); s('sn-log',sn.log_channel_id); sc('sn-spam',sn.anti_spam); sc('sn-raid',sn.anti_raid); sc('sn-link',sn.anti_link); s('sn-warn',sn.warn_limit); s('sn-mute',sn.mute_duration_minutes);
+
+  const gp=C.ghost_ping||DEF.ghost_ping;
+  sc('gp-on',gp.enabled); s('gp-log',gp.log_channel_id); s('gp-msg',gp.alert_message);
+
+  const mu=C.music||DEF.music;
+  sc('mu-on',mu.enabled); s('mu-ch',mu.channel_id||''); s('mu-dj',mu.dj_role_id||''); s('mu-src',mu.default_source); s('mu-queue',mu.max_queue_size); s('mu-vol',mu.volume||100);
+
+  const mm=C.memes||DEF.memes;
+  sc('mm-on',mm.enabled); s('mm-ch',mm.channel_id); renderTrols();
+
+  const sm=C.summon||DEF.summon;
+  sc('sm-on',sm.enabled); s('sm-ch',sm.trigger_channel_id); renderDoms();
+
+  sc('vo-on',(C.voices||DEF.voices).enabled); renderVoices();
+
+  const bi=C.bio||DEF.bio;
+  s('bi-rot',bi.rotation_minutes); renderBio();
+
+  const ec=C.economy||DEF.economy;
+  s('ec-name',ec.currency_name); s('ec-sym',ec.currency_symbol); s('ec-start',ec.starting_balance);
+  s('ec-daily',ec.daily_reward); s('ec-weekly',ec.weekly_reward); sc('ec-rob',ec.rob_enabled); sc('ec-gamble',ec.gamble_enabled);
+
+  const cp=C.codepilot||DEF.codepilot;
+  sc('cp-on',cp.enabled); s('cp-channels',(cp.allowed_channel_ids||[]).join('\n')); s('cp-maxlen',cp.max_response_length);
+
+  // Color picker sync
+  document.getElementById('b-color-picker').oninput = function(){ s('b-color',this.value); };
+  document.getElementById('b-color').oninput = function(){ if(/^#[0-9a-f]{6}$/i.test(this.value)) s('b-color-picker',this.value); };
 }
 
+// ───────────────────────────────────────────
+// SAVE
+// ───────────────────────────────────────────
 async function save(sec){
-  if(sec==='bot') C.bot={name:gv('bName'),tagline:gv('bTag'),developer:gv('bDev'),embed_color:gv('bColor')};
-  else if(sec==='welcome') C.welcome={enabled:gc('wcOn'),channel_id:gv('wcCh'),title:gv('wcTi'),message:gv('wcMsg')};
-  else if(sec==='summon') C.summon={enabled:gc('smOn'),trigger_channel_id:gv('smCh'),domain_names:C.summon.domain_names};
-  else if(sec==='voices') C.voices={enabled:gc('voOn'),voice_list:C.voices.voice_list};
-  else if(sec==='bio') C.bio={rotation_minutes:parseInt(gv('biRot'))||5,statuses:C.bio.statuses};
-  else if(sec==='memes') C.memes={enabled:gc('mmOn'),channel_id:gv('mmCh'),troll_messages:C.memes.troll_messages};
-  else if(sec==='economy') C.economy={currency_name:gv('ecNm'),currency_symbol:gv('ecSy'),starting_balance:parseInt(gv('ecSt'))||100,daily_reward:parseInt(gv('ecDa'))||100,weekly_reward:parseInt(gv('ecWk'))||1000};
-  else if(sec==='music') C.music={enabled:gc('muOn'),default_source:gv('muSrc'),max_queue_size:parseInt(gv('muQ'))||50};
-
-  // Save locally first
-  writeLocal();
-  toast('Saved locally!');
-
-  // Try to save to server
-  try{
+  collectSection(sec);
+  localStorage.setItem('minnalcfg', JSON.stringify(C));
+  try {
     const r = await fetch('/api/save',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-      body:JSON.stringify({section:sec, data:C[sec]})
+      body:JSON.stringify({section:sec,data:C[sec]})
     });
-    if(r.ok){
-      toast('✅ Saved to bot!');
-    } else {
-      toast('Saved locally. Export to apply to bot.');
-    }
-  }catch(e){
-    toast('Saved locally. Export to apply to bot.');
-  }
+    if(r.ok){ toast('✅ Saved to bot!','ok'); }
+    else { toast('Saved locally (bot offline)','info'); }
+  } catch(e){ toast('Saved locally (bot offline)','info'); }
+  updateSummary();
 }
 
-// TABS
-document.getElementById('tabBar').onclick=function(e){
-  if(!e.target.dataset.t)return;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
-  e.target.classList.add('active');
-  document.getElementById('pg-'+e.target.dataset.t).classList.add('on');
-};
+function collectSection(sec){
+  if(sec==='bot') C.bot={name:g('b-name'),tagline:g('b-tag'),developer:g('b-dev'),embed_color:g('b-color'),prefix:g('b-prefix')||'/'};
+  else if(sec==='channels') C.channels={welcome_channel_id:g('ch-welcome'),leave_channel_id:g('ch-leave'),music_channel_id:g('ch-music'),ticket_channel_id:g('ch-ticket'),game_update_channel_id:g('ch-game'),meme_channel_id:g('ch-meme'),log_channel_id:g('ch-log'),announcement_channel_id:g('ch-announcement'),giveaway_channel_id:g('ch-giveaway'),default_voice_channel_id:g('ch-voice-default'),announcement_voice_channel_id:g('ch-voice-announcement')};
+  else if(sec==='roles') C.roles={verified_role_id:g('rl-verified'),unverified_role_id:g('rl-unverified'),staff_role_id:g('rl-staff'),muted_role_id:g('rl-muted'),bot_role_id:g('rl-bot'),member_role_id:g('rl-member')};
+  else if(sec==='welcome') C.welcome={enabled:gc('wc-on'),channel_id:g('wc-ch'),title:g('wc-title'),message:g('wc-msg'),image_url:g('wc-img'),leave_enabled:gc('lv-on'),leave_channel_id:g('lv-ch'),leave_message:g('lv-msg'),leave_image_url:g('lv-img')};
+  else if(sec==='dm_join') C.dm_join={enabled:gc('dm-on'),message:g('dm-msg')};
+  else if(sec==='verify') C.verify={enabled:gc('vr-on'),channel_id:g('vr-ch'),verified_role_id:g('vr-vrole'),unverified_role_id:g('vr-urole'),message:g('vr-msg'),button_label:g('vr-btn')};
+  else if(sec==='tickets') C.tickets={enabled:gc('tk-on'),channel_id:g('tk-ch'),staff_role_id:g('tk-staff'),category_id:g('tk-cat'),log_channel_id:g('tk-log'),welcome_message:g('tk-welcome'),close_message:g('tk-close')};
+  else if(sec==='autorole'){const ids=g('ar-roles').split('\n').map(x=>x.trim()).filter(Boolean);C.autorole={enabled:gc('ar-on'),role_ids:ids,bot_role_id:g('ar-botrole')};}
+  else if(sec==='giveaways') C.giveaways={enabled:gc('gw-on'),manager_role_id:g('gw-role'),default_duration_hours:parseInt(g('gw-dur'))||24,default_winners:parseInt(g('gw-win'))||1};
+  else if(sec==='sentinel') C.sentinel={enabled:gc('sn-on'),log_channel_id:g('sn-log'),anti_spam:gc('sn-spam'),anti_raid:gc('sn-raid'),anti_link:gc('sn-link'),warn_limit:parseInt(g('sn-warn'))||3,mute_duration_minutes:parseInt(g('sn-mute'))||10};
+  else if(sec==='ghost_ping') C.ghost_ping={enabled:gc('gp-on'),log_channel_id:g('gp-log'),alert_message:g('gp-msg')};
+  else if(sec==='economy') C.economy={currency_name:g('ec-name'),currency_symbol:g('ec-sym'),starting_balance:parseInt(g('ec-start'))||100,daily_reward:parseInt(g('ec-daily'))||100,weekly_reward:parseInt(g('ec-weekly'))||1000,rob_enabled:gc('ec-rob'),gamble_enabled:gc('ec-gamble')};
+  else if(sec==='music') C.music={enabled:gc('mu-on'),channel_id:g('mu-ch'),dj_role_id:g('mu-dj'),default_source:g('mu-src'),max_queue_size:parseInt(g('mu-queue'))||50,volume:parseInt(g('mu-vol'))||100};
+  else if(sec==='memes') C.memes={enabled:gc('mm-on'),channel_id:g('mm-ch'),troll_messages:C.memes.troll_messages};
+  else if(sec==='summon') C.summon={enabled:gc('sm-on'),trigger_channel_id:g('sm-ch'),domain_names:C.summon.domain_names};
+  else if(sec==='voices') C.voices={enabled:gc('vo-on'),voice_list:C.voices.voice_list};
+  else if(sec==='bio') C.bio={rotation_minutes:parseInt(g('bi-rot'))||5,statuses:C.bio.statuses};
+  else if(sec==='codepilot'){const chs=g('cp-channels').split('\n').map(x=>x.trim()).filter(Boolean);C.codepilot={enabled:gc('cp-on'),allowed_channel_ids:chs,max_response_length:parseInt(g('cp-maxlen'))||2000};}
+}
 
-// DOMAINS
-function rDoms(){
-  const c=document.getElementById('domLst');c.innerHTML='';
-  if(!C.summon.domain_names.length){c.innerHTML='<div class="empty">No domains</div>';return;}
-  C.summon.domain_names.forEach(function(n,i){
-    const d=document.createElement('div');d.className='row2';
-    d.innerHTML='<input type="text" value="'+esc(n)+'"><button class="btn btn-sm btn-red" onclick="delDom('+i+')">Del</button>';
+// ───────────────────────────────────────────
+// STATS
+// ───────────────────────────────────────────
+async function loadStats(){
+  try {
+    const r = await fetch('/api/stats');
+    const d = await r.json();
+    if(d.online){
+      document.getElementById('st-latency').textContent=d.latency;
+      document.getElementById('st-uptime').textContent=d.uptime;
+      document.getElementById('st-guilds').textContent=d.guilds;
+      document.getElementById('st-users').textContent=d.users.toLocaleString();
+      document.getElementById('st-cpu').textContent=d.cpu;
+      document.getElementById('st-ram').textContent=d.ram;
+      document.getElementById('st-online').textContent='Online';
+      document.getElementById('st-ping').textContent=d.latency;
+      document.getElementById('botStatus').innerHTML='<span class="status-dot"></span>Bot Online';
+      document.getElementById('botStatus').style.color='var(--green)';
+    }
+  } catch(e){ document.getElementById('botStatus').textContent='Bot Offline'; }
+}
+
+function updateSummary(){
+  const lines=[];
+  const ch=C.channels||{};
+  const rl=C.roles||{};
+  const filled=k=>k&&k!=='';
+  lines.push(`<b>Channels configured:</b> ${Object.values(ch).filter(filled).length}/${Object.keys(ch).length}`);
+  lines.push(`<b>Roles configured:</b> ${Object.values(rl).filter(filled).length}/${Object.keys(rl).length}`);
+  lines.push(`<b>Economy:</b> ${(C.economy||{}).currency_symbol||'⚡'} ${(C.economy||{}).currency_name||'Coins'} — Daily: ${(C.economy||{}).daily_reward||100}`);
+  lines.push(`<b>Bot status rotations:</b> ${((C.bio||{}).statuses||[]).length} statuses, every ${(C.bio||{}).rotation_minutes||5}m`);
+  lines.push(`<b>Voice spells:</b> ${((C.voices||{}).voice_list||[]).length} spells`);
+  lines.push(`<b>Domain names:</b> ${((C.summon||{}).domain_names||[]).length}`);
+  document.getElementById('cfgSummary').innerHTML=lines.join('<br>');
+}
+
+// ───────────────────────────────────────────
+// LISTS — DOMAINS
+// ───────────────────────────────────────────
+function renderDoms(){
+  const c=document.getElementById('domLst'); c.innerHTML='';
+  const arr=(C.summon||{}).domain_names||[];
+  if(!arr.length){c.innerHTML='<div class="empty-lst">No domains added</div>';return;}
+  arr.forEach((n,i)=>{
+    const d=document.createElement('div'); d.className='lst-item';
+    d.innerHTML=`<input type="text" value="${esc(n)}"><button class="btn btn-sm btn-red" onclick="delDom(${i})">✕</button>`;
     d.querySelector('input').onchange=function(){C.summon.domain_names[i]=this.value;};
     c.appendChild(d);
   });
 }
-function addDom(){const v=gv('newDom').trim();if(!v)return;C.summon.domain_names.push(v);sv('newDom','');rDoms();}
-function delDom(i){C.summon.domain_names.splice(i,1);rDoms();}
+function addDom(){const v=document.getElementById('newDom').value.trim();if(!v)return;C.summon.domain_names.push(v);document.getElementById('newDom').value='';renderDoms();}
+function delDom(i){C.summon.domain_names.splice(i,1);renderDoms();}
 
-// VOICES
-function rVoices(){
-  const c=document.getElementById('voiceLst');c.innerHTML='';
-  if(!C.voices.voice_list.length){c.innerHTML='<div class="empty">No voices</div>';return;}
-  C.voices.voice_list.forEach(function(v,i){
-    const d=document.createElement('div');d.className='vrow';
-    const ha=v.audio_file&&v.audio_file.trim();
-    const bg=ha?'<span class="badge ba">Audio</span>':'<span class="badge bt">TTS</span>';
-    d.innerHTML='<div style="font-weight:600;font-size:13px;margin-bottom:8px">#'+(i+1)+bg+'</div>'+
-      '<input type="text" value="'+esc(v.spell)+'" placeholder="Spell">'+
-      '<input type="text" value="'+esc(v.anime)+'" placeholder="Character">'+
-      '<input type="text" value="'+esc(v.voice_text)+'" placeholder="TTS text">'+
-      '<div class="vbottom"><input type="text" value="'+esc(v.audio_file||'')+'" placeholder="Audio file"><button class="btn btn-sm btn-red" onclick="delVoice('+i+')">Del</button></div>';
+// ───────────────────────────────────────────
+// LISTS — VOICES
+// ───────────────────────────────────────────
+function renderVoices(){
+  const c=document.getElementById('voiceList'); c.innerHTML='';
+  const arr=(C.voices||{}).voice_list||[];
+  if(!arr.length){c.innerHTML='<div class="empty-lst">No voice spells added</div>';return;}
+  arr.forEach((v,i)=>{
+    const hasAudio=v.audio_file&&v.audio_file.trim();
+    const d=document.createElement('div'); d.className='vcard';
+    d.innerHTML=`<div class="vcard-head"><strong>#${i+1} — ${esc(v.spell)}</strong><div style="display:flex;gap:6px;align-items:center"><span class="badge ${hasAudio?'badge-audio':'badge-tts'}">${hasAudio?'🔊 Audio':'🗣️ TTS'}</span><button class="btn btn-sm btn-red" onclick="delVoice(${i})">✕</button></div></div>
+      <div class="row2"><div><label>Spell Trigger</label><input value="${esc(v.spell)}"></div><div><label>Character</label><input value="${esc(v.anime)}"></div></div>
+      <div class="row2"><div><label>TTS Text</label><input value="${esc(v.voice_text)}"></div><div><label>Audio File</label><input value="${esc(v.audio_file||'')}"></div></div>`;
     const ins=d.querySelectorAll('input');
-    ins[0].onchange=function(){C.voices.voice_list[i].spell=this.value;};
-    ins[1].onchange=function(){C.voices.voice_list[i].anime=this.value;};
-    ins[2].onchange=function(){C.voices.voice_list[i].voice_text=this.value;};
-    ins[3].onchange=function(){C.voices.voice_list[i].audio_file=this.value;rVoices();};
+    ins[0].onchange=e=>{C.voices.voice_list[i].spell=e.target.value;};
+    ins[1].onchange=e=>{C.voices.voice_list[i].anime=e.target.value;};
+    ins[2].onchange=e=>{C.voices.voice_list[i].voice_text=e.target.value;};
+    ins[3].onchange=e=>{C.voices.voice_list[i].audio_file=e.target.value;renderVoices();};
     c.appendChild(d);
   });
 }
 function addVoice(){
-  const s=gv('nVsp').trim(),a=gv('nVan').trim(),t=gv('nVtx').trim(),f=gv('nVfi').trim();
-  if(!s||!a||!t){toast('Fill required fields',true);return;}
-  C.voices.voice_list.push({spell:s,anime:a,voice_text:t,audio_file:f});
-  sv('nVsp','');sv('nVan','');sv('nVtx','');sv('nVfi','');
-  rVoices();toast('Voice added!');
+  const spell=g('nv-spell').trim(),chr=g('nv-char').trim(),tts=g('nv-tts').trim(),file=g('nv-file').trim();
+  if(!spell||!chr){toast('Fill Spell and Character','err');return;}
+  C.voices.voice_list.push({spell,anime:chr,voice_text:tts||spell,audio_file:file});
+  ['nv-spell','nv-char','nv-tts','nv-file'].forEach(id=>s(id,''));
+  renderVoices(); toast('Voice spell added!','ok');
 }
-function delVoice(i){C.voices.voice_list.splice(i,1);rVoices();}
+function delVoice(i){C.voices.voice_list.splice(i,1);renderVoices();}
 
-// BIO
-function rBio(){
-  const c=document.getElementById('bioLst');c.innerHTML='';
-  if(!C.bio.statuses.length){c.innerHTML='<div class="empty">No statuses</div>';return;}
-  C.bio.statuses.forEach(function(st,i){
-    const d=document.createElement('div');d.className='row2';
-    d.innerHTML='<select style="flex:0 0 100px;margin:0;padding:6px"><option value="watching"'+(st.type==='watching'?' selected':'')+'>Watch</option><option value="playing"'+(st.type==='playing'?' selected':'')+'>Play</option><option value="listening"'+(st.type==='liste
+// ───────────────────────────────────────────
+// LISTS — BIO
+// ───────────────────────────────────────────
+function renderBio(){
+  const c=document.getElementById('bioLst'); c.innerHTML='';
+  const arr=(C.bio||{}).statuses||[];
+  if(!arr.length){c.innerHTML='<div class="empty-lst">No statuses added</div>';return;}
+  arr.forEach((st,i)=>{
+    const d=document.createElement('div'); d.className='lst-item';
+    d.innerHTML=`<span style="font-size:11px;color:var(--muted);width:70px;flex-shrink:0;text-transform:capitalize">${st.type}</span><input type="text" value="${esc(st.name)}"><button class="btn btn-sm btn-red" onclick="delBio(${i})">✕</button>`;
+    d.querySelector('input').onchange=function(){C.bio.statuses[i].name=this.value;};
+    c.appendChild(d);
+  });
+}
+function addBio(){
+  const t=g('nb-type'),n=g('nb-name').trim();
+  if(!n)return;
+  C.bio.statuses.push({type:t,name:n}); s('nb-name',''); renderBio();
+}
+function delBio(i){C.bio.statuses.splice(i,1);renderBio();}
+
+// ───────────────────────────────────────────
+// LISTS — TROLL MSGS
+// ───────────────────────────────────────────
+function renderTrols(){
+  const c=document.getElementById('trolLst'); c.innerHTML='';
+  const arr=(C.memes||{}).troll_messages||[];
+  if(!arr.length){c.innerHTML='<div class="empty-lst">No troll messages</div>';return;}
+  arr.forEach((m,i)=>{
+    const d=document.createElement('div'); d.className='lst-item';
+    d.innerHTML=`<input type="text" value="${esc(m)}"><button class="btn btn-sm btn-red" onclick="delTrol(${i})">✕</button>`;
+    d.querySelector('input').onchange=function(){C.memes.troll_messages[i]=this.value;};
+    c.appendChild(d);
+  });
+}
+function addTrol(){const v=document.getElementById('newTrol').value.trim();if(!v)return;C.memes.troll_messages.push(v);document.getElementById('newTrol').value='';renderTrols();}
+function delTrol(i){C.memes.troll_messages.splice(i,1);renderTrols();}
+
+// ───────────────────────────────────────────
+// IMPORT / EXPORT
+// ───────────────────────────────────────────
+function doExport(){
+  const blob=new Blob([JSON.stringify(C,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='minnal-settings.json'; a.click();
+  toast('Config exported!','ok');
+}
+function doImport(e){
+  const file=e.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{C=JSON.parse(ev.target.result);fillUI();localStorage.setItem('minnalcfg',JSON.stringify(C));toast('Config imported!','ok');}
+    catch(er){toast('Invalid JSON file','err');}
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+// ───────────────────────────────────────────
+// TOAST
+// ───────────────────────────────────────────
+let toastTimer;
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+type+' show';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>
