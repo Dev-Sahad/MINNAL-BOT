@@ -1,0 +1,453 @@
+<!-- ========================================================================== -->
+<!-- WEBHOOK INTEGRATION FOR WEB PANEL -->
+<!-- Add this to your advanced-admin-panel.html -->
+<!-- ========================================================================== -->
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// WEBHOOK CONFIGURATION
+// ══════════════════════════════════════════════════════════════════════════════
+
+const WEBHOOK_CONFIG = {
+    url: '', // Will be set by user
+    serverToken: '', // From /link command
+    webhookSecret: '', // From /link command  
+    connected: false
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WEBHOOK FUNCTIONS
+// ══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Connect to webhook server
+ */
+async function connectWebhook() {
+    const webhookUrl = document.getElementById('webhookUrl').value.trim();
+    const serverToken = document.getElementById('webhookServerToken').value.trim();
+    const webhookSecret = document.getElementById('webhookSecret').value.trim();
+    
+    if (!webhookUrl || !serverToken || !webhookSecret) {
+        showNotification('⚠️ Please fill all webhook fields');
+        return;
+    }
+    
+    // Test connection
+    try {
+        const response = await fetch(`${webhookUrl}/webhook/health`);
+        const data = await response.json();
+        
+        if (data.status === 'online') {
+            WEBHOOK_CONFIG.url = webhookUrl;
+            WEBHOOK_CONFIG.serverToken = serverToken;
+            WEBHOOK_CONFIG.webhookSecret = webhookSecret;
+            WEBHOOK_CONFIG.connected = true;
+            
+            // Save to localStorage
+            localStorage.setItem('webhook_config', JSON.stringify(WEBHOOK_CONFIG));
+            
+            document.getElementById('webhookStatus').innerHTML = '✅ Connected';
+            showNotification('✅ Webhook connected successfully!');
+            
+            // Start real-time updates
+            startRealtimeUpdates();
+        }
+    } catch (error) {
+        showNotification('❌ Cannot connect to webhook server');
+        console.error(error);
+    }
+}
+
+/**
+ * Disconnect webhook
+ */
+function disconnectWebhook() {
+    WEBHOOK_CONFIG.connected = false;
+    localStorage.removeItem('webhook_config');
+    document.getElementById('webhookStatus').innerHTML = '❌ Disconnected';
+    showNotification('🔓 Webhook disconnected');
+    stopRealtimeUpdates();
+}
+
+/**
+ * Fetch bot stats from webhook
+ */
+async function fetchBotStats() {
+    if (!WEBHOOK_CONFIG.connected) return;
+    
+    try {
+        const response = await fetch(`${WEBHOOK_CONFIG.url}/webhook/web/stats`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${WEBHOOK_CONFIG.serverToken}`
+            }
+        });
+        
+        if (response.ok) {
+            const stats = await response.json();
+            updateBotStatsUI(stats);
+        }
+    } catch (error) {
+        console.error('Stats fetch error:', error);
+    }
+}
+
+/**
+ * Update UI with bot stats
+ */
+function updateBotStatsUI(stats) {
+    document.getElementById('botStatusIndicator').innerHTML = 
+        stats.status === 'online' ? '🟢 Online' : '🔴 Offline';
+    document.getElementById('botUptime').textContent = stats.uptime || '-';
+    document.getElementById('botServers').textContent = stats.servers || '-';
+    document.getElementById('botMembers').textContent = (stats.members || 0).toLocaleString();
+    document.getElementById('botLatency').textContent = (stats.latency || 0) + 'ms';
+    document.getElementById('botCommands').textContent = stats.commands_today || 0;
+    
+    // Update economy if available
+    if (stats.economy_users) {
+        document.getElementById('economyUsers').textContent = stats.economy_users.toLocaleString();
+        document.getElementById('totalCoins').textContent = (stats.total_coins || 0).toLocaleString();
+    }
+    
+    // Update last sync time
+    const now = new Date();
+    document.getElementById('lastSync').textContent = now.toLocaleTimeString();
+}
+
+/**
+ * Send channel update to bot
+ */
+async function updateChannelViaWebhook(channelType, channelId) {
+    if (!WEBHOOK_CONFIG.connected) {
+        showNotification('⚠️ Webhook not connected');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${WEBHOOK_CONFIG.url}/webhook/web/settings`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${WEBHOOK_CONFIG.serverToken}`
+            },
+            body: JSON.stringify({
+                type: 'channel',
+                channel_type: channelType,
+                channel_id: channelId
+            })
+        });
+        
+        if (response.ok) {
+            showNotification(`✅ ${channelType} channel updated!`);
+        } else {
+            showNotification('❌ Update failed');
+        }
+    } catch (error) {
+        showNotification('❌ Webhook error');
+        console.error(error);
+    }
+}
+
+/**
+ * Send message through webhook
+ */
+async function sendMessageViaWebhook(channelId, message) {
+    if (!WEBHOOK_CONFIG.connected) {
+        showNotification('⚠️ Webhook not connected');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${WEBHOOK_CONFIG.url}/webhook/web/command`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${WEBHOOK_CONFIG.serverToken}`
+            },
+            body: JSON.stringify({
+                command: 'send_message',
+                params: {
+                    channel_id: channelId,
+                    message: message
+                }
+            })
+        });
+        
+        if (response.ok) {
+            showNotification('✅ Message sent to Discord!');
+        } else {
+            showNotification('❌ Send failed');
+        }
+    } catch (error) {
+        showNotification('❌ Webhook error');
+        console.error(error);
+    }
+}
+
+/**
+ * Get command statistics
+ */
+async function fetchCommandStats() {
+    if (!WEBHOOK_CONFIG.connected) return;
+    
+    try {
+        const response = await fetch(`${WEBHOOK_CONFIG.url}/webhook/web/command-stats`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${WEBHOOK_CONFIG.serverToken}`
+            }
+        });
+        
+        if (response.ok) {
+            const stats = await response.json();
+            updateCommandStatsUI(stats);
+        }
+    } catch (error) {
+        console.error('Command stats error:', error);
+    }
+}
+
+/**
+ * Update command stats UI
+ */
+function updateCommandStatsUI(stats) {
+    document.getElementById('commandsToday').textContent = stats.commands_today || 0;
+    document.getElementById('newMembersToday').textContent = stats.new_members_today || 0;
+    
+    // Show top commands
+    const breakdown = stats.command_breakdown || {};
+    const topCommands = Object.entries(breakdown)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+    
+    let html = '<h4>Top Commands Today:</h4><ul>';
+    topCommands.forEach(([cmd, count]) => {
+        html += `<li><strong>/${cmd}</strong>: ${count} times</li>`;
+    });
+    html += '</ul>';
+    
+    document.getElementById('topCommands').innerHTML = html;
+}
+
+/**
+ * Get webhook activity logs
+ */
+async function fetchWebhookLogs() {
+    if (!WEBHOOK_CONFIG.connected) return;
+    
+    try {
+        const response = await fetch(`${WEBHOOK_CONFIG.url}/webhook/logs`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${WEBHOOK_CONFIG.serverToken}`
+            }
+        });
+        
+        if (response.ok) {
+            const logs = await response.json();
+            displayWebhookLogs(logs);
+        }
+    } catch (error) {
+        console.error('Webhook logs error:', error);
+    }
+}
+
+/**
+ * Display webhook logs
+ */
+function displayWebhookLogs(logs) {
+    const events = logs.events || [];
+    let html = '<div style="max-height: 400px; overflow-y: auto;">';
+    
+    events.reverse().forEach(event => {
+        const time = new Date(event.timestamp).toLocaleTimeString();
+        const type = event.type.replace(/_/g, ' ').toUpperCase();
+        html += `
+            <div style="padding: 0.5rem; border-bottom: 1px solid var(--border);">
+                <strong>${time}</strong> - ${type}
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    document.getElementById('webhookLogs').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// REAL-TIME UPDATES
+// ══════════════════════════════════════════════════════════════════════════════
+
+let updateInterval = null;
+
+function startRealtimeUpdates() {
+    // Fetch stats every 10 seconds
+    updateInterval = setInterval(() => {
+        fetchBotStats();
+        fetchCommandStats();
+    }, 10000);
+    
+    // Initial fetch
+    fetchBotStats();
+    fetchCommandStats();
+}
+
+function stopRealtimeUpdates() {
+    if (updateInterval) {
+        clearInterval(updateInterval);
+        updateInterval = null;
+    }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// AUTO-CONNECT ON PAGE LOAD
+// ══════════════════════════════════════════════════════════════════════════════
+
+window.addEventListener('load', () => {
+    // Try to load saved webhook config
+    const saved = localStorage.getItem('webhook_config');
+    if (saved) {
+        const config = JSON.parse(saved);
+        WEBHOOK_CONFIG.url = config.url;
+        WEBHOOK_CONFIG.serverToken = config.serverToken;
+        WEBHOOK_CONFIG.webhookSecret = config.webhookSecret;
+        WEBHOOK_CONFIG.connected = true;
+        
+        // Update UI
+        document.getElementById('webhookUrl').value = config.url;
+        document.getElementById('webhookServerToken').value = config.serverToken;
+        document.getElementById('webhookSecret').value = config.webhookSecret;
+        document.getElementById('webhookStatus').innerHTML = '✅ Connected';
+        
+        // Start updates
+        startRealtimeUpdates();
+    }
+});
+</script>
+
+<!-- ========================================================================== -->
+<!-- HTML FOR WEBHOOK TAB -->
+<!-- Add this tab content to your panel -->
+<!-- ========================================================================== -->
+
+<div class="tab-content" id="webhook">
+    <div class="grid">
+        <!-- Webhook Connection -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">🔗</span>
+                <h2 class="card-title">Webhook Connection</h2>
+            </div>
+            <div class="form-group">
+                <label>Webhook Server URL</label>
+                <input type="text" id="webhookUrl" placeholder="https://your-webhook-server.com">
+                <p class="helper-text">Your webhook server URL (e.g., Render, Railway, Replit)</p>
+            </div>
+            <div class="form-group">
+                <label>Server Token</label>
+                <input type="text" id="webhookServerToken" placeholder="From /link command">
+            </div>
+            <div class="form-group">
+                <label>Webhook Secret</label>
+                <input type="password" id="webhookSecret" placeholder="From /link command">
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <p id="webhookStatus">❌ Disconnected</p>
+                <p class="helper-text" id="lastSync">Last sync: Never</p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn-primary" onclick="connectWebhook()">🔗 Connect</button>
+                <button class="btn-secondary" onclick="disconnectWebhook()">🔓 Disconnect</button>
+            </div>
+        </div>
+
+        <!-- Real-time Stats -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📊</span>
+                <h2 class="card-title">Real-Time Bot Stats</h2>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <p id="botStatusIndicator">🔴 Offline</p>
+            </div>
+            <div class="form-group">
+                <label>Uptime</label>
+                <p id="botUptime">-</p>
+            </div>
+            <div class="form-group">
+                <label>Servers / Members</label>
+                <p><span id="botServers">-</span> servers / <span id="botMembers">-</span> members</p>
+            </div>
+            <div class="form-group">
+                <label>Latency</label>
+                <p id="botLatency">-</p>
+            </div>
+            <div class="form-group">
+                <label>Commands Today</label>
+                <p id="botCommands">-</p>
+            </div>
+            <button class="btn-secondary" onclick="fetchBotStats()">🔄 Refresh</button>
+        </div>
+
+        <!-- Command Stats -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">⚡</span>
+                <h2 class="card-title">Command Statistics</h2>
+            </div>
+            <div class="form-group">
+                <label>Commands Used Today</label>
+                <p id="commandsToday" style="font-size: 2rem; font-weight: bold;">0</p>
+            </div>
+            <div class="form-group">
+                <label>New Members Today</label>
+                <p id="newMembersToday" style="font-size: 2rem; font-weight: bold;">0</p>
+            </div>
+            <div id="topCommands"></div>
+            <button class="btn-secondary" onclick="fetchCommandStats()">🔄 Refresh Stats</button>
+        </div>
+
+        <!-- Webhook Logs -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📜</span>
+                <h2 class="card-title">Recent Activity</h2>
+            </div>
+            <div id="webhookLogs">
+                <p style="color: var(--text-secondary);">Connect webhook to see activity</p>
+            </div>
+            <button class="btn-secondary" onclick="fetchWebhookLogs()">🔄 Refresh Logs</button>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">⚡</span>
+                <h2 class="card-title">Quick Actions</h2>
+            </div>
+            <div class="form-group">
+                <label>Send Message to Discord</label>
+                <input type="text" id="quickMessageChannel" placeholder="Channel ID">
+                <textarea id="quickMessage" placeholder="Message content" style="margin-top: 0.5rem;"></textarea>
+                <button class="btn-primary" onclick="sendQuickMessage()" style="margin-top: 0.5rem;">📤 Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function sendQuickMessage() {
+    const channelId = document.getElementById('quickMessageChannel').value;
+    const message = document.getElementById('quickMessage').value;
+    
+    if (!channelId || !message) {
+        showNotification('⚠️ Fill channel ID and message');
+        return;
+    }
+    
+    sendMessageViaWebhook(channelId, message);
+    document.getElementById('quickMessage').value = '';
+}
+</script>

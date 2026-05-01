@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINNAL Bot - Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Poppins:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-card: #141824;
+            --bg-input: #1a1f30;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --border: #2d3548;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+        }
+
+        /* Login Screen */
+        .login-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .login-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 3rem;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .login-box h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-box p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .error-message {
+            background: var(--danger);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Main Panel */
+        .main-panel {
+            display: none;
+        }
+
+        .main-panel.active {
+            display: block;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-left h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .logout-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            border-color: var(--accent-blue);
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-color: transparent;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 0 10px currentColor);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-input);
+            border-radius: 0.5rem;
+            border: 2px solid var(--border);
+        }
+
+        .toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: var(--border);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle.active {
+            background: var(--accent-blue);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle.active .toggle-slider {
+            transform: translateX(30px);
+        }
+
+        .toggle-label {
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: var(--success);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            font-weight: 600;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .helper-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 2rem 0;
+        }
+
+        .command-output {
+            background: var(--bg-input);
+            border: 2px solid var(--accent-green);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-green);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--accent-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-box">
+            <h1>⚡ MINNAL</h1>
+            <p>Admin Panel Access</p>
+            <div class="error-message" id="loginError">Invalid password!</div>
+            <input type="password" class="login-input" id="passwordInput" placeholder="Enter Password" onkeypress="handleLoginKeypress(event)">
+            <button class="login-btn" onclick="login()">Login</button>
+        </div>
+    </div>
+
+    <!-- Main Panel -->
+    <div class="main-panel" id="mainPanel">
+        <div class="container">
+            <header>
+                <div class="header-left">
+                    <h1>⚡ MINNAL Bot Admin Panel</h1>
+                    <p class="subtitle">Full Control - All Commands Available</p>
+                </div>
+                <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+            </header>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('config')">⚙️ Configuration</div>
+                <div class="tab" onclick="switchTab('messages')">💬 Messages</div>
+                <div class="tab" onclick="switchTab('channels')">📡 Channels</div>
+                <div class="tab" onclick="switchTab('commands')">🎮 Quick Commands</div>
+                <div class="tab" onclick="switchTab('export')">📦 Export Config</div>
+            </div>
+
+            <!-- Config Tab -->
+            <div class="tab-content active" id="config">
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">📡</span>
+                            <h2 class="card-title">Text Channel IDs</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Welcome Channel ID</label>
+                            <input type="text" id="welcomeChannel" placeholder="1234567890123456789">
+                            <p class="helper-text">Right-click channel → Copy Channel ID</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Leave Channel ID</label>
+                            <input type="text" id="leaveChannel" placeholder="1234567890123456789">
+                        </div>
+                        <div class="form-group">
+                            <label>Game Update Channel ID</label>
+                            <input type="text" id="gameChannel" placeholder="1234567890123456789">
+                        </div>
+                        <div class="form-group">
+                            <label>Music Request Channel ID (Optional)</label>
+                            <input type="text" id="musicChannel" placeholder="Leave empty for any channel">
+                            <p class="helper-text">Where users can request music</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">🔊</span>
+                            <h2 class="card-title">Voice Channel IDs</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Default Music Voice Channel ID (Optional)</label>
+                            <input type="text" id="defaultVoiceChannel" placeholder="1234567890123456789">
+                            <p class="helper-text">Bot will auto-join this voice channel for music</p>
+                        </div>
+                        <div class="form-group">
+                            <label>Announcement Voice Channel ID (Optional)</label>
+                            <input type="text" id="announcementVoiceChannel" placeholder="1234567890123456789">
+                            <p class="helper-text">For voice announcements (if needed)</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">🖼️</span>
+                            <h2 class="card-title">Images</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Welcome Image URL</label>
+                            <input type="text" id="welcomeImage" placeholder="https://cdn.discord.com/...">
+                        </div>
+                        <div class="form-group">
+                            <label>Leave Image URL</label>
+                            <input type="text" id="leaveImage" placeholder="https://cdn.discord.com/...">
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">👨‍💻</span>
+                            <h2 class="card-title">Developer</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Developer Name</label>
+                            <input type="text" id="developerName" value="SAHAD SHA">
+                        </div>
+                        <div class="form-group">
+                            <label>Developer User IDs</label>
+                            <input type="text" id="developerIds" placeholder="123456789,987654321">
+                            <p class="helper-text">Comma-separated Discord user IDs</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">💬</span>
+                            <h2 class="card-title">Auto-DM</h2>
+                        </div>
+                        <div class="form-group">
+                            <div class="toggle-group">
+                                <span class="toggle-label">Enable Auto-DM</span>
+                                <div class="toggle active" id="dmToggle" onclick="toggleDM()">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>DM Message</label>
+                            <textarea id="dmMessage">👋 Hey **{member}**, welcome to **{server}**!</textarea>
+                            <p class="helper-text">{member}, {server}, {member_count}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Tab -->
+            <div class="tab-content" id="messages">
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">📨</span>
+                            <h2 class="card-title">Send Message</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Channel ID</label>
+                            <input type="text" id="sendChannelId" placeholder="1234567890123456789">
+                        </div>
+                        <div class="form-group">
+                            <label>Message</label>
+                            <textarea id="sendMessage" placeholder="Your message here..."></textarea>
+                        </div>
+                        <button class="btn-primary" onclick="showCommand('send')">Generate Command</button>
+                        <div class="command-output" id="sendOutput" style="display:none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">📋</span>
+                            <h2 class="card-title">Send Embed</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Channel ID</label>
+                            <input type="text" id="embedChannelId" placeholder="1234567890123456789">
+                        </div>
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" id="embedTitle" placeholder="Embed title">
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="embedDesc" placeholder="Embed description..."></textarea>
+                        </div>
+                        <button class="btn-primary" onclick="showCommand('embed')">Generate Command</button>
+                        <div class="command-output" id="embedOutput" style="display:none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">📢</span>
+                            <h2 class="card-title">Announcement</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Announcement Text</label>
+                            <textarea id="announceText" placeholder="Your announcement..."></textarea>
+                        </div>
+                        <button class="btn-primary" onclick="showCommand('announce')">Generate Command</button>
+                        <div class="command-output" id="announceOutput" style="display:none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">✦</span>
+                            <h2 class="card-title">Styled Post</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Channel ID</label>
+                            <input type="text" id="postChannelId" placeholder="1234567890123456789">
+                        </div>
+                        <div class="form-group">
+                            <label>Color</label>
+                            <select id="postColor">
+                                <option value="blue">Blue</option>
+                                <option value="red">Red</option>
+                                <option value="green">Green</option>
+                                <option value="gold">Gold</option>
+                                <option value="purple">Purple</option>
+                                <option value="orange">Orange</option>
+                                <option value="teal">Teal</option>
+                                <option value="dark">Dark</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" id="postTitle" placeholder="Post title">
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="postDesc" placeholder="Post description..."></textarea>
+                        </div>
+                        <button class="btn-primary" onclick="showCommand('post')">Generate Command</button>
+                        <div class="command-output" id="postOutput" style="display:none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Channels Tab -->
+            <div class="tab-content" id="channels">
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">👋</span>
+                            <h2 class="card-title">Set Welcome Channel</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Channel ID</label>
+                            <input type="text" id="setWelcomeChannelId" placeholder="1234567890123456789">
+                        </div>
+                        <button class="btn-primary" onclick="showCommand('welcomeChannel')">Generate Command</button>
+                        <div class="command-output" id="welcomeChannelOutput" style="display:none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">🚪</span>
+                            <h2 class="card-title">Set Leave Channel</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Channel ID</label>
+                            <input type="text" id="setLeaveChannelId" placeholder="1234567890123456789">
+                        </div>
+                        <button class="btn-primary" onclick="showCommand('leaveChannel')">Generate Command</button>
+                        <div class="command-output" id="leaveChannelOutput" style="display:none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">🎮</span>
+                            <h2 class="card-title">Set Game Channel</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Channel ID</label>
+                            <input type="text" id="setGameChannelId" placeholder="1234567890123456789">
+                        </div>
+                        <button class="btn-primary" onclick="showCommand('gameChannel')">Generate Command</button>
+                        <div class="command-output" id="gameChannelOutput" style="display:none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">🎵</span>
+                            <h2 class="card-title">Set Music Channel</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Channel ID</label>
+                            <input type="text" id="setMusicChannelId" placeholder="1234567890123456789">
+                        </div>
+                        <button class="btn-primary" onclick="showCommand('musicChannel')">Generate Command</button>
+                        <div class="command-output" id="musicChannelOutput" style="display:none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Commands Tab -->
+            <div class="tab-content" id="commands">
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">🎲</span>
+                            <h2 class="card-title">Fun Commands</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Roll Dice</label>
+                            <input type="text" id="rollDice" placeholder="1d6, 2d20, etc." value="1d6">
+                            <button class="btn-secondary" onclick="showCommand('roll')" style="margin-top: 0.5rem;">Generate /roll</button>
+                        </div>
+                        <div class="form-group">
+                            <label>8Ball Question</label>
+                            <input type="text" id="eightBallQuestion" placeholder="Will I succeed?">
+                            <button class="btn-secondary" onclick="showCommand('8ball')" style="margin-top: 0.5rem;">Generate /8ball</button>
+                        </div>
+                        <div class="command-output" id="funOutput" style="display:none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">📊</span>
+                            <h2 class="card-title">Poll Creator</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Question</label>
+                            <input type="text" id="pollQuestion" placeholder="What should we do?">
+                        </div>
+                        <div class="form-group">
+                            <label>Option 1</label>
+                            <input type="text" id="pollOpt1" placeholder="First option">
+                        </div>
+                        <div class="form-group">
+                            <label>Option 2</label>
+                            <input type="text" id="pollOpt2" placeholder="Second option">
+                        </div>
+                        <div class="form-group">
+                            <label>Option 3 (Optional)</label>
+                            <input type="text" id="pollOpt3" placeholder="Third option">
+                        </div>
+                        <button class="btn-primary" onclick="showCommand('poll')">Generate Command</button>
+                        <div class="command-output" id="pollOutput" style="display:none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">🧹</span>
+                            <h2 class="card-title">Clean Messages</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Number of Messages</label>
+                            <input type="number" id="cleanAmount" placeholder="10" min="1" max="100" value="10">
+                            <p class="helper-text">Max 100 messages</p>
+                        </div>
+                        <button class="btn-warning" onclick="showCommand('clean')">Generate Command</button>
+                        <div class="command-output" id="cleanOutput" style="display:none;"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-icon">⏰</span>
+                            <h2 class="card-title">Set Reminder</h2>
+                        </div>
+                        <div class="form-group">
+                            <label>Time (10m, 2h, 1d)</label>
+                            <input type="text" id="reminderTime" placeholder="10m" value="10m">
+                        </div>
+                        <div class="form-group">
+                            <label>Reminder Text</label>
+                            <input type="text" id="reminderText" placeholder="Check the server">
+                        </div>
+                        <button class="btn-secondary" onclick="showCommand('reminder')">Generate Command</button>
+                        <div class="command-output" id="reminderOutput" style="display:none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Tab -->
+            <div class="tab-content" id="export">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-icon">📦</span>
+                        <h2 class="card-title">Export config.py</h2>
+                    </div>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        Generate your complete config.py file based on the settings in the Configuration tab.
+                    </p>
+                    <div class="btn-group">
+                        <button class="btn-secondary" onclick="loadExample()">Load Example</button>
+                        <button class="btn-primary" onclick="generateConfig()">Generate config.py</button>
+                        <button class="btn-success" onclick="copyConfig()">Copy to Clipboard</button>
+                    </div>
+                    <textarea id="configOutput" readonly style="margin-top: 2rem; min-height: 400px; font-size: 0.85rem; display: none;"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">✅ Success!</div>
+
+    <script>
+        // ====== AUTHENTICATION ======
+        const PASSWORD = "MINNAL@2025"; // ⚠️ CHANGE THIS PASSWORD!
+        let isLoggedIn = false;
+        let dmEnabled = true;
+
+        function handleLoginKeypress(event) {
+            if (event.key === 'Enter') {
+                login();
+            }
+        }
+
+        function login() {
+            const password = document.getElementById('passwordInput').value;
+            const errorMsg = document.getElementById('loginError');
+
+            if (password === PASSWORD) {
+                isLoggedIn = true;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainPanel').classList.add('active');
+                loadExample();
+            } else {
+                errorMsg.classList.add('show');
+                setTimeout(() => errorMsg.classList.remove('show'), 3000);
+            }
+        }
+
+        function logout() {
+            isLoggedIn = false;
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('mainPanel').classList.remove('active');
+            document.getElementById('passwordInput').value = '';
+        }
+
+        // ====== TAB SWITCHING ======
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // ====== TOGGLES ======
+        function toggleDM() {
+            dmEnabled = !dmEnabled;
+            document.getElementById('dmToggle').classList.toggle('active');
+        }
+
+        // ====== COMMAND GENERATORS ======
+        function showCommand(type) {
+            let command = '';
+            let outputId = '';
+
+            switch(type) {
+                case 'send':
+                    const sendChannel = document.getElementById('sendChannelId').value;
+                    const sendMsg = document.getElementById('sendMessage').value;
+                    command = `/send channel:<#${sendChannel}> message:${sendMsg}`;
+                    outputId = 'sendOutput';
+                    break;
+
+                case 'embed':
+                    const embedChannel = document.getElementById('embedChannelId').value;
+                    const embedTitle = document.getElementById('embedTitle').value;
+                    const embedDesc = document.getElementById('embedDesc').value;
+                    command = `/embed channel:<#${embedChannel}> title:${embedTitle} description:${embedDesc}`;
+                    outputId = 'embedOutput';
+                    break;
+
+                case 'announce':
+                    const announceText = document.getElementById('announceText').value;
+                    command = `/announce announcement:${announceText}`;
+                    outputId = 'announceOutput';
+                    break;
+
+                case 'post':
+                    const postChannel = document.getElementById('postChannelId').value;
+                    const postColor = document.getElementById('postColor').value;
+                    const postTitle = document.getElementById('postTitle').value;
+                    const postDesc = document.getElementById('postDesc').value;
+                    command = `/post channel:<#${postChannel}> color:${postColor} title:${postTitle} description:${postDesc}`;
+                    outputId = 'postOutput';
+                    break;
+
+                case 'welcomeChannel':
+                    const welcomeCh = document.getElementById('setWelcomeChannelId').value;
+                    command = `/welcome channel:<#${welcomeCh}>`;
+                    outputId = 'welcomeChannelOutput';
+                    break;
+
+                case 'leaveChannel':
+                    const leaveCh = document.getElementById('setLeaveChannelId').value;
+                    command = `/leavechannel channel:<#${leaveCh}>`;
+                    outputId = 'leaveChannelOutput';
+                    break;
+
+                case 'gameChannel':
+                    const gameCh = document.getElementById('setGameChannelId').value;
+                    command = `/gamechannel channel:<#${gameCh}>`;
+                    outputId = 'gameChannelOutput';
+                    break;
+
+                case 'musicChannel':
+                    const musicCh = document.getElementById('setMusicChannelId').value;
+                    command = `/setmusicchannel channel:<#${musicCh}>`;
+                    outputId = 'musicChannelOutput';
+                    break;
+
+                case 'roll':
+                    const dice = document.getElementById('rollDice').value;
+                    command = `/roll dice:${dice}`;
+                    outputId = 'funOutput';
+                    break;
+
+                case '8ball':
+                    const question = document.getElementById('eightBallQuestion').value;
+                    command = `/8ball question:${question}`;
+                    outputId = 'funOutput';
+                    break;
+
+                case 'poll':
+                    const pollQ = document.getElementById('pollQuestion').value;
+                    const opt1 = document.getElementById('pollOpt1').value;
+                    const opt2 = document.getElementById('pollOpt2').value;
+                    const opt3 = document.getElementById('pollOpt3').value;
+                    command = `/poll question:${pollQ} option1:${opt1} option2:${opt2}`;
+                    if (opt3) command += ` option3:${opt3}`;
+                    outputId = 'pollOutput';
+                    break;
+
+                case 'clean':
+                    const amount = document.getElementById('cleanAmount').value;
+                    command = `/clean amount:${amount}`;
+                    outputId = 'cleanOutput';
+                    break;
+
+                case 'reminder':
+                    const time = document.getElementById('reminderTime').value;
+                    const text = document.getElementById('reminderText').value;
+                    command = `/remindme time:${time} reminder:${text}`;
+                    outputId = 'reminderOutput';
+                    break;
+            }
+
+            const output = document.getElementById(outputId);
+            output.textContent = command;
+            output.style.display = 'block';
+            showNotification('Command generated! Copy and paste in Discord.');
+        }
+
+        // ====== CONFIG GENERATOR ======
+        function loadExample() {
+            document.getElementById('welcomeChannel').value = '1463854523935359115';
+            document.getElementById('leaveChannel').value = '1463854523935359115';
+            document.getElementById('gameChannel').value = '1467730984723284141';
+            document.getElementById('musicChannel').value = '1463956357530124329';
+            document.getElementById('defaultVoiceChannel').value = '';
+            document.getElementById('announcementVoiceChannel').value = '';
+            document.getElementById('welcomeImage').value = 'https://cdn.discordapp.com/attachments/1219285338191826965/1445653191906689075/Welcome_To_MRP.png';
+            document.getElementById('leaveImage').value = '';
+            document.getElementById('dmMessage').value = `👋 Hey **{member}**, welcome to **{server}**!
+
+We're glad to have you here. Feel free to explore the channels and have fun! 🎉
+
+If you need any help, feel free to ask the admins.`;
+            document.getElementById('developerName').value = 'SAHAD SHA';
+            document.getElementById('developerIds').value = '';
+            
+            showNotification('Example settings loaded!');
+        }
+
+        function generateConfig() {
+            const welcomeChannel = document.getElementById('welcomeChannel').value || 'None';
+            const leaveChannel = document.getElementById('leaveChannel').value || 'None';
+            const gameChannel = document.getElementById('gameChannel').value || 'None';
+            const musicChannel = document.getElementById('musicChannel').value || 'None';
+            const defaultVoiceChannel = document.getElementById('defaultVoiceChannel').value || 'None';
+            const announcementVoiceChannel = document.getElementById('announcementVoiceChannel').value || 'None';
+            const welcomeImage = document.getElementById('welcomeImage').value;
+            const leaveImage = document.getElementById('leaveImage').value;
+            const dmMessage = document.getElementById('dmMessage').value;
+            const developerName = document.getElementById('developerName').value || 'SAHAD SHA';
+            const developerIds = document.getElementById('developerIds').value;
+
+            const devIdsArray = developerIds ? `[${developerIds}]` : '[]';
+
+            const config = `# =============================================================================
+#  config.py — Bot-wide settings & shared mutable state
+#  Generated by MINNAL Admin Panel
+# =============================================================================
+
+from collections import deque
+
+# ── Developer ────────────────────────────────────────────────────────────────
+DEVELOPER = "${developerName}"
+
+# ── Text Channel IDs ──────────────────────────────────────────────────────────
+# HOW TO FIND A CHANNEL ID:
+#   1. Open Discord → Settings → Advanced → turn ON "Developer Mode"
+#   2. Right-click any channel → "Copy Channel ID"
+#   3. Paste the number below (no quotes needed — it's just a plain integer)
+
+WELCOME_CHANNEL_ID      = ${welcomeChannel}
+LEAVE_CHANNEL_ID        = ${leaveChannel}
+GAME_UPDATE_CHANNEL_ID  = ${gameChannel}
+MUSIC_CHANNEL_ID        = ${musicChannel}   # Where users can request music
+
+# ── Voice Channel IDs ─────────────────────────────────────────────────────────
+DEFAULT_VOICE_CHANNEL_ID      = ${defaultVoiceChannel}   # Bot auto-joins this voice channel
+ANNOUNCEMENT_VOICE_CHANNEL_ID = ${announcementVoiceChannel}   # For voice announcements
+
+# ── Image URLs ────────────────────────────────────────────────────────────────
+WELCOME_IMAGE_URL       = ${welcomeImage ? `"${welcomeImage}"` : 'None'}
+LEAVE_IMAGE_URL         = ${leaveImage ? `"${leaveImage}"` : 'None'}
+
+# ── Developer / owner bypass ──────────────────────────────────────────────────
+DEVELOPER_IDS: list[int] = ${devIdsArray}
+
+# ── Auto-DM on member join ─────────────────────────────────────────────────────
+DM_JOIN_ENABLED  = ${dmEnabled}
+DM_JOIN_MESSAGE  = (
+    """${dmMessage}"""
+)
+
+# ── Music shared state ────────────────────────────────────────────────────────
+music_queues       = {}
+now_playing        = {}
+music_text_channels = {}
+
+# ── yt-dlp options ────────────────────────────────────────────────────────────
+YTDL_OPTIONS = {
+    'format': 'bestaudio/best',
+    'noplaylist': True,
+    'quiet': True,
+    'default_search': 'ytsearch',
+    'source_address': '0.0.0.0',
+}
+
+# ── FFmpeg options ────────────────────────────────────────────────────────────
+FFMPEG_OPTIONS = {
+    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+    'options': '-vn',
+}`;
+
+            const output = document.getElementById('configOutput');
+            output.value = config;
+            output.style.display = 'block';
+            showNotification('Config generated!');
+        }
+
+        function copyConfig() {
+            const output = document.getElementById('configOutput');
+            if (!output.value) {
+                showNotification('Generate config first!', 'warning');
+                return;
+            }
+            output.select();
+            document.execCommand('copy');
+            showNotification('✅ Copied to clipboard!');
+        }
+
+        // ====== NOTIFICATIONS ======
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+{
+  "bot": {
+    "name": "MINNAL",
+    "tagline": "The Lightning Engine",
+    "developer": "@sxhd_sha",
+    "embed_color": "#9b59b6"
+  },
+  "welcome": {
+    "enabled": true,
+    "channel_id": "1463854523935359115",
+    "title": "**`#———————————————————————————————#`** ✨ **WELCOME TO THE {server}**",
+    "message": "**`|`** 👋 **IDENTITY:** {member}\n**`|`** 📑 **REGISTRY:** `Member #{member guild.member_count}`\n**`|`** 📡 **LOCATION:** `{member guild.name}`\n**`#———————————————————————————————#`**\n\n**`|`** 📜 **CORE PROTOCOLS:**\n**`|`** 1️⃣ Respect the ` Community`.\n**`|`** 2️⃣ Stay active and have ` Fun `.\n**`|`** 3️⃣ Enjoy your ` Stay `\n\n**`#———————————————————————————————#`**\n**` STATUS: ACCESS GRANTED `**"
+  },
+  "summon": {
+    "enabled": true,
+    "trigger_channel_id": "",
+    "domain_names": [
+      "Minnal Cave",
+      "Sukuna Shrine",
+      "Gojo Infinity",
+      "Itadori Pit",
+      "Megumi Realm",
+      "Infinite void !",
+      "Rasengan",
+      "Chidori",
+      "Bankai: Senbonzakura Kageyoshi",
+      "Bankai: Zanka no Tachi",
+      "Bankai: katen kyokostu 👾"
+    ]
+  },
+  "voices": {
+    "enabled": true,
+    "voice_list": [
+      {
+        "spell": "Domain Expansion!",
+        "anime": "Sukuna",
+        "voice_text": "Domain Expansion!",
+        "audio_file": "sukuna.mp3"
+      },
+      {
+        "spell": "Rasengan!",
+        "anime": "Naruto",
+        "voice_text": "Rasengan!",
+        "audio_file": ""
+      },
+      {
+        "spell": "Kamehameha!",
+        "anime": "Goku",
+        "voice_text": "Kamehameha!",
+        "audio_file": ""
+      },
+      {
+        "spell": "Bankai",
+        "anime": "Shunsui Kyoraku",
+        "voice_text": "Bankai katen kyokostu",
+        "audio_file": "shunsui.mp3"
+      }
+    ]
+  },
+  "bio": {
+    "rotation_minutes": 5,
+    "statuses": [
+      {
+        "type": "watching",
+        "name": "https://github.com/Dev-Sahad"
+      },
+      {
+        "type": "playing",
+        "name": "/help | MINNAL"
+      },
+      {
+        "type": "listening",
+        "name": "https://youtu.be/Hd5nXTyaXZg?si=mm4M7imxyzC1H4XV"
+      }
+    ]
+  },
+  "memes": {
+    "enabled": true,
+    "channel_id": "1465845962118533311",
+    "troll_messages": [
+      "{target} got trolled! 💀",
+      "{target} is just a side character 😂"
+    ]
+  },
+  "economy": {
+    "currency_name": "Coins",
+    "currency_symbol": "⚡",
+    "starting_balance": 100,
+    "daily_reward": 100,
+    "weekly_reward": 1000
+  },
+  "music": {
+    "enabled": true,
+    "default_source": "soundcloud",
+    "max_queue_size": 50
+  }
+}

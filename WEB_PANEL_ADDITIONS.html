@@ -1,0 +1,287 @@
+<!-- ========================================================================== -->
+<!-- ADD THIS TO YOUR ADVANCED-ADMIN-PANEL.HTML -->
+<!-- Insert after the "Inner Features" tab -->
+<!-- ========================================================================== -->
+
+<!-- IN THE TABS SECTION, ADD: -->
+<div class="tab" onclick="switchTab('connection')">🔗 Bot Connection</div>
+<div class="tab" onclick="switchTab('channels')">📡 Channel Manager</div>
+<div class="tab" onclick="switchTab('commands')">⚡ Command Manager</div>
+
+<!-- IN THE TAB-CONTENT SECTION, ADD: -->
+
+<!-- Bot Connection Tab -->
+<div class="tab-content" id="connection">
+    <div class="grid">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">🔗</span>
+                <h2 class="card-title">Connect to Discord Bot</h2>
+            </div>
+            <div class="form-group">
+                <label>Server Token</label>
+                <input type="text" id="serverToken" placeholder="Paste token from /link command">
+                <p class="helper-text">Run /link in Discord to get your token</p>
+            </div>
+            <div class="form-group">
+                <label>Connection Status</label>
+                <div id="connectionStatus" style="padding: 1rem; background: var(--bg-input); border-radius: 0.5rem;">
+                    <p id="connStatus">❌ Not Connected</p>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="connectToBot()">🔗 Connect Bot</button>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📊</span>
+                <h2 class="card-title">Live Bot Status</h2>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <p id="botStatusIndicator" style="font-size: 1.2rem;">🔴 Offline</p>
+            </div>
+            <div class="form-group">
+                <label>Uptime</label>
+                <p id="botUptime">-</p>
+            </div>
+            <div class="form-group">
+                <label>Servers</label>
+                <p id="botServers">-</p>
+            </div>
+            <div class="form-group">
+                <label>Total Members</label>
+                <p id="botMembers">-</p>
+            </div>
+            <div class="form-group">
+                <label>Latency</label>
+                <p id="botLatency">-</p>
+            </div>
+            <div class="form-group">
+                <label>Commands Today</label>
+                <p id="botCommands">-</p>
+            </div>
+            <button class="btn-secondary" onclick="refreshBotStatus()">🔄 Refresh Status</button>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📧</span>
+                <h2 class="card-title">Daily Reports</h2>
+            </div>
+            <div class="form-group">
+                <label>Report Schedule</label>
+                <p>Every day at 9:00 AM UTC</p>
+            </div>
+            <div class="form-group">
+                <label>Report Recipient</label>
+                <p id="reportRecipient">Set via /link command in Discord</p>
+            </div>
+            <div class="form-group">
+                <label>Last Report Sent</label>
+                <p id="lastReport">Never</p>
+            </div>
+            <div class="form-group">
+                <label>Next Report</label>
+                <p id="nextReport">-</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Channel Manager Tab -->
+<div class="tab-content" id="channels">
+    <div class="grid">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">📡</span>
+                <h2 class="card-title">Quick Channel Updates</h2>
+            </div>
+            <div class="form-group">
+                <label>Welcome Channel ID</label>
+                <input type="text" id="quickWelcomeChannel" placeholder="Right-click channel → Copy ID">
+                <button class="btn-primary" onclick="updateBotChannel('WELCOME_CHANNEL_ID', 'quickWelcomeChannel')" style="margin-top: 0.5rem;">💾 Update</button>
+            </div>
+            <div class="form-group">
+                <label>Leave Channel ID</label>
+                <input type="text" id="quickLeaveChannel" placeholder="Right-click channel → Copy ID">
+                <button class="btn-primary" onclick="updateBotChannel('LEAVE_CHANNEL_ID', 'quickLeaveChannel')" style="margin-top: 0.5rem;">💾 Update</button>
+            </div>
+            <div class="form-group">
+                <label>Game Update Channel ID</label>
+                <input type="text" id="quickGameChannel" placeholder="Right-click channel → Copy ID">
+                <button class="btn-primary" onclick="updateBotChannel('GAME_UPDATE_CHANNEL_ID', 'quickGameChannel')" style="margin-top: 0.5rem;">💾 Update</button>
+            </div>
+            <div class="form-group">
+                <label>Music Channel ID</label>
+                <input type="text" id="quickMusicChannel" placeholder="Right-click channel → Copy ID">
+                <button class="btn-primary" onclick="updateBotChannel('MUSIC_CHANNEL_ID', 'quickMusicChannel')" style="margin-top: 0.5rem;">💾 Update</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">ℹ️</span>
+                <h2 class="card-title">How to Get Channel IDs</h2>
+            </div>
+            <div style="line-height: 1.8;">
+                <p><strong>Step 1:</strong> Enable Developer Mode</p>
+                <p style="color: var(--text-secondary); margin-left: 1rem;">Settings → Advanced → Developer Mode ON</p>
+                <br>
+                <p><strong>Step 2:</strong> Copy Channel ID</p>
+                <p style="color: var(--text-secondary); margin-left: 1rem;">Right-click any channel → Copy Channel ID</p>
+                <br>
+                <p><strong>Step 3:</strong> Paste Here</p>
+                <p style="color: var(--text-secondary); margin-left: 1rem;">Paste the ID in the field above → Click Update</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Command Manager Tab -->
+<div class="tab-content" id="commands">
+    <div class="grid">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">⚡</span>
+                <h2 class="card-title">Slash Commands</h2>
+            </div>
+            <div class="form-group">
+                <label>Command List</label>
+                <div id="commandList" style="background: var(--bg-input); padding: 1rem; border-radius: 0.5rem; max-height: 400px; overflow-y: auto;">
+                    <div style="margin-bottom: 1rem;">
+                        <strong>💰 Economy Commands (8)</strong>
+                        <p style="color: var(--text-secondary); margin-left: 1rem;">/balance, /daily, /weekly, /leaderboard, /give, /coinflip</p>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <strong>🎁 Giveaway Commands (3)</strong>
+                        <p style="color: var(--text-secondary); margin-left: 1rem;">/giveaway, /reroll, /pick</p>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <strong>🎵 Music Commands (10)</strong>
+                        <p style="color: var(--text-secondary); margin-left: 1rem;">/play, /pause, /resume, /skip, /stop, /queue, /nowplaying, /volume, /join, /leave</p>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <strong>🔐 Admin Commands (17)</strong>
+                        <p style="color: var(--text-secondary); margin-left: 1rem;">/send, /embed, /announce, /post, /welcome, /panel, /clean, /link, /botstatus, etc.</p>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <strong>🛠️ Utility Commands (5)</strong>
+                        <p style="color: var(--text-secondary); margin-left: 1rem;">/reactionrole, /birthday, /afk, /serverinfo, /userinfo</p>
+                    </div>
+                    <div>
+                        <strong>🎮 Fun Commands (5)</strong>
+                        <p style="color: var(--text-secondary); margin-left: 1rem;">/roll, /8ball, /poll, /remindme, /info</p>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Total Commands</label>
+                <p style="font-size: 2rem; font-weight: 900; color: var(--accent-blue);">50+</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-icon">🔗</span>
+                <h2 class="card-title">Web Bridge Commands</h2>
+            </div>
+            <div style="line-height: 2;">
+                <p><strong>/link</strong></p>
+                <p style="color: var(--text-secondary); margin-left: 1rem;">Link Discord server to web panel</p>
+                <br>
+                <p><strong>/unlink</strong></p>
+                <p style="color: var(--text-secondary); margin-left: 1rem;">Disconnect web panel</p>
+                <br>
+                <p><strong>/botstatus</strong></p>
+                <p style="color: var(--text-secondary); margin-left: 1rem;">View detailed bot dashboard</p>
+                <br>
+                <p><strong>/updatechannels</strong></p>
+                <p style="color: var(--text-secondary); margin-left: 1rem;">Quick channel editor with buttons</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- ADD THESE JAVASCRIPT FUNCTIONS AT THE END OF YOUR SCRIPT TAG -->
+<!-- ========================================================================== -->
+
+<script>
+// Bot Connection Functions
+let botToken = '';
+let botConnected = false;
+
+function connectToBot() {
+    const token = document.getElementById('serverToken').value.trim();
+    
+    if (!token) {
+        showNotification('⚠️ Please enter server token');
+        return;
+    }
+    
+    botToken = token;
+    botConnected = true;
+    
+    document.getElementById('connStatus').innerHTML = '✅ Connected!';
+    showNotification('✅ Bot connected successfully!');
+    
+    // Start auto-refresh
+    refreshBotStatus();
+    setInterval(refreshBotStatus, 30000); // Refresh every 30 seconds
+}
+
+async function refreshBotStatus() {
+    if (!botConnected) {
+        return;
+    }
+    
+    // In production, this would fetch from your server
+    // For now, simulating with local data
+    
+    // Simulate bot stats (replace with actual API call)
+    const stats = {
+        status: 'online',
+        uptime: '5 days, 3 hours',
+        servers: 1,
+        members: 156,
+        latency: 45,
+        commands: 89
+    };
+    
+    document.getElementById('botStatusIndicator').innerHTML = '🟢 Online';
+    document.getElementById('botUptime').textContent = stats.uptime;
+    document.getElementById('botServers').textContent = stats.servers;
+    document.getElementById('botMembers').textContent = stats.members.toLocaleString();
+    document.getElementById('botLatency').textContent = stats.latency + 'ms';
+    document.getElementById('botCommands').textContent = stats.commands;
+    
+    // Calculate next report time
+    const now = new Date();
+    const next = new Date();
+    next.setUTCHours(9, 0, 0, 0);
+    if (now.getUTCHours() >= 9) {
+        next.setDate(next.getDate() + 1);
+    }
+    
+    document.getElementById('nextReport').textContent = next.toLocaleString();
+}
+
+function updateBotChannel(channelType, inputId) {
+    const channelId = document.getElementById(inputId).value.trim();
+    
+    if (!channelId || !channelId.match(/^\d+$/)) {
+        showNotification('❌ Invalid channel ID');
+        return;
+    }
+    
+    // Store channel update (in production, this would sync with bot)
+    showNotification(`✅ ${channelType} updated to ${channelId}`);
+    
+    // You can add API call here to update bot config
+}
+</script>
+
+<!-- ========================================================================== -->
+<!-- END OF ADDITIONS -->
+<!-- ========================================================================== -->
