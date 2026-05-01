@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "MINNAL Bot Logs"
+version = "1.0.0"
+id = "artifacts/bot-logs"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23443
+
+[services.development]
+run = "pnpm --filter @workspace/bot-logs run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/bot-logs", "run", "build" ]
+publicDir = "artifacts/bot-logs/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23443"
+BASE_PATH = "/"
