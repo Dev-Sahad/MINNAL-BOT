@@ -1,10 +1,2 @@
-.env
-.env.txt
-__pycache__/
-*.pyc
-*.pyo
-venv/
-.vscode/
-.DS_Store
-*.log
-data/active_domains.json
+.idx/
+node_modules/
