@@ -185,7 +185,13 @@ select option{background:var(--card)}
       <div class="nav-item" data-pg="codepilot"><span class="ni">🤖</span>CodePilot AI</div>
     </div>
 
+    <div class="nav-group">
+      <div class="nav-label">Sync</div>
+      <div class="nav-item" data-pg="github"><span class="ni">🐙</span>GitHub Sync</div>
+    </div>
+
     <div style="padding:12px;margin-top:auto;border-top:1px solid var(--border)">
+      <button class="btn btn-full" style="background:linear-gradient(135deg,#238636,#1a6e2e);margin-bottom:6px" onclick="quickPush()">🐙 Push to GitHub</button>
       <button class="btn btn-full btn-gray" style="margin-bottom:6px" onclick="doExport()">📥 Export JSON</button>
       <button class="btn btn-full btn-red" onclick="doLogout()">Logout</button>
     </div>
@@ -566,6 +572,47 @@ select option{background:var(--card)}
         </div>
       </div>
 
+      <!-- GITHUB -->
+      <div class="pg" id="pg-github">
+        <div class="card">
+          <h3>🐙 GitHub Sync</h3>
+          <div class="info-box">Pushes your current <strong>settings.json</strong> and panel to <strong>github.com/Dev-Sahad/MINNAL-BOT</strong> — Railway auto-deploys on every push.</div>
+
+          <div id="gh-token-warn" class="warn-box" style="display:none">⚠️ GITHUB_PERSONAL_ACCESS_TOKEN is not configured. Set it as a secret in Replit to enable GitHub push.</div>
+
+          <button class="btn btn-full" id="ghPushBtn" style="background:linear-gradient(135deg,#238636,#1a6e2e);font-size:15px;padding:13px;margin-bottom:14px" onclick="doPush()">
+            🐙 Push Settings to GitHub
+          </button>
+
+          <div id="gh-push-result" style="display:none" class="card" style="background:var(--surface)">
+            <div id="gh-push-msg" style="font-weight:600;margin-bottom:10px"></div>
+            <div id="gh-push-steps" style="font-size:12px;color:var(--muted);font-family:monospace;line-height:1.8"></div>
+          </div>
+        </div>
+
+        <div class="card" id="gh-commits-card">
+          <h3>📜 Recent Commits</h3>
+          <div id="gh-commits" style="font-size:12px;color:var(--muted);font-family:monospace;line-height:2">Loading...</div>
+          <div class="divider"></div>
+          <div id="gh-dirty-wrap">
+            <div class="section-title">Uncommitted Changes</div>
+            <div id="gh-dirty" style="font-size:12px;font-family:monospace;color:var(--muted);background:var(--surface);padding:10px;border-radius:8px;border:1px solid var(--border)">Checking...</div>
+          </div>
+          <button class="btn btn-sm btn-gray" style="margin-top:12px" onclick="loadGHStatus()">↻ Refresh</button>
+        </div>
+
+        <div class="card">
+          <h3>⚙️ How It Works</h3>
+          <div style="font-size:13px;color:var(--muted);line-height:2">
+            <div>1. Edit any setting in this panel and click Save</div>
+            <div>2. Click <strong style="color:var(--text)">Push to GitHub</strong> above</div>
+            <div>3. Bot's <code style="background:var(--surface);padding:2px 6px;border-radius:4px">data/settings.json</code> is committed and pushed</div>
+            <div>4. Railway detects the push and auto-redeploys the bot</div>
+            <div>5. Your bot is live with the new settings! ⚡</div>
+          </div>
+        </div>
+      </div>
+
     </div><!-- /main-area -->
   </div><!-- /content -->
 </div><!-- /app -->
@@ -924,6 +971,95 @@ function toast(msg,type='ok'){
 }
 
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ───────────────────────────────────────────
+// GITHUB SYNC
+// ───────────────────────────────────────────
+async function doPush(){
+  const btn = document.getElementById('ghPushBtn');
+  const result = document.getElementById('gh-push-result');
+  const msg = document.getElementById('gh-push-msg');
+  const steps = document.getElementById('gh-push-steps');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Pushing to GitHub...';
+  result.style.display = 'none';
+
+  try {
+    const r = await fetch('/api/github/push', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const d = await r.json();
+
+    result.style.display = 'block';
+    if(r.ok && d.success){
+      msg.style.color = 'var(--green)';
+      msg.textContent = '✅ ' + d.message;
+      steps.textContent = (d.steps || []).join('\n');
+      toast('Pushed to GitHub!', 'ok');
+      loadGHStatus();
+    } else {
+      msg.style.color = 'var(--red)';
+      msg.textContent = '❌ ' + (d.detail || 'Push failed');
+      steps.textContent = (d.steps || []).join('\n');
+      toast('Push failed', 'err');
+    }
+  } catch(e) {
+    result.style.display = 'block';
+    msg.style.color = 'var(--red)';
+    msg.textContent = '❌ Cannot reach bot — make sure the bot is running on port 6000';
+    toast('Push failed — bot offline', 'err');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '🐙 Push Settings to GitHub';
+}
+
+async function quickPush(){
+  toast('Pushing to GitHub...', 'info');
+  try {
+    const r = await fetch('/api/github/push', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const d = await r.json();
+    if(r.ok && d.success){ toast('🐙 ' + d.message, 'ok'); }
+    else { toast('Push failed: ' + (d.detail || 'error'), 'err'); }
+  } catch(e) { toast('Bot offline — cannot push', 'err'); }
+}
+
+async function loadGHStatus(){
+  try {
+    const r = await fetch('/api/github/status', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const d = await r.json();
+
+    if(!d.has_token){
+      document.getElementById('gh-token-warn').style.display = 'block';
+    }
+
+    const commits = d.recent_commits || [];
+    document.getElementById('gh-commits').innerHTML = commits.length
+      ? commits.map(c => `<div>📌 ${esc(c)}</div>`).join('')
+      : '<div>No commits yet</div>';
+
+    const dirty = d.uncommitted_changes;
+    document.getElementById('gh-dirty').textContent = dirty
+      ? dirty
+      : '✅ Working tree clean — nothing to commit';
+    document.getElementById('gh-dirty').style.color = dirty ? 'var(--yellow)' : 'var(--green)';
+  } catch(e) {
+    document.getElementById('gh-commits').textContent = 'Bot offline';
+    document.getElementById('gh-dirty').textContent = 'Cannot connect to bot';
+  }
+}
+
+// Load GitHub status when GitHub page is opened
+document.querySelector('[data-pg="github"]').addEventListener('click', () => {
+  loadGHStatus();
+});
 </script>
 </body>
 </html>
