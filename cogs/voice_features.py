@@ -1,4 +1,4 @@
-# =============================================================================
+'''# =============================================================================
 #  cogs/voice_features.py — Anime Voice System (with audio files + TTS fallback)
 # =============================================================================
 
@@ -368,7 +368,37 @@ class VoiceFeatures(commands.Cog):
         embed.set_footer(text="Edit voices in admin panel: minnal.up.railway.app")
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
+    @app_commands.command(name="addvoice", description="🎤 Add a new anime voice")
+    @app_commands.describe(spell="The spell or phrase", anime="The anime or character", voice_text="The text for TTS fallback", audio_file="The audio file name (optional)")
+    async def add_voice(self, interaction: discord.Interaction, spell: str, anime: str, voice_text: str, audio_file: str = None):
+        # Implementation to add a new voice
+        new_voice = {
+            "spell": spell,
+            "anime": anime,
+            "voice_text": voice_text,
+            "audio_file": audio_file if audio_file else ""
+        }
+        
+        try:
+            settings_data = {}
+            if os.path.exists(SETTINGS_FILE):
+                with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
+                    settings_data = json.load(f)
+            
+            if 'voices' not in settings_data:
+                settings_data['voices'] = {'voice_list': []}
+            
+            settings_data['voices']['voice_list'].append(new_voice)
+            
+            with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
+                json.dump(settings_data, f, indent=4)
+            
+            await interaction.response.send_message(f"✅ Voice '{spell}' added successfully!", ephemeral=True)
+        except Exception as e:
+            await interaction.response.send_message(f"❌ Error adding voice: {e}", ephemeral=True)
+
 
 async def setup(bot):
     await bot.add_cog(VoiceFeatures(bot))
     print("✅ VoiceFeatures cog loaded!", flush=True)
+''
