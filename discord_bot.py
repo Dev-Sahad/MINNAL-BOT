@@ -13,6 +13,13 @@ import config
 
 # ── 1. MOBILE STATUS SPOOFING ──────────────────────────────────────────────
 async def mobile_identify(self):
+    try:
+        intents_value = self.intents.value
+    except AttributeError:
+        try:
+            intents_value = self._connection.intents.value
+        except AttributeError:
+            intents_value = discord.Intents.all().value
     payload = {
         'op': self.IDENTIFY,
         'd': {
@@ -24,12 +31,12 @@ async def mobile_identify(self):
             },
             'compress': True,
             'large_threshold': 250,
-            'intents': self.intents.value if hasattr(self, 'intents') else self._intents.value
+            'intents': intents_value
         }
     }
     if self.shard_id is not None and self.shard_count is not None:
         payload['d']['shard'] = [self.shard_id, self.shard_count]
-    await self.send_json(payload)
+    await self.send_as_json(payload)
 
 discord.gateway.DiscordWebSocket.identify = mobile_identify
 
