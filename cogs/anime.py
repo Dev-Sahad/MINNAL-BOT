@@ -184,7 +184,7 @@ class Anime(commands.Cog):
         self.bot   = bot
         self.daily_posted_date = None
         self.daily_task.start()
-        print("🎌 Anime cog loaded!", flush=True)
+        pass  # startup logged by discord_bot.py
 
     def cog_unload(self):
         self.daily_task.cancel()
