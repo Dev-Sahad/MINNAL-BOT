@@ -5,6 +5,7 @@
 import discord
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
+import aiohttp
 import io
 import json
 import os
@@ -76,8 +77,9 @@ class Welcome(commands.Cog):
             width, height = base_image.size
             
             # Get member avatar
-            async with self.bot.session.get(str(member.display_avatar.url)) as resp:
-                avatar_data = await resp.read()
+            async with aiohttp.ClientSession() as session:
+                async with session.get(str(member.display_avatar.url)) as resp:
+                    avatar_data = await resp.read()
             
             avatar_img = Image.open(io.BytesIO(avatar_data)).convert('RGBA')
             avatar_img = avatar_img.resize((self.AVATAR_SIZE, self.AVATAR_SIZE))
@@ -200,8 +202,9 @@ class Welcome(commands.Cog):
                 color=0x9400D3
             )
             
+            tag = f"#{member.discriminator}" if member.discriminator != "0" else ""
             embed.set_author(
-                name=f"{member.name}#{member.discriminator}",
+                name=f"{member.name}{tag}",
                 icon_url=member.display_avatar.url
             )
             
@@ -280,7 +283,8 @@ class Welcome(commands.Cog):
             color=0x9400D3
         )
         
-        embed.set_author(name=f"{target.name}#{target.discriminator}", icon_url=target.display_avatar.url)
+        tag = f"#{target.discriminator}" if target.discriminator != "0" else ""
+        embed.set_author(name=f"{target.name}{tag}", icon_url=target.display_avatar.url)
         embed.set_thumbnail(url=target.display_avatar.url)
         embed.add_field(name="Member #", value=f"{len(ctx.guild.members)}", inline=True)
         embed.add_field(name="Account Age", value=f"<t:{int(target.created_at.timestamp())}:R>", inline=True)
