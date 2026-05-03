@@ -32,6 +32,7 @@ COGS = [
     'cogs.verify', 'cogs.autorole', 'cogs.ghostping',
     'cogs.stats', 'cogs.tickets', 'cogs.sentinel', 'cogs.codepilot',
     'cogs.log_relay', 'cogs.welcome', 'cogs.anime', 'cogs.levels', 'cogs.help',
+    'cogs.watchlist',
 ]
 
 COG_DESC = {
@@ -60,6 +61,7 @@ COG_DESC = {
     'cogs.anime':          'Anime search & daily posts',
     'cogs.levels':         'XP & level system',
     'cogs.help':           'Command catalogue',
+    'cogs.watchlist':      'Personal anime watchlist',
 }
 
 # ── STARTUP & SYNC ────────────────────────────────────────────────────────────
