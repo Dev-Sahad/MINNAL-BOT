@@ -37,27 +37,69 @@ select option{background:var(--card)}
 
 /* Sidebar layout */
 #app{display:flex;min-height:100vh}
-#sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+#sidebar{
+  width:220px;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;flex-shrink:0;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  transition:transform .25s cubic-bezier(.4,0,.2,1);
+  z-index:200;
+}
+/* Collapsed desktop sidebar */
+#app.sidebar-collapsed #sidebar{width:56px;overflow:hidden}
+#app.sidebar-collapsed #sidebar .nav-label,
+#app.sidebar-collapsed #sidebar .nav-item span:not(.ni),
+#app.sidebar-collapsed #sidebar-logo .title,
+#app.sidebar-collapsed #sidebar-logo .sub,
+#app.sidebar-collapsed .sidebar-footer-btns{display:none}
+#app.sidebar-collapsed #sidebar .nav-item{justify-content:center;padding:10px 0;border-left:none}
+#app.sidebar-collapsed #sidebar .nav-item.active{background:rgba(124,92,252,.18)}
+#app.sidebar-collapsed #sidebar-logo{justify-content:center;padding:14px 0}
+
 #sidebar-logo{padding:20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-#sidebar-logo .icon{font-size:24px}
+#sidebar-logo .icon{font-size:24px;flex-shrink:0}
 #sidebar-logo .title{font-weight:700;font-size:15px}
 #sidebar-logo .sub{font-size:11px;color:var(--muted)}
 .nav-group{padding:8px 0}
-.nav-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:6px 16px 3px}
-.nav-item{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);border-radius:0;transition:background .15s,color .15s;border-left:3px solid transparent}
+.nav-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:6px 16px 3px;white-space:nowrap}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);border-radius:0;transition:background .15s,color .15s;border-left:3px solid transparent;white-space:nowrap}
 .nav-item:hover{background:var(--card);color:var(--text)}
 .nav-item.active{background:rgba(124,92,252,.12);color:var(--accent);border-left-color:var(--accent);font-weight:600}
-.nav-item .ni{font-size:16px;width:20px;text-align:center}
+.nav-item .ni{font-size:16px;width:20px;text-align:center;flex-shrink:0}
 
-#content{flex:1;overflow-y:auto}
-#topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12;position:sticky;top:0;z-index:10}
+/* Overlay for mobile */
+#sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:190;backdrop-filter:blur(2px)}
+#app.mobile-open #sidebar-overlay{display:block}
+
+#content{flex:1;overflow-y:auto;min-width:0}
+#topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:100}
+#topbar-left{display:flex;align-items:center;gap:10px}
 #topbar-title{font-weight:700;font-size:15px}
-#topbar-actions{display:flex;gap:8px;align-items:center}
-.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:5px;animation:pulse 2s infinite}
+#topbar-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:4px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-#main-area{padding:24px;max-width:860px}
+#main-area{padding:20px;max-width:860px}
 .pg{display:none}
 .pg.on{display:block}
+
+/* Hamburger / collapse toggle buttons */
+.icon-btn{background:var(--border);border:none;color:var(--text);width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:background .15s}
+.icon-btn:hover{background:var(--accent);color:#fff}
+#menu-btn{display:none}
+
+/* Mobile overrides */
+@media(max-width:768px){
+  #sidebar{position:fixed;left:0;top:0;height:100vh;transform:translateX(-100%);width:240px}
+  #app.mobile-open #sidebar{transform:translateX(0)}
+  #menu-btn{display:flex}
+  #collapse-btn{display:none}
+  .row2{grid-template-columns:1fr}
+  .row3{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:1fr 1fr}
+  #main-area{padding:14px}
+}
+@media(min-width:769px){
+  #menu-btn{display:none}
+}
 
 /* Stats bar */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
@@ -199,8 +241,13 @@ select option{background:var(--card)}
 
   <!-- Main Content -->
   <div id="content">
+    <div id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
     <div id="topbar">
-      <div id="topbar-title">Dashboard</div>
+      <div id="topbar-left">
+        <button class="icon-btn" id="menu-btn" onclick="openMobileSidebar()" title="Menu">☰</button>
+        <button class="icon-btn" id="collapse-btn" onclick="toggleCollapse()" title="Collapse sidebar">◀</button>
+        <div id="topbar-title">Dashboard</div>
+      </div>
       <div id="topbar-actions">
         <span id="botStatus" style="font-size:12px;color:var(--muted)">Connecting...</span>
         <button class="btn btn-sm btn-gray" onclick="document.getElementById('impFile').click()">📤 Import</button>
@@ -636,6 +683,43 @@ select option{background:var(--card)}
 <div class="toast" id="toast"></div>
 
 <script>
+// ───────────────────────────────────────────
+// SIDEBAR TOGGLE (mobile + desktop collapse)
+// ───────────────────────────────────────────
+const app = document.getElementById('app');
+const collapseBtn = document.getElementById('collapse-btn');
+
+function openMobileSidebar(){
+  app.classList.add('mobile-open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMobileSidebar(){
+  app.classList.remove('mobile-open');
+  document.body.style.overflow = '';
+}
+function toggleCollapse(){
+  const collapsed = app.classList.toggle('sidebar-collapsed');
+  collapseBtn.textContent = collapsed ? '▶' : '◀';
+  collapseBtn.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+  try { localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0'); } catch(e){}
+}
+// Restore desktop collapse state
+try {
+  if(localStorage.getItem('sidebarCollapsed') === '1'){
+    app.classList.add('sidebar-collapsed');
+    collapseBtn.textContent = '▶';
+    collapseBtn.title = 'Expand sidebar';
+  }
+} catch(e){}
+// Close sidebar when nav item clicked on mobile
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', () => {
+    if(window.innerWidth <= 768) closeMobileSidebar();
+  });
+});
+// Close on ESC key
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeMobileSidebar(); });
+
 // ───────────────────────────────────────────
 // AUTH
 // ───────────────────────────────────────────
