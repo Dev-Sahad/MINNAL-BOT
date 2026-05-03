@@ -578,13 +578,29 @@ select option{background:var(--card)}
           <h3>🐙 GitHub Sync</h3>
           <div class="info-box">Pushes your current <strong>settings.json</strong> and panel to <strong>github.com/Dev-Sahad/MINNAL-BOT</strong> — Railway auto-deploys on every push.</div>
 
-          <div id="gh-token-warn" class="warn-box" style="display:none">⚠️ GITHUB_PERSONAL_ACCESS_TOKEN is not configured. Set it as a secret in Replit to enable GitHub push.</div>
+          <div id="gh-token-warn" style="display:none">
+            <div class="warn-box" style="margin-bottom:10px">
+              ⚠️ <strong>GITHUB_PERSONAL_ACCESS_TOKEN</strong> is not set in Railway. Follow these steps:
+            </div>
+            <div class="card" style="background:var(--surface);border:1px solid var(--border);margin-bottom:14px">
+              <div style="font-size:13px;line-height:2.2;color:var(--text)">
+                <div><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:8px">1</span>Open <a href="https://railway.app/project/2e3746dd-f853-42a6-9198-0fe1008b68e1" target="_blank" style="color:var(--accent2)">Railway → MINNAL THE GOAT project</a></div>
+                <div><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:8px">2</span>Click your <strong>MINNAL-BOT service</strong> → <strong>Variables</strong> tab</div>
+                <div><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:8px">3</span>Click <strong>New Variable</strong> and add:</div>
+                <div style="margin-left:28px;background:var(--input);padding:8px 12px;border-radius:6px;font-family:monospace;font-size:12px;border:1px solid var(--border)">
+                  Name: <strong style="color:var(--accent)">GITHUB_PERSONAL_ACCESS_TOKEN</strong><br>
+                  Value: <em style="color:var(--muted)">(paste your GitHub PAT here)</em>
+                </div>
+                <div><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:8px">4</span>Click <strong>Add</strong> — Railway will redeploy automatically ⚡</div>
+              </div>
+            </div>
+          </div>
 
           <button class="btn btn-full" id="ghPushBtn" style="background:linear-gradient(135deg,#238636,#1a6e2e);font-size:15px;padding:13px;margin-bottom:14px" onclick="doPush()">
             🐙 Push Settings to GitHub
           </button>
 
-          <div id="gh-push-result" style="display:none" class="card" style="background:var(--surface)">
+          <div id="gh-push-result" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px">
             <div id="gh-push-msg" style="font-weight:600;margin-bottom:10px"></div>
             <div id="gh-push-steps" style="font-size:12px;color:var(--muted);font-family:monospace;line-height:1.8"></div>
           </div>
