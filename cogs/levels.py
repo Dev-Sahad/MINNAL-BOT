@@ -94,7 +94,7 @@ class Levels(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot      = bot
         self.cooldown: dict[int, float] = {}
-        print("🏆 Levels cog loaded!", flush=True)
+        pass  # startup logged by discord_bot.py
 
     # ── XP grant on message ────────────────────────────────────────────────
 
