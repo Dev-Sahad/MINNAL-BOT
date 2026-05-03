@@ -77,7 +77,7 @@ class MinnalTickets(commands.Cog):
         # Register both views so they work after bot restarts
         self.bot.add_view(TicketStarterView())
         self.bot.add_view(CloseTicketView())
-        print("⚡ MINNAL Ticket System is online!")
+        pass  # startup logged by discord_bot.py
 
     @commands.command()
     @commands.has_permissions(administrator=True)
