@@ -119,7 +119,7 @@ class LogRelay(commands.Cog):
         self.bot = bot
         self.state = _load_state()
         self.relay_task.start()
-        print("📡 LogRelay cog loaded — posting Railway logs to Discord", flush=True)
+        pass  # startup logged by discord_bot.py
 
     def cog_unload(self):
         self.relay_task.cancel()
