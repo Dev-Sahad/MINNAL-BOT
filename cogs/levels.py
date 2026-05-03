@@ -233,7 +233,7 @@ class Levels(commands.Cog):
 
     # ── /leaderboard ───────────────────────────────────────────────────────
 
-    @discord.app_commands.command(name="leaderboard", description="Top 10 most active members by XP")
+    @discord.app_commands.command(name="xptop", description="Top 10 most active members by XP")
     async def leaderboard_cmd(self, interaction: discord.Interaction):
         await interaction.response.defer()
         xp_data  = _load_xp()
