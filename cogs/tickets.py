@@ -13,7 +13,7 @@ import asyncio
 
 # ── Config ─────────────────────────────────────────────────────────────────
 STAFF_ROLE_IDS  = [1477254538313470096, 1499490549621850184]   # Admin / Sub-Admin
-TICKET_LOG_ID   = 0    # set to a channel ID to log ticket opens (0 = disabled)
+TICKET_LOG_ID   = 1500510668418191510    # set to a channel ID to log ticket opens (0 = disabled)
 
 BRAND_COLOR  = 0x5865F2   # Discord blurple
 OPEN_COLOR   = 0x57F287   # green
