@@ -259,7 +259,7 @@ class HelpView(discord.ui.View):
 class HelpCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        print("📖 Help cog loaded!", flush=True)
+        pass  # startup logged by discord_bot.py
 
     @app_commands.command(name="help", description="Browse all MINNAL commands by category")
     async def help_cmd(self, interaction: discord.Interaction):
