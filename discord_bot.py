@@ -25,6 +25,7 @@ bot = commands.Bot(command_prefix='/', intents=intents, help_command=None)
 
 # ── MODULE REGISTRY ───────────────────────────────────────────────────────────
 COGS = [
+    'cogs.bot_control',                                              # ← first: installs global check
     'cogs.dashboard', 'cogs.admin', 'cogs.music', 'cogs.fun',
     'cogs.info', 'cogs.economy', 'cogs.giveaways', 'cogs.utilities',
     'cogs.voice_manager', 'cogs.web_bridge', 'cogs.rizz_engine',
@@ -37,6 +38,7 @@ COGS = [
 ]
 
 COG_DESC = {
+    'cogs.bot_control':    'Admin lock · feature toggles · audit log',
     'cogs.dashboard':      'Web admin panel & API server',
     'cogs.admin':          'Server control center',
     'cogs.music':          'Voice & music player',
@@ -66,10 +68,94 @@ COG_DESC = {
     'cogs.ai_chat':        'Claude AI chat channel',
 }
 
+# ── GLOBAL INTERACTION CHECK ──────────────────────────────────────────────────
+# Runs before every slash command. Enforces:
+#   1. Bot lock    — only admins get through when locked
+#   2. Feature off — block commands belonging to a disabled feature
+#   3. Restriction — block commands restricted to a role the user lacks
+
+def _is_admin_user(interaction: discord.Interaction) -> bool:
+    if interaction.user.id in config.DEVELOPER_IDS:
+        return True
+    if interaction.guild and interaction.guild.owner_id == interaction.user.id:
+        return True
+    member = interaction.guild.get_member(interaction.user.id) if interaction.guild else None
+    return bool(member and member.guild_permissions.administrator)
+
+
+async def global_interaction_check(interaction: discord.Interaction) -> bool:
+    from cogs.bot_control import (
+        is_bot_locked, get_lock_reason,
+        get_disabled_features, get_command_restrictions
+    )
+
+    # Always pass through for admins / DMs
+    if not interaction.guild or _is_admin_user(interaction):
+        return True
+
+    cmd_name = interaction.command.name if interaction.command else ""
+
+    # ── 1. Bot Lock ───────────────────────────────────────────────────────
+    if is_bot_locked():
+        embed = discord.Embed(
+            title="🔒 Bot Locked",
+            description=(
+                f"**{get_lock_reason()}**\n\n"
+                "The bot is currently restricted to administrators only.\n"
+                "Please wait for an admin to unlock it."
+            ),
+            color=0xff4757
+        )
+        embed.set_footer(text="MINNAL  ·  Admin Control")
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+        return False
+
+    # ── 2. Disabled Features ──────────────────────────────────────────────
+    cog_obj  = interaction.command.binding if interaction.command else None
+    cog_name = type(cog_obj).__module__.split(".")[-1] if cog_obj else ""
+    disabled = get_disabled_features()
+
+    if cog_name in disabled:
+        from cogs.bot_control import FEATURES
+        label = FEATURES.get(cog_name, cog_name)
+        embed = discord.Embed(
+            title="🔴 Feature Disabled",
+            description=f"**{label}** has been turned off by an admin.",
+            color=0xff4757
+        )
+        embed.set_footer(text="Contact a server admin to re-enable this feature.")
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+        return False
+
+    # ── 3. Command Role Restrictions ──────────────────────────────────────
+    restrictions = get_command_restrictions()
+    if cmd_name in restrictions:
+        required_role_id = int(restrictions[cmd_name])
+        member = interaction.guild.get_member(interaction.user.id)
+        if member and not any(r.id == required_role_id for r in member.roles):
+            role = interaction.guild.get_role(required_role_id)
+            role_name = role.name if role else f"ID {required_role_id}"
+            embed = discord.Embed(
+                title="🔐 Restricted Command",
+                description=(
+                    f"`/{cmd_name}` requires the **{role_name}** role.\n"
+                    "Ask an admin if you think you should have access."
+                ),
+                color=0xffa502
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return False
+
+    return True
+
+
 # ── STARTUP & SYNC ────────────────────────────────────────────────────────────
 
 @bot.event
 async def on_ready():
+    # Wire up global interaction check
+    bot.tree.interaction_check = global_interaction_check
+
     if all([TicketStarter, CloseTicket, VerifyView]):
         bot.add_view(TicketStarter())
         bot.add_view(CloseTicket())
