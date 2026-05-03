@@ -181,7 +181,7 @@ def _build_aotd_embed(anime: dict) -> discord.Embed:
     embed.add_field(name="👥 Members",    value=f"{members:,}",                      inline=True)
     if genres:
         embed.add_field(name="🎭 Genres", value=_genre_str(genres),                  inline=False)
-    embed.set_footer(text="⏳ This post auto-deletes in 24 hours  ·  Data from MyAnimeList")
+    embed.set_footer(text="Data from MyAnimeList via Jikan API")
     return embed
 
 
@@ -261,7 +261,7 @@ def _build_categories_embed() -> discord.Embed:
         ),
         inline=False
     )
-    embed.set_footer(text="⏳ This post auto-deletes in 24 hours  ·  Genres sourced from MyAnimeList")
+    embed.set_footer(text="Genres sourced from MyAnimeList  ·  Use /anime search <genre> to explore")
     return embed
 
 
@@ -501,7 +501,7 @@ class Anime(commands.Cog):
         try:
             DELETE = 86400  # 24 hours in seconds
 
-            # ── Card 1: Slash Commands Guide ──────────────────────────────
+            # ── Card 1: Slash Commands Guide (auto-deletes in 24h) ────────
             await channel.send(
                 content="📌 **Today's Anime Commands** — use these slash commands!",
                 embed=_build_commands_embed(),
@@ -509,15 +509,14 @@ class Anime(commands.Cog):
             )
             await asyncio.sleep(1.5)
 
-            # ── Card 2: Genre Categories ──────────────────────────────────
+            # ── Card 2: Genre Categories (permanent) ──────────────────────
             await channel.send(
                 content="🗂️ **Browse by Genre** — explore the anime world!",
-                embed=_build_categories_embed(),
-                delete_after=DELETE
+                embed=_build_categories_embed()
             )
             await asyncio.sleep(1.5)
 
-            # ── Card 3: Anime of the Day (full poster) ────────────────────
+            # ── Card 3: Anime of the Day (permanent, full poster) ─────────
             page  = random.randint(1, 4)
             data  = await _jikan_get("/top/anime", {"limit": 25, "page": page})
             items = data.get("data", [])
@@ -525,8 +524,7 @@ class Anime(commands.Cog):
                 anime = random.choice(items)
                 await channel.send(
                     content="🌅 **Anime of the Day!** Good morning, anime fans! 🌸",
-                    embed=_build_aotd_embed(anime),
-                    delete_after=DELETE
+                    embed=_build_aotd_embed(anime)
                 )
                 import logger as log
                 log.event("anime", f"Daily posts sent → #{channel.name}  |  AotD: {anime.get('title')}")
