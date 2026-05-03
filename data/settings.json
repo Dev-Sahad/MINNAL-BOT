@@ -13,7 +13,7 @@
     "message": "**`|`** 👋 **IDENTITY:** {member}\n**`|`** 📑 **REGISTRY:** `Member #{member guild.member_count}`\n**`|`** 📡 **LOCATION:** `{member guild.name}`\n\n**`|`** 📜 **CORE PROTOCOLS:**\n**`|`** 1️⃣ Respect the ` Community`.\n**`|`** 2️⃣ Stay active and have ` Fun `.\n**`|`** 3️⃣ Enjoy your ` Stay `\n\n**` STATUS: ACCESS GRANTED `**",
     "image_url": "",
     "leave_enabled": true,
-    "leave_channel_id": "",
+    "leave_channel_id": "1463855462712868948",
     "leave_message": "# A MEMBER HAS DEPARTED 💔\n\n**`|`** 👤 **IDENTITY:** `{member.name}`\n**`|`** 🆔 **SERIAL:** `{member.id}`\n**`|`** 📉 **CAPACITY:** `{member guild.member_count}`\n\n**`|`** 🕊️ *Safe travels through the network...*\n**`|`** *We hope to see you back soon.* ✨\n\n**` STATUS: SESSION TERMINATED `**\n",
     "leave_image_url": ""
   },
@@ -101,15 +101,15 @@
     "max_queue_size": 50
   },
   "channels": {
-    "welcome_channel_id": "",
-    "leave_channel_id": "",
-    "music_channel_id": "",
-    "ticket_channel_id": "",
-    "game_update_channel_id": "",
-    "meme_channel_id": "",
-    "log_channel_id": "",
-    "announcement_channel_id": "",
-    "giveaway_channel_id": "",
+    "welcome_channel_id": "1463854523935359115",
+    "leave_channel_id": "1463855462712868948",
+    "music_channel_id": "1463956357530124329",
+    "ticket_channel_id": "1463953874019680276",
+    "game_update_channel_id": "1467730984723284141",
+    "meme_channel_id": "1465845962118533311",
+    "log_channel_id": "1499449737047314543",
+    "announcement_channel_id": "1463881156201283767",
+    "giveaway_channel_id": "1463882095985430558",
     "default_voice_channel_id": "",
     "announcement_voice_channel_id": ""
   },
