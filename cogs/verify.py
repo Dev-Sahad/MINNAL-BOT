@@ -50,7 +50,7 @@ class MinnalSystem(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         self.bot.add_view(MinnalVerifyView())
-        print("⚡ MINNAL System Cog loaded.")
+        pass  # startup logged by discord_bot.py
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
