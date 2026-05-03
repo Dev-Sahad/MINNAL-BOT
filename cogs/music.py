@@ -23,7 +23,7 @@ if not FFMPEG_PATH:
     if not FFMPEG_PATH:
         FFMPEG_PATH = "ffmpeg"  # Use PATH fallback
 
-print(f"🎵 FFmpeg location: {FFMPEG_PATH}", flush=True)
+# FFmpeg ready — path logged at startup by discord_bot.py
 
 # yt-dlp options for SoundCloud
 YTDL_OPTIONS = {
