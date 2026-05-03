@@ -33,8 +33,8 @@ DOMAIN_NAMES = [
     "🗡️ Tanjiro's Forge",
     "🌪️ Naruto's Vortex"
     "💻 Sahad's Code"
-    "👨🏻‍💻 Dev-Sahad
-    "🦖 Project Godzilla
+    "👨🏻‍💻 Dev-Sahad"
+    "🦖 Project Godzilla"
 ]
 
 DATA_DIR = "data"
