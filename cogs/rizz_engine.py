@@ -102,7 +102,7 @@ class RizzEngine(commands.Cog):
     @rotate_status.before_loop
     async def before_rotate(self):
         await self.bot.wait_until_ready()
-        print(f"⚡ MINNAL Engine: Loaded {len(self.rizz_lines)} Rizz Lines!", flush=True)
+        pass  # startup logged by discord_bot.py
 
     @discord.app_commands.command(name="rizz_check", description="⚡ Scan your current power level")
     async def rizz_check(self, interaction: discord.Interaction):
