@@ -112,6 +112,9 @@
   },
   "ai_chat": {
     "enabled": true,
-    "channel_id": "1500459868086079620"
+    "channel_id": ""
+  },
+  "sentinel": {
+    "log_channel_id": ""
   }
 }
