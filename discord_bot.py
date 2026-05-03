@@ -33,6 +33,7 @@ COGS = [
     'cogs.stats', 'cogs.tickets', 'cogs.sentinel', 'cogs.codepilot',
     'cogs.log_relay', 'cogs.welcome', 'cogs.anime', 'cogs.levels', 'cogs.help',
     'cogs.watchlist',
+    'cogs.ai_chat',
 ]
 
 COG_DESC = {
@@ -62,6 +63,7 @@ COG_DESC = {
     'cogs.levels':         'XP & level system',
     'cogs.help':           'Command catalogue',
     'cogs.watchlist':      'Personal anime watchlist',
+    'cogs.ai_chat':        'Claude AI chat channel',
 }
 
 # ── STARTUP & SYNC ────────────────────────────────────────────────────────────
