@@ -380,22 +380,31 @@ class BotControl(commands.Cog):
         )
         log.event("admin", f"Announcement in #{channel.name} by {interaction.user}: {title}")
 
-    # ── Error handler for non-admins ──────────────────────────────────────
+    # ── Catch check failures on any /admin subcommand ─────────────────────
 
-    @admin.error
-    async def admin_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
-        embed = discord.Embed(
-            title="⛔ Administrator Only",
-            description=(
-                "This command requires **Administrator** permission.\n"
-                "Contact a server admin if you think this is a mistake."
-            ),
-            color=LOCK_CLR
-        )
-        try:
-            await interaction.response.send_message(embed=embed, ephemeral=True)
-        except Exception:
-            await interaction.followup.send(embed=embed, ephemeral=True)
+    @commands.Cog.listener()
+    async def on_app_command_error(
+        self,
+        interaction: discord.Interaction,
+        error: app_commands.AppCommandError
+    ):
+        # Only handle errors from /admin commands
+        cmd = interaction.command
+        if cmd is None or not (hasattr(cmd, 'parent') and cmd.parent and cmd.parent.name == "admin"):
+            return
+        if isinstance(error, (app_commands.CheckFailure, app_commands.MissingPermissions)):
+            embed = discord.Embed(
+                title="⛔ Administrator Only",
+                description=(
+                    "This command requires **Administrator** permission.\n"
+                    "Contact a server admin if you think this is a mistake."
+                ),
+                color=LOCK_CLR
+            )
+            try:
+                await interaction.response.send_message(embed=embed, ephemeral=True)
+            except discord.InteractionResponded:
+                await interaction.followup.send(embed=embed, ephemeral=True)
 
 
 async def setup(bot: commands.Bot):
