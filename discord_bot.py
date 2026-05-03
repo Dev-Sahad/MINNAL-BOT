@@ -32,7 +32,7 @@ COGS = [
     'cogs.voice_manager', 'cogs.web_bridge', 'cogs.rizz_engine',
     'cogs.voice_features', 'cogs.memes', 
     'cogs.verify', 'cogs.autorole', 'cogs.ghostping', 
-    'cogs.stats', 'cogs.tickets', 'cogs.sentinel', 'cogs.codepilot',
+    'cogs.stats', 'cogs.tickets', 'cogs.sentinel', 'cogs.codepilot', 'cogs.welcome',
 ]
 
 # ── 4. STARTUP & SYNC ─────────────────────────────────────────────────────────
