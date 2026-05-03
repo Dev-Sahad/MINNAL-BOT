@@ -83,7 +83,7 @@ class MemeSystem(commands.Cog):
         self.session = None
         self.meme_channel_id = int(os.getenv('MEME_CHANNEL_ID', '0'))
         self.daily_meme_task.start()
-        print(f"✅ MemeSystem cog loaded! Channel ID: {self.meme_channel_id}", flush=True)
+        pass  # startup logged by discord_bot.py
     
     def cog_unload(self):
         self.daily_meme_task.cancel()
@@ -331,4 +331,3 @@ class MemeSystem(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(MemeSystem(bot))
-    print("✅ MemeSystem cog loaded!", flush=True)
