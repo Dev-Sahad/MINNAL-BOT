@@ -14,6 +14,9 @@ import psutil
 import time
 import os
 import json
+import subprocess
+import base64
+import requests as req_lib
 
 
 DATA_DIR = "data"
@@ -167,6 +170,104 @@ async def save_section(req: SaveReq, authorization: Optional[str] = Header(None)
     if save_settings(settings):
         return {"success": True}
     raise HTTPException(status_code=500, detail="Save failed")
+
+
+GITHUB_OWNER = "Dev-Sahad"
+GITHUB_REPO  = "MINNAL-BOT"
+GITHUB_API   = "https://api.github.com"
+
+# Files to push: (github_path, local_path)
+PUSH_FILES = [
+    ("data/settings.json", SETTINGS_FILE),
+    ("advanced-admin-panel.html", "advanced-admin-panel.html"),
+]
+
+
+def _gh_headers(token: str) -> dict:
+    return {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "MINNAL-Bot"
+    }
+
+
+def _gh_push_file(token: str, github_path: str, local_path: str, commit_msg: str) -> dict:
+    """Push a single file via GitHub REST API. Returns {ok, msg}."""
+    url = f"{GITHUB_API}/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/{github_path}"
+    headers = _gh_headers(token)
+
+    if not os.path.exists(local_path):
+        return {"ok": False, "msg": f"local file not found: {local_path}"}
+
+    with open(local_path, "r", encoding="utf-8") as f:
+        raw = f.read()
+    encoded = base64.b64encode(raw.encode("utf-8")).decode()
+
+    # Get current SHA (needed for update)
+    r = req_lib.get(url, headers=headers, timeout=10)
+    sha = r.json().get("sha") if r.status_code == 200 else None
+
+    payload = {"message": commit_msg, "content": encoded, "branch": "main"}
+    if sha:
+        payload["sha"] = sha
+
+    r = req_lib.put(url, headers=headers, json=payload, timeout=15)
+    if r.status_code in (200, 201):
+        return {"ok": True, "msg": f"✅ {github_path}"}
+    body = r.json()
+    return {"ok": False, "msg": f"❌ {github_path}: {body.get('message', r.status_code)}"}
+
+
+@app.post("/api/github/push")
+async def github_push(authorization: Optional[str] = Header(None)):
+    if not check_auth(authorization):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    token = os.getenv('GITHUB_PERSONAL_ACCESS_TOKEN', '')
+    if not token:
+        raise HTTPException(status_code=500, detail="GITHUB_PERSONAL_ACCESS_TOKEN not set in Railway environment variables")
+
+    commit_msg = "⚙️ Settings update from Admin Panel"
+    steps = []
+    any_ok = False
+
+    for github_path, local_path in PUSH_FILES:
+        result = _gh_push_file(token, github_path, local_path, commit_msg)
+        steps.append(result["msg"])
+        if result["ok"]:
+            any_ok = True
+
+    if not any_ok:
+        raise HTTPException(status_code=500, detail="\n".join(steps))
+
+    return {"success": True, "message": f"Pushed to GitHub! Railway will redeploy automatically.", "steps": steps}
+
+
+@app.get("/api/github/status")
+async def github_status(authorization: Optional[str] = Header(None)):
+    if not check_auth(authorization):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    token = os.getenv('GITHUB_PERSONAL_ACCESS_TOKEN', '')
+    has_token = bool(token)
+    commits = []
+
+    if token:
+        url = f"{GITHUB_API}/repos/{GITHUB_OWNER}/{GITHUB_REPO}/commits?per_page=5&sha=main"
+        r = req_lib.get(url, headers=_gh_headers(token), timeout=10)
+        if r.status_code == 200:
+            for c in r.json():
+                sha = c.get("sha", "")[:7]
+                msg = c.get("commit", {}).get("message", "").split("\n")[0]
+                commits.append(f"{sha} {msg}")
+
+    return {
+        "success": True,
+        "recent_commits": commits,
+        "uncommitted_changes": None,
+        "has_token": has_token
+    }
 
 
 @app.get("/api/stats")
