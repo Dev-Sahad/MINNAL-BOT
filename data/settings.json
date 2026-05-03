@@ -99,5 +99,15 @@
     "anime_channel_id": "1500443460686319807",
     "daily_post": true,
     "daily_hour_utc": 9
+  },
+  "levels": {
+    "enabled": true,
+    "levelup_channel_id": "",
+    "role_rewards": {
+      "5":  "",
+      "10": "",
+      "20": "",
+      "50": ""
+    }
   }
 }
