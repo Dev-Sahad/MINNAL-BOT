@@ -33,7 +33,7 @@ COGS = [
     'cogs.voice_features', 'cogs.memes',
     'cogs.verify', 'cogs.autorole', 'cogs.ghostping',
     'cogs.stats', 'cogs.tickets', 'cogs.sentinel', 'cogs.codepilot',
-    'cogs.log_relay', 'cogs.welcome', 'cogs.anime',
+    'cogs.log_relay', 'cogs.welcome', 'cogs.anime', 'cogs.levels',
 ]
 
 # ── 4. STARTUP & SYNC ─────────────────────────────────────────────────────────
