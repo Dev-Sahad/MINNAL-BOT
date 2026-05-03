@@ -238,7 +238,7 @@ class MemeSystem(commands.Cog):
         
         await interaction.followup.send(content=f"{target.mention} TROLLED! 💀", embed=embed)
     
-    @app_commands.command(name="anime", description="🎌 Random anime content")
+    @app_commands.command(name="animememe", description="🎌 Random anime meme, quote or fact")
     async def anime_command(self, interaction: discord.Interaction):
         await interaction.response.defer()
         choice = random.choice(['meme', 'quote', 'fact', 'meme', 'meme'])
