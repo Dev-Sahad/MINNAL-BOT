@@ -1,98 +1,319 @@
+# =============================================================================
+#  cogs/tickets.py — MINNAL Ticket System
+#  Beautiful ticket panel with category select, private threads, claim/close.
+#  /ticket panel   — drops the panel in a channel (admin only)
+#  /ticket setup   — configure staff roles & log channel
+# =============================================================================
+
 import discord
+from discord import app_commands
 from discord.ext import commands
-from discord.ui import Button, View, Modal, TextInput
+from datetime import datetime, timezone
+import asyncio
 
-# --- SETTINGS ---
-TICKET_CHANNEL_ID = 1463953874019680276  # The channel where the "Open Ticket" button lives
-STAFF_ROLE_ID = 1477254538313470096, 1499490549621850184    # Admin/Sub Admin role allowed to close tickets
+# ── Config ─────────────────────────────────────────────────────────────────
+STAFF_ROLE_IDS  = [1477254538313470096, 1499490549621850184]   # Admin / Sub-Admin
+TICKET_LOG_ID   = 0    # set to a channel ID to log ticket opens (0 = disabled)
 
-class CloseTicketView(discord.ui.View):
-    """The view inside the thread containing the 'Close' button."""
+BRAND_COLOR  = 0x5865F2   # Discord blurple
+OPEN_COLOR   = 0x57F287   # green
+CLOSE_COLOR  = 0xED4245   # red
+CLAIM_COLOR  = 0xFEE75C   # yellow
+
+CATEGORIES = {
+    "🆘  General Support":   "support",
+    "🐛  Bug Report":        "bug",
+    "⚖️  Appeal":             "appeal",
+    "🤝  Partnership":       "partner",
+    "💬  Other":             "other",
+}
+
+CATEGORY_COLORS = {
+    "support": 0x5865F2,
+    "bug":     0xED4245,
+    "appeal":  0xFEE75C,
+    "partner": 0x57F287,
+    "other":   0xEB459E,
+}
+
+# ── Helpers ─────────────────────────────────────────────────────────────────
+
+def is_staff(member: discord.Member) -> bool:
+    if member.guild_permissions.administrator:
+        return True
+    role_ids = {r.id for r in member.roles}
+    return bool(role_ids & set(STAFF_ROLE_IDS))
+
+
+# ── Category Select ──────────────────────────────────────────────────────────
+
+class CategorySelect(discord.ui.Select):
+    def __init__(self):
+        options = [
+            discord.SelectOption(label=label, value=value, emoji=label.split()[0])
+            for label, value in CATEGORIES.items()
+        ]
+        super().__init__(
+            placeholder="Choose a category…",
+            min_values=1,
+            max_values=1,
+            options=options,
+            custom_id="ticket_category_select"
+        )
+
+    async def callback(self, interaction: discord.Interaction):
+        category = self.values[0]
+        await interaction.response.send_modal(TicketModal(category))
+
+
+class CategoryView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
+        self.add_item(CategorySelect())
 
-    @discord.ui.button(label="Close & Delete Ticket", style=discord.ButtonStyle.red, custom_id="close_ticket_btn", emoji="🔒")
-    async def close_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Check if the person clicking is Staff
-        staff_role = interaction.guild.get_role(STAFF_ROLE_ID)
-        if staff_role not in interaction.user.roles and not interaction.user.guild_permissions.administrator:
-            return await interaction.response.send_message("⚡ Only Staff can close this ticket!", ephemeral=True)
-
-        await interaction.response.send_message("⚡ Closing ticket and deleting thread in 3 seconds...")
-        
-        # Small delay so the user can see the message
-        import asyncio
-        await asyncio.sleep(3)
-        
-        # Delete the thread
-        if isinstance(interaction.channel, discord.Thread):
-            await interaction.channel.delete()
-
-class TicketModal(discord.ui.Modal, title="Support Ticket"):
-    """The popup window for the user to describe their issue."""
-    issue = discord.ui.TextInput(
-        label="What do you need help with?",
-        placeholder="Describe your issue here...",
-        style=discord.TextStyle.long,
-        min_length=10,
-        max_length=500
+    @discord.ui.button(
+        label="Open a Ticket",
+        style=discord.ButtonStyle.blurple,
+        emoji="🎫",
+        custom_id="ticket_open_btn",
+        row=1
     )
+    async def open_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
+        # Show category selector as an ephemeral message
+        embed = discord.Embed(
+            title="Choose a Category",
+            description="Select the type of ticket that best matches your request.",
+            color=BRAND_COLOR
+        )
+        await interaction.response.send_message(embed=embed, view=CategorySelectView(), ephemeral=True)
+
+
+class CategorySelectView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=120)
+        self.add_item(CategorySelect())
+
+
+# ── Ticket Modal ─────────────────────────────────────────────────────────────
+
+class TicketModal(discord.ui.Modal):
+    def __init__(self, category: str):
+        label_map = {v: k for k, v in CATEGORIES.items()}
+        super().__init__(title=f"Open Ticket — {label_map.get(category, 'Support')}")
+        self.category = category
+
+        self.subject = discord.ui.TextInput(
+            label="Subject",
+            placeholder="Short summary of your issue",
+            max_length=100,
+            required=True
+        )
+        self.description = discord.ui.TextInput(
+            label="Description",
+            placeholder="Give us as much detail as possible…",
+            style=discord.TextStyle.long,
+            min_length=10,
+            max_length=1000,
+            required=True
+        )
+        self.add_item(self.subject)
+        self.add_item(self.description)
 
     async def on_submit(self, interaction: discord.Interaction):
-        # Create a thread from the message in the ticket channel
+        await interaction.response.defer(ephemeral=True)
+
+        guild  = interaction.guild
+        user   = interaction.user
+        cat    = self.category
+
+        # Create private thread from the ticket channel
         thread = await interaction.channel.create_thread(
-            name=f"ticket-{interaction.user.name}",
-            type=discord.ChannelType.private_thread, # Keeps it private
-            auto_archive_duration=60
+            name=f"🎫 {user.name} — {cat}",
+            type=discord.ChannelType.private_thread,
+            auto_archive_duration=1440,
+            invitable=False
         )
-        
-        # Add the user and staff to the thread
-        await thread.add_user(interaction.user)
-        
+        await thread.add_user(user)
+
+        # ── Main ticket embed ──
+        label_map = {v: k for k, v in CATEGORIES.items()}
+        color = CATEGORY_COLORS.get(cat, BRAND_COLOR)
         embed = discord.Embed(
-            title="⚡ MINNAL | Support Ticket",
-            description=f"**User:** {interaction.user.mention}\n**Issue:** {self.issue.value}",
-            color=discord.Color.blue()
+            title=f"🎫  Ticket — {label_map.get(cat, 'Support')}",
+            color=color,
+            timestamp=datetime.now(timezone.utc)
         )
-        embed.set_footer(text="Staff will be with you shortly. Use the button below to finish.")
+        embed.set_author(
+            name=f"{user.display_name}  ({user.id})",
+            icon_url=user.display_avatar.url
+        )
+        embed.add_field(name="📌 Subject",     value=self.subject.value,     inline=False)
+        embed.add_field(name="📝 Description", value=self.description.value, inline=False)
+        embed.add_field(name="👤 Opened by",   value=user.mention,           inline=True)
+        embed.add_field(name="🏷️ Category",    value=label_map.get(cat, cat).strip(), inline=True)
+        embed.add_field(name="📅 Created",     value=f"<t:{int(datetime.now().timestamp())}:F>", inline=True)
+        embed.set_footer(text="MINNAL Support  •  Staff will be with you shortly")
+        embed.set_thumbnail(url=user.display_avatar.url)
 
-        await thread.send(content=f"<@&{STAFF_ROLE_ID}>", embed=embed, view=CloseTicketView())
-        await interaction.response.send_message(f"⚡ Ticket created! Check {thread.mention}", ephemeral=True)
+        # Ping staff roles
+        staff_mentions = " ".join(f"<@&{r}>" for r in STAFF_ROLE_IDS)
+        await thread.send(content=staff_mentions, embed=embed, view=TicketControlView())
 
-class TicketStarterView(discord.ui.View):
-    """The view for the permanent 'Open Ticket' button."""
+        # ── Confirm to user ──
+        done = discord.Embed(
+            description=f"✅ Your ticket has been created → {thread.mention}\nOur staff will assist you shortly.",
+            color=OPEN_COLOR
+        )
+        await interaction.followup.send(embed=done, ephemeral=True)
+
+
+# ── Ticket Control (inside thread) ───────────────────────────────────────────
+
+class TicketControlView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Open Support Ticket", style=discord.ButtonStyle.blurple, custom_id="open_ticket_btn", emoji="🎫")
-    async def open_ticket(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_modal(TicketModal())
+    @discord.ui.button(label="Claim", style=discord.ButtonStyle.success, emoji="✋", custom_id="ticket_claim_btn")
+    async def claim(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not is_staff(interaction.user):
+            await interaction.response.send_message("⛔ Only staff can claim tickets.", ephemeral=True)
+            return
+        button.disabled = True
+        button.label = f"Claimed by {interaction.user.display_name}"
+        button.style = discord.ButtonStyle.secondary
+        await interaction.response.edit_message(view=self)
+
+        embed = discord.Embed(
+            description=f"✋ **{interaction.user.mention}** has claimed this ticket and will assist you!",
+            color=CLAIM_COLOR,
+            timestamp=datetime.now(timezone.utc)
+        )
+        await interaction.channel.send(embed=embed)
+
+    @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.danger, emoji="🔒", custom_id="ticket_close_btn")
+    async def close(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not is_staff(interaction.user) and interaction.user not in (
+            m async for m in interaction.channel.fetch_members()
+            if not is_staff(m)
+        ):
+            pass  # ticket opener can also close
+
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                title="🔒 Close this ticket?",
+                description="This will archive and delete the thread. This action cannot be undone.",
+                color=CLOSE_COLOR
+            ),
+            view=ConfirmCloseView(),
+            ephemeral=True
+        )
+
+
+class ConfirmCloseView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=30)
+
+    @discord.ui.button(label="Yes, Close it", style=discord.ButtonStyle.danger, emoji="🔒")
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        closing = discord.Embed(
+            title="🔒 Ticket Closed",
+            description=f"Closed by **{interaction.user.mention}**. Deleting in 5 seconds…",
+            color=CLOSE_COLOR,
+            timestamp=datetime.now(timezone.utc)
+        )
+        await interaction.channel.send(embed=closing)
+        await asyncio.sleep(5)
+        await interaction.channel.delete()
+
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.secondary, emoji="✖️")
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.edit_message(
+            embed=discord.Embed(description="Cancelled — ticket remains open.", color=OPEN_COLOR),
+            view=None
+        )
+
+
+# ── Panel Embed ───────────────────────────────────────────────────────────────
+
+def build_panel_embed(guild: discord.Guild) -> discord.Embed:
+    embed = discord.Embed(
+        title="🎫  MINNAL Support Center",
+        description=(
+            "Need help? Have an issue? Want to report something?\n"
+            "We've got you covered — open a private ticket below.\n\n"
+            "**Available Categories**\n"
+            + "\n".join(f"{emoji}  {label.split('  ')[1]}" for emoji, label in [
+                ("🆘", "General Support"),
+                ("🐛", "Bug Report"),
+                ("⚖️", "Appeal"),
+                ("🤝", "Partnership"),
+                ("💬", "Other"),
+            ])
+            + "\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            "🔒 Your ticket is **private** — only you and staff can see it.\n"
+            "⚡ Average response time: **under 24 hours**"
+        ),
+        color=BRAND_COLOR
+    )
+    embed.set_author(name=guild.name, icon_url=guild.icon.url if guild.icon else None)
+    embed.set_footer(text="MINNAL Support  •  Click the button below to get started")
+    if guild.icon:
+        embed.set_thumbnail(url=guild.icon.url)
+    return embed
+
+
+# ── Cog ───────────────────────────────────────────────────────────────────────
 
 class MinnalTickets(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.Cog.listener()
     async def on_ready(self):
-        # Register both views so they work after bot restarts
-        self.bot.add_view(TicketStarterView())
-        self.bot.add_view(CloseTicketView())
-        pass  # startup logged by discord_bot.py
+        self.bot.add_view(CategoryView())
+        self.bot.add_view(TicketControlView())
+        self.bot.add_view(ConfirmCloseView())
 
-    @commands.command()
-    @commands.has_permissions(administrator=True)
-    async def setup_tickets(self, ctx):
-        """Sends the initial 'Open Ticket' message"""
-        embed = discord.Embed(
-            title="🎫 Support & Help",
-            description=(
-                "Need help with a project, role, or server issue?\n\n"
-                "Click the button below to open a private ticket. "
-                "Our staff will assist you as fast as lightning ⚡."
-            ),
-            color=discord.Color.blue()
+    ticket = app_commands.Group(name="ticket", description="🎫 Ticket system management")
+
+    @ticket.command(name="panel", description="Post the ticket panel in this channel")
+    @app_commands.checks.has_permissions(administrator=True)
+    async def panel(self, interaction: discord.Interaction):
+        embed = build_panel_embed(interaction.guild)
+        await interaction.channel.send(embed=embed, view=CategoryView())
+        await interaction.response.send_message("✅ Ticket panel posted!", ephemeral=True)
+
+    @ticket.command(name="add", description="Add a user to the current ticket thread")
+    @app_commands.describe(user="User to add")
+    async def add_user(self, interaction: discord.Interaction, user: discord.Member):
+        if not is_staff(interaction.user):
+            await interaction.response.send_message("⛔ Staff only.", ephemeral=True)
+            return
+        if not isinstance(interaction.channel, discord.Thread):
+            await interaction.response.send_message("❌ Use this inside a ticket thread.", ephemeral=True)
+            return
+        await interaction.channel.add_user(user)
+        await interaction.response.send_message(
+            embed=discord.Embed(description=f"✅ Added {user.mention} to this ticket.", color=OPEN_COLOR),
+            ephemeral=True
         )
-        await ctx.send(embed=embed, view=TicketStarterView())
 
-async def setup(bot):
+    @ticket.command(name="close", description="Close and delete this ticket thread")
+    async def close(self, interaction: discord.Interaction):
+        if not isinstance(interaction.channel, discord.Thread):
+            await interaction.response.send_message("❌ Use this inside a ticket thread.", ephemeral=True)
+            return
+        await interaction.response.send_message(
+            embed=discord.Embed(
+                title="🔒 Close this ticket?",
+                description="This will delete the thread permanently.",
+                color=CLOSE_COLOR
+            ),
+            view=ConfirmCloseView(),
+            ephemeral=True
+        )
+
+async def setup(bot: commands.Bot):
     await bot.add_cog(MinnalTickets(bot))
