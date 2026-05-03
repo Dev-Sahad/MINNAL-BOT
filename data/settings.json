@@ -109,5 +109,9 @@
       "20": "",
       "50": ""
     }
+  },
+  "ai_chat": {
+    "enabled": true,
+    "channel_id": ""
   }
 }
