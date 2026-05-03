@@ -30,9 +30,10 @@ COGS = [
     'cogs.dashboard', 'cogs.admin', 'cogs.music', 'cogs.fun',
     'cogs.info', 'cogs.economy', 'cogs.giveaways', 'cogs.utilities',
     'cogs.voice_manager', 'cogs.web_bridge', 'cogs.rizz_engine',
-    'cogs.voice_features', 'cogs.memes', 
-    'cogs.verify', 'cogs.autorole', 'cogs.ghostping', 
-    'cogs.stats', 'cogs.tickets', 'cogs.sentinel', 'cogs.codepilot', 'cogs.welcome',
+    'cogs.voice_features', 'cogs.memes',
+    'cogs.verify', 'cogs.autorole', 'cogs.ghostping',
+    'cogs.stats', 'cogs.tickets', 'cogs.sentinel', 'cogs.codepilot',
+    'cogs.log_relay',
 ]
 
 # ── 4. STARTUP & SYNC ─────────────────────────────────────────────────────────
