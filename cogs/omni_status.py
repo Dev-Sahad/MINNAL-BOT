@@ -10,7 +10,7 @@ import random
 class OmniStatus(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.stream_url = "https://twitch.tv/sxhd_sha"
+        self.stream_url = "https://youtu.be/KXUmI_aXG0Q?si=A8tGIfiLegCcOxtj"
         self.rotate_status_menu.start()
 
     def cog_unload(self):
