@@ -84,7 +84,7 @@ class RizzEngine(commands.Cog):
             "🌊 Tidal Wave Energy", "🌪️ Vortex Active"
         ]
         
-        self.stream_url = "https://twitch.tv/sahad_sha" 
+        self.stream_url = "https://youtu.be/KXUmI_aXG0Q?si=0WZsQzbQie71nPxA" 
         self.rotate_status.start()
     
     def cog_unload(self):
