@@ -115,7 +115,18 @@ class Welcome(commands.Cog):
         # Create the embed for the welcome message
         embed = discord.Embed(
             title="🎉 New Member Arrived!",
-            description=f"Welcome {member.mention} to the server!",
+            description=f"**WELCOME TO THE {server}**",
+    "message": "**`|`** 👋 **IDENTITY:** {member}\n**`|`** 📑 **REGISTRY:** `Member #{member guild.member_count}`\n**`|`** 📡 **LOCATION:** `{member guild.name}`\n**`#———————————————————————————————#`**\n\n**`|`** 📜 **CORE PROTOCOLS:**\n**`|`** 1️⃣ Respect the ` Community`.\n**`|`** 2️⃣ Stay active and have ` Fun `.\n**`|`** 3️⃣ Enjoy your ` Stay `\n\n**`#———————————————————————————————#`**\n**` STATUS: ACCESS GRANTED `**",
+    "avatar_x": 25,
+    "avatar_y": 35,
+    "avatar_size": 180,
+    "avatar_border": true,
+    "border_color": "#9400D3",
+    "border_width": 5,
+    "username_x": 25,
+    "username_y": 205,
+    "username_size": 32,
+    "username_color": "#FFFFFF",
             color=0x9400D3
         )
         embed.set_image(url="attachment://welcome.png")
