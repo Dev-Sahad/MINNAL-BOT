@@ -12,8 +12,10 @@ from datetime import datetime, timezone
 import asyncio
 
 # ── Config ─────────────────────────────────────────────────────────────────
-STAFF_ROLE_IDS  = [1477254538313470096, 1499490549621850184]   # Admin / Sub-Admin
-TICKET_LOG_ID   = 1500510668418191510    # set to a channel ID to log ticket opens (0 = disabled)
+import config
+
+STAFF_ROLE_IDS  = [config.STAFF_ROLE_ID, 1477254538313470096, 1499490549621850184]   # Use config + defaults
+TICKET_LOG_ID   = getattr(config, 'TICKET_LOG_ID', 0)    # Fallback to 0 if not defined
 
 BRAND_COLOR  = 0x5865F2   # Discord blurple
 OPEN_COLOR   = 0x57F287   # green
@@ -126,13 +128,25 @@ class TicketModal(discord.ui.Modal):
         user   = interaction.user
         cat    = self.category
 
-        # Create private thread from the ticket channel
-        thread = await interaction.channel.create_thread(
-            name=f"🎫 {user.name} — {cat}",
-            type=discord.ChannelType.private_thread,
-            auto_archive_duration=1440,
-            invitable=False
-        )
+        try:
+            # Create private thread from the ticket channel
+            thread = await interaction.channel.create_thread(
+                name=f"🎫 {user.name} — {cat}",
+                type=discord.ChannelType.private_thread,
+                auto_archive_duration=1440,
+                invitable=False
+            )
+        except discord.Forbidden:
+            return await interaction.followup.send(
+                "❌ **Missing Permissions**: I don't have permission to create private threads in this channel.",
+                ephemeral=True
+            )
+        except Exception as e:
+            return await interaction.followup.send(
+                f"❌ **Error**: Failed to create ticket. ({str(e)})",
+                ephemeral=True
+            )
+
         await thread.add_user(user)
 
         # ── Main ticket embed ──

@@ -2,8 +2,10 @@ import discord
 from discord.ext import commands
 from discord.ui import Button, View
 
+import config
+
 # --- SETTINGS ---
-VERIFIED_ROLE_ID = 1499465467402653767 
+VERIFIED_ROLE_ID = config.VERIFIED_ROLE_ID 
 
 class MinnalVerifyView(discord.ui.View):
     def __init__(self):

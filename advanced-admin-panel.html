@@ -1013,7 +1013,7 @@ function renderDoms(){
   if(!arr.length){c.innerHTML='<div class="empty-lst">No domains added</div>';return;}
     arr.forEach((n,i)=>{
     const d=document.createElement('div'); d.className='lst-item';
-    d.innerHTML=`<input type="text" value="${esc(n)}"><button class="btn btn-sm btn-red" onclick="delDom(${i})">âœ•</button>`;
+    d.innerHTML=`<input type="text" value="${esc(n)}"><button class="btn btn-sm btn-red" onclick="delDom(${i})">&times;</button>`;
     d.querySelector('input').onchange=function(){C.summon.domain_names[i]=this.value;};
     c.appendChild(d);
   });
@@ -1060,7 +1060,7 @@ function renderBio(){
   if(!arr.length){c.innerHTML='<div class="empty-lst">No statuses added</div>';return;}
     arr.forEach((st,i)=>{
     const d=document.createElement('div'); d.className='lst-item';
-    d.innerHTML=`<span style="font-size:11px;color:var(--muted);width:70px;flex-shrink:0;text-transform:capitalize">${st.type}</span><input type="text" value="${esc(st.name)}"><button class="btn btn-sm btn-red" onclick="delBio(${i})">âœ•</button>`;
+    d.innerHTML=`<span style="font-size:11px;color:var(--muted);width:70px;flex-shrink:0;text-transform:capitalize">${st.type}</span><input type="text" value="${esc(st.name)}"><button class="btn btn-sm btn-red" onclick="delBio(${i})">&times;</button>`;
     d.querySelector('input').onchange=function(){C.bio.statuses[i].name=this.value;};
     c.appendChild(d);
   });
@@ -1081,7 +1081,7 @@ function renderTrols(){
   if(!arr.length){c.innerHTML='<div class="empty-lst">No troll messages</div>';return;}
     arr.forEach((m,i)=>{
     const d=document.createElement('div'); d.className='lst-item';
-    d.innerHTML=`<input type="text" value="${esc(m)}"><button class="btn btn-sm btn-red" onclick="delTrol(${i})">âœ•</button>`;
+    d.innerHTML=`<input type="text" value="${esc(m)}"><button class="btn btn-sm btn-red" onclick="delTrol(${i})">&times;</button>`;
     d.querySelector('input').onchange=function(){C.memes.troll_messages[i]=this.value;};
     c.appendChild(d);
   });

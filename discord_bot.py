@@ -12,10 +12,10 @@ import logger as log
 
 # Attempt to import Persistent Views
 try:
-    from cogs.tickets import TicketStarter, CloseTicket
-    from cogs.verify import VerifyView
+    from cogs.tickets import CategoryView, TicketControlView, ConfirmCloseView
+    from cogs.verify import MinnalVerifyView
 except ImportError:
-    TicketStarter, CloseTicket, VerifyView = None, None, None
+    CategoryView, TicketControlView, ConfirmCloseView, MinnalVerifyView = None, None, None, None
 
 load_dotenv()
 
@@ -156,10 +156,11 @@ async def on_ready():
     # Wire up global interaction check
     bot.tree.interaction_check = global_interaction_check
 
-    if all([TicketStarter, CloseTicket, VerifyView]):
-        bot.add_view(TicketStarter())
-        bot.add_view(CloseTicket())
-        bot.add_view(VerifyView())
+    if all([CategoryView, TicketControlView, ConfirmCloseView, MinnalVerifyView]):
+        bot.add_view(CategoryView())
+        bot.add_view(TicketControlView())
+        bot.add_view(ConfirmCloseView())
+        bot.add_view(MinnalVerifyView())
 
     try:
         synced = await bot.tree.sync()
