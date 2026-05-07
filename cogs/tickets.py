@@ -358,7 +358,7 @@ class MinnalTickets(commands.Cog):
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(staff_role="The role that handles tickets", log_channel="Channel for ticket logs")
     async def setup(self, interaction: discord.Interaction, staff_role: discord.Role = None, log_channel: discord.TextChannel = None):
-        global STAFF_ROLE_IDS, TICKET_LOG_ID
+        global TICKET_LOG_ID
         
         if not staff_role and not log_channel:
             return await interaction.response.send_message("❌ Please provide at least one setting to update.", ephemeral=True)
