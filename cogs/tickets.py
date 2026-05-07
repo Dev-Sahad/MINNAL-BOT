@@ -192,11 +192,12 @@ class TicketControlView(discord.ui.View):
 
     @discord.ui.button(label="Close Ticket", style=discord.ButtonStyle.danger, emoji="🔒", custom_id="ticket_close_btn")
     async def close(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if not is_staff(interaction.user) and interaction.user not in (
-            m async for m in interaction.channel.fetch_members()
-            if not is_staff(m)
-        ):
-            pass  # ticket opener can also close
+        # check if member is staff
+        if not is_staff(interaction.user):
+            # check if member is the ticket opener
+            if interaction.user not in interaction.channel.members:
+                await interaction.response.send_message("⛔ You cannot close this ticket.", ephemeral=True)
+                return
 
         await interaction.response.send_message(
             embed=discord.Embed(
