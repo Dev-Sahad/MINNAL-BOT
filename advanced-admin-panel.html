@@ -742,14 +742,56 @@ function togglePwd(){
 document.getElementById(\'pwdIn\').onkeypress = e => { if(e.key===\'Enter\') tryLogin(); };
 
 async function tryLogin(){
-  const pwd = document.getElementById(\'pwdIn\').value.trim();
-  const err = document.getElementById(\'loginErr\');
-  if(!pwd){ err.textContent=\'Enter password\'; return; }
-  if(pwd !== PWD){ err.textContent=\'Wrong password\'; return; }
-  token = pwd;
-  document.getElementById(\'loginPage\').style.display = \'none\';
-  document.getElementById(\'app\').style.display = \'flex\';
-  await loadConfig();
+  const pwd = document.getElementById('pwdIn').value.trim();
+  const err = document.getElementById('loginErr');
+  const btn = document.getElementById('loginBtn');
+  
+  if(!pwd){ err.textContent='Enter password'; return; }
+  
+  btn.disabled = true;
+  btn.textContent = 'Authenticating...';
+
+  try {
+    // 1. Try server-side authentication first
+    const r = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd })
+    });
+
+    if (r.ok) {
+      const d = await r.json();
+      token = d.token;
+      proceedToApp();
+      return;
+    } else if (r.status === 401) {
+      err.textContent = 'Wrong password';
+      btn.disabled = false;
+      btn.textContent = 'Login';
+      return;
+    }
+    // If other error (like 404), fall back to local check
+    throw new Error('API unavailable');
+
+  } catch(e) {
+    // 2. Fallback to local hardcoded check (for offline/local use)
+    if (pwd === PWD) {
+      token = pwd;
+      proceedToApp();
+    } else {
+      err.textContent = 'Wrong password';
+      btn.disabled = false;
+      btn.textContent = 'Login';
+    }
+  }
+}
+
+function proceedToApp() {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  
+  // Load data in background
+  loadConfig();
   loadStats();
   setInterval(loadStats, 15000);
 }
@@ -968,8 +1010,8 @@ function updateSummary(){
 function renderDoms(){
   const c=document.getElementById(\'domLst\'); c.innerHTML=\'\';
   const arr=(C.summon||{}).domain_names||[];
-  if(!arr.length){c.innerHTML=\'<div class="empty-lst">No domains added</div>\';return;}\
-  arr.forEach((n,i)=>{
+  if(!arr.length){c.innerHTML=\'<div class="empty-lst">No domains added</div>\';return;}
+    arr.forEach((n,i)=>{
     const d=document.createElement(\'div\'); d.className=\'lst-item\';
     d.innerHTML=`<input type="text" value="${esc(n)}"><button class="btn btn-sm btn-red" onclick="delDom(${i})">✕</button>`;
     d.querySelector(\'input\').onchange=function(){C.summon.domain_names[i]=this.value;};
@@ -985,8 +1027,8 @@ function delDom(i){C.summon.domain_names.splice(i,1);renderDoms();}
 function renderVoices(){
   const c=document.getElementById(\'voiceList\'); c.innerHTML=\'\';
   const arr=(C.voices||{}).voice_list||[];
-  if(!arr.length){c.innerHTML=\'<div class="empty-lst">No voice spells added</div>\';return;}\
-  arr.forEach((v,i)=>{
+  if(!arr.length){c.innerHTML=\'<div class="empty-lst">No voice spells added</div>\';return;}
+    arr.forEach((v,i)=>{
     const hasAudio=v.audio_file&&v.audio_file.trim();
     const d=document.createElement(\'div\'); d.className=\'vcard\';
     d.innerHTML=`<div class="vcard-head"><strong>#${i+1} — ${esc(v.spell)}</strong><div style="display:flex;gap:6px;align-items:center"><span class="badge ${hasAudio?\'badge-audio\':\'badge-tts\'}">${hasAudio?\'🔊 Audio\':\'🗣️ TTS\'}</span><button class="btn btn-sm btn-red" onclick="delVoice(${i})">✕</button></div></div>
@@ -1015,8 +1057,8 @@ function delVoice(i){C.voices.voice_list.splice(i,1);renderVoices();}
 function renderBio(){
   const c=document.getElementById(\'bioLst\'); c.innerHTML=\'\';
   const arr=(C.bio||{}).statuses||[];
-  if(!arr.length){c.innerHTML=\'<div class="empty-lst">No statuses added</div>\';return;}\
-  arr.forEach((st,i)=>{
+  if(!arr.length){c.innerHTML=\'<div class="empty-lst">No statuses added</div>\';return;}
+    arr.forEach((st,i)=>{
     const d=document.createElement(\'div\'); d.className=\'lst-item\';
     d.innerHTML=`<span style="font-size:11px;color:var(--muted);width:70px;flex-shrink:0;text-transform:capitalize">${st.type}</span><input type="text" value="${esc(st.name)}"><button class="btn btn-sm btn-red" onclick="delBio(${i})">✕</button>`;
     d.querySelector(\'input\').onchange=function(){C.bio.statuses[i].name=this.value;};
@@ -1036,8 +1078,8 @@ function delBio(i){C.bio.statuses.splice(i,1);renderBio();}
 function renderTrols(){
   const c=document.getElementById(\'trolLst\'); c.innerHTML=\'\';
   const arr=(C.memes||{}).troll_messages||[];
-  if(!arr.length){c.innerHTML=\'<div class="empty-lst">No troll messages</div>\';return;}\
-  arr.forEach((m,i)=>{
+  if(!arr.length){c.innerHTML=\'<div class="empty-lst">No troll messages</div>\';return;}
+    arr.forEach((m,i)=>{
     const d=document.createElement(\'div\'); d.className=\'lst-item\';
     d.innerHTML=`<input type="text" value="${esc(m)}"><button class="btn btn-sm btn-red" onclick="delTrol(${i})">✕</button>`;
     d.querySelector(\'input\').onchange=function(){C.memes.troll_messages[i]=this.value;};

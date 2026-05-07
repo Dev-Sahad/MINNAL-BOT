@@ -7,6 +7,7 @@ from discord.ext import commands
 from fastapi import FastAPI, HTTPException, Header
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 import uvicorn
@@ -129,14 +130,6 @@ class Dashboard(commands.Cog):
             await server.serve()
         except Exception as e:
             print(f"❌ Server error: {e}", flush=True)
-
-
-@app.get("/", response_class=HTMLResponse)
-async def panel():
-    if os.path.exists("advanced-admin-panel.html"):
-        with open("advanced-admin-panel.html", 'r', encoding='utf-8') as f:
-            return HTMLResponse(content=f.read())
-    return HTMLResponse(content="<h1>Panel not found</h1>")
 
 
 @app.get("/api/test")
@@ -288,6 +281,28 @@ async def stats():
         "cpu": f"{psutil.cpu_percent()}%",
         "ram": f"{psutil.virtual_memory().percent}%"
     }
+
+
+@app.get("/{path:path}", response_class=HTMLResponse)
+async def serve_file(path: str = ""):
+    if not path or path == "/":
+        path = "advanced-admin-panel.html"
+    
+    # Security: prevent directory traversal
+    safe_path = os.path.basename(path)
+    if not safe_path.endswith(".html") and "." not in safe_path:
+        safe_path += ".html"
+
+    if os.path.exists(safe_path) and os.path.isfile(safe_path):
+        with open(safe_path, 'r', encoding='utf-8') as f:
+            return HTMLResponse(content=f.read())
+    
+    # If not found, try to serve advanced-admin-panel as default
+    if os.path.exists("advanced-admin-panel.html"):
+        with open("advanced-admin-panel.html", 'r', encoding='utf-8') as f:
+            return HTMLResponse(content=f.read())
+            
+    return HTMLResponse(content="<h1>Panel not found</h1>", status_code=404)
 
 
 async def setup(bot):
