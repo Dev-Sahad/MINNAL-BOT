@@ -10,10 +10,11 @@ class Welcome(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.config_file = "data/settings.json"
-        self.banner_path = "assets/welcome_banner.png"
+        self.assets_path = "assets"
+        self.banner_path = f"{self.assets_path}/welcome_banner.png"
+        self.font_path = f"{self.assets_path}/Ginto-Nord-700.ttf"
 
     def load_settings(self):
-        """Load latest settings from JSON."""
         try:
             if os.path.exists(self.config_file):
                 with open(self.config_file, 'r', encoding='utf-8') as f:
@@ -24,72 +25,47 @@ class Welcome(commands.Cog):
         return {}
 
     def hex_to_rgb(self, hex_str):
-        """Converts #RRGGBB to (R, G, B) tuple."""
         hex_str = hex_str.lstrip('#')
         return tuple(int(hex_str[i:i+2], 16) for i in (0, 2, 4))
 
     async def create_welcome_image(self, member):
-        """Generates dynamic image based on settings.json positions."""
         try:
             conf = self.load_settings()
             if not os.path.exists(self.banner_path):
                 return None
 
-            # 1. Base Image
             base = Image.open(self.banner_path).convert('RGBA')
-            w, h = base.size
-
-            # 2. Get Avatar
+            
             async with aiohttp.ClientSession() as session:
                 async with session.get(str(member.display_avatar.url)) as resp:
+                    if resp.status != 200: return None
                     avatar_bytes = await resp.read()
             
-            size = conf.get('avatar_size', 180)
-            avatar = Image.open(io.BytesIO(avatar_bytes)).convert('RGBA').resize((size, size))
+            avatar_size = conf.get('avatar_size', 145) 
+            avatar = Image.open(io.BytesIO(avatar_bytes)).convert('RGBA').resize((avatar_size, avatar_size))
 
-            # 3. Apply Circular Mask
-            mask = Image.new('L', (size, size), 0)
-            ImageDraw.Draw(mask).ellipse([0, 0, size, size], fill=255)
+            mask = Image.new('L', (avatar_size, avatar_size), 0)
+            ImageDraw.Draw(mask).ellipse([0, 0, avatar_size, avatar_size], fill=255)
             avatar.putalpha(mask)
 
-            # 4. Handle Border
-            if conf.get('avatar_border', True):
-                bw = conf.get('border_width', 5)
-                bc = self.hex_to_rgb(conf.get('border_color', '#9400D3'))
-                
-                canvas_size = size + (bw * 2)
-                bordered = Image.new('RGBA', (canvas_size, canvas_size), (0,0,0,0))
-                draw_b = ImageDraw.Draw(bordered)
-                draw_b.ellipse([0, 0, canvas_size, canvas_size], outline=bc + (255,), width=bw)
-                bordered.paste(avatar, (bw, bw), avatar)
-                avatar = bordered
-                size = canvas_size # Update size for positioning
-
-            # 5. Positioning Logic (Defaults to right-center if null)
-            ax = conf.get('avatar_x') if conf.get('avatar_x') is not None else (w - size - 40)
-            ay = conf.get('avatar_y') if conf.get('avatar_y') is not None else (h - size) // 2
+            ax, ay = conf.get('avatar_x', 25), conf.get('avatar_y', 35)
             base.paste(avatar, (int(ax), int(ay)), avatar)
 
-            # 6. Username Text
-            ux = conf.get('username_x', 50)
-            uy = conf.get('username_y', h - 100)
-            u_size = conf.get('username_size', 50)
+            ux, uy = conf.get('username_x', 25), conf.get('username_y', 205)
+            u_size = conf.get('username_size', 32)
             u_color = self.hex_to_rgb(conf.get('username_color', '#FFFFFF'))
 
             try:
-                # Ensure path matches your server's font location
-                font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", u_size)
+                font = ImageFont.truetype(self.font_path, u_size) if os.path.exists(self.font_path) else ImageFont.load_default()
             except:
                 font = ImageFont.load_default()
 
-            ImageDraw.Draw(base).text((int(ux), int(uy)), f"@{member.name}", fill=u_color + (255,), font=font)
+            ImageDraw.Draw(base).text((int(ux), int(uy)), f"{member.name.upper()}", fill=u_color + (255,), font=font)
 
-            # 7. Finalize
             out = io.BytesIO()
             base.convert('RGB').save(out, format='PNG', quality=95)
             out.seek(0)
             return discord.File(out, filename="welcome.png")
-
         except Exception as e:
             print(f"❌ Image Creation Failed: {e}")
             return None
@@ -103,10 +79,32 @@ class Welcome(commands.Cog):
         if not channel: return
 
         img = await self.create_welcome_image(member)
-        embed = discord.Embed(title="🎉 Welcome!", color=0x9400D3)
-        embed.set_image(url="attachment://welcome.png")
         
-        await channel.send(content=f"Welcome {member.mention}!", embed=embed, file=img)
+        # --- Custom Welcome Protocol Message ---
+        welcome_text = (
+            f"**`|`** 👋 **IDENTITY:** {member.mention}\n"
+            f"**`|`** 📑 **REGISTRY:** `Member #{len(member.guild.members)}`\n"
+            f"**`|`** 📡 **LOCATION:** `{member.guild.name}`\n"
+            f"**`#———————————————————————————————#`**\n\n"
+            f"**`|`** 📜 **CORE PROTOCOLS:**\n"
+            f"**`|`** 1️⃣ Respect the ` Community `.\n"
+            f"**`|`** 2️⃣ Stay active and have ` Fun `.\n"
+            f"**`|`** 3️⃣ Enjoy your ` Stay `\n\n"
+            f"**`#———————————————————————————————#`**\n"
+            f"**` STATUS: ACCESS GRANTED `**"
+        )
+
+        embed = discord.Embed(
+            title=f"WELCOME TO THE {member.guild.name.upper()}",
+            description=welcome_text,
+            color=0x9400D3
+        )
+        
+        if img:
+            embed.set_image(url="attachment://welcome.png")
+            await channel.send(embed=embed, file=img)
+        else:
+            await channel.send(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Welcome(bot))
