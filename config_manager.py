@@ -46,18 +46,17 @@ class ConfigManager:
             "welcome": {
                 "enabled": True,
                 "channel_id": 1463854523935359115,
-                "title": "**`
-✨ **WELCOME TO THE ENVIRONMENT**",
-                "message": "**`|`** 👋 **IDENTITY:** {member}
-**`|`** 📑 **REGISTRY:** `Member #{member guild.member_count}`
-**`|`** 📡 **LOCATION:** `{member guild.name}`
-
-**`|`** 📜 **CORE PROTOCOLS:**
-**`|`** 1️⃣ Read the ` #rules `
-**`|`** 2️⃣ Assign ` #roles `
-**`|`** 3️⃣ Initialize in ` #general `
-
-**` STATUS: ACCESS GRANTED `**",
+                "title": "**✨ WELCOME TO THE ENVIRONMENT**",
+                "message": (
+                    "**`|`** 👋 **IDENTITY:** {member}\n"
+                    "**`|`** 📑 **REGISTRY:** `Member #{member guild.member_count}`\n"
+                    "**`|`** 📡 **LOCATION:** `{member guild.name}`\n\n"
+                    "**`|`** 📜 **CORE PROTOCOLS:**\n"
+                    "**`|`** 1️⃣ Read the ` #rules `\n"
+                    "**`|`** 2️⃣ Assign ` #roles `\n"
+                    "**`|`** 3️⃣ Initialize in ` #general `\n\n"
+                    "**` STATUS: ACCESS GRANTED `**"
+                ),
                 "image_url": "",
                 "color": "gold",
                 "send_dm": True,
@@ -69,14 +68,14 @@ class ConfigManager:
                 "enabled": True,
                 "channel_id": 1463855462712868948,
                 "title": "💔 **A MEMBER HAS DEPARTED**",
-                "message": "**`|`** 👤 **IDENTITY:** `{member.name}`
-**`|`** 🆔 **SERIAL:** `{member.id}`
-**`|`** 📉 **CAPACITY:** `{member guild.member_count}`
-
-**`|`** 🕊️ *Safe travels through the network...*
-**`|`** *We hope to see you back soon.* ✨
-
-**` STATUS: SESSION TERMINATED `**",
+                "message": (
+                    "**`|`** 👤 **IDENTITY:** `{member.name}`\n"
+                    "**`|`** 🆔 **SERIAL:** `{member.id}`\n"
+                    "**`|`** 📉 **CAPACITY:** `{member guild.member_count}`\n\n"
+                    "**`|`** 🕊️ *Safe travels through the network...*\n"
+                    "**`|`** *We hope to see you back soon.* ✨\n\n"
+                    "**` STATUS: SESSION TERMINATED `**"
+                ),
                 "color": "red"
             },
             
