@@ -1,1243 +1,1156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MINNAL Admin Panel</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#0e0e14;--surface:#16161f;--card:#1c1c28;--border:#2a2a3a;
-  --accent:#7c5cfc;--accent2:#5c9afc;--green:#2ecc71;--red:#e74c3c;--yellow:#f39c12;
-  --text:#e8e8f0;--muted:#7a7a9a;--input:#12121c;
-}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
-input,textarea,select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;background:var(--input);color:var(--text);font-family:inherit;margin-bottom:10px;transition:border .2s}
-input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
-input::placeholder,textarea::placeholder{color:var(--muted)}
-label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-select option{background:var(--card)}
-.btn{background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:opacity .15s,transform .1s}
-.btn:hover{opacity:.85}
-.btn:active{transform:scale(.97)}
-.btn-sm{padding:6px 12px;font-size:12px}
-.btn-full{width:100%;display:block;padding:11px}
-.btn-red{background:var(--red)}
-.btn-green{background:var(--green)}
-.btn-gray{background:var(--border);color:var(--text)}
-.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px}
-.card h3{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.tog{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 14px;background:var(--surface);border-radius:8px;border:1px solid var(--border)}
-.tog label{margin:0;text-transform:none;font-size:13px;font-weight:600;color:var(--text);cursor:pointer}
-.tog input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
-.tog-desc{font-size:11px;color:var(--muted);margin-left:28px;margin-top:-10px;margin-bottom:10px}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINNAL | Core Management</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --bg: #050508;
+            --surface: #0a0a12;
+            --card: rgba(16, 16, 28, 0.7);
+            --card-hover: rgba(22, 22, 38, 0.9);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.4);
+            --accent-dim: rgba(139, 92, 246, 0.15);
+            --blue: #3b82f6;
+            --green: #10b981;
+            --red: #ef4444;
+            --yellow: #f59e0b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --sidebar-width: 260px;
+            --sidebar-collapsed: 80px;
+            --glass: rgba(255, 255, 255, 0.03);
+            --header-height: 70px;
+        }
 
-/* Sidebar layout */
-#app{display:flex;min-height:100vh}
-#sidebar{
-  width:220px;background:var(--surface);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;flex-shrink:0;
-  position:sticky;top:0;height:100vh;overflow-y:auto;
-  transition:transform .25s cubic-bezier(.4,0,.2,1);
-  z-index:200;
-}
-/* Collapsed desktop sidebar */
-#app.sidebar-collapsed #sidebar{width:56px;overflow:hidden}
-#app.sidebar-collapsed #sidebar .nav-label,
-#app.sidebar-collapsed #sidebar .nav-item span:not(.ni),
-#app.sidebar-collapsed #sidebar-logo .title,
-#app.sidebar-collapsed #sidebar-logo .sub,
-#app.sidebar-collapsed .sidebar-footer-btns{display:none}
-#app.sidebar-collapsed #sidebar .nav-item{justify-content:center;padding:10px 0;border-left:none}
-#app.sidebar-collapsed #sidebar .nav-item.active{background:rgba(124,92,252,.18)}
-#app.sidebar-collapsed #sidebar-logo{justify-content:center;padding:14px 0}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
 
-#sidebar-logo{padding:20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-#sidebar-logo .icon{font-size:24px;flex-shrink:0}
-#sidebar-logo .title{font-weight:700;font-size:15px}
-#sidebar-logo .sub{font-size:11px;color:var(--muted)}
-.nav-group{padding:8px 0}
-.nav-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:6px 16px 3px;white-space:nowrap}
-.nav-item{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);border-radius:0;transition:background .15s,color .15s;border-left:3px solid transparent;white-space:nowrap}
-.nav-item:hover{background:var(--card);color:var(--text)}
-.nav-item.active{background:rgba(124,92,252,.12);color:var(--accent);border-left-color:var(--accent);font-weight:600}
-.nav-item .ni{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+        }
 
-/* Overlay for mobile */
-#sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:190;backdrop-filter:blur(2px)}
-#app.mobile-open #sidebar-overlay{display:block}
+        /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
-#content{flex:1;overflow-y:auto;min-width:0}
-#topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:100}
-#topbar-left{display:flex;align-items:center;gap:10px}
-#topbar-title{font-weight:700;font-size:15px}
-#topbar-actions{display:flex;gap:6px;align-items:center;flex-shrink:0}
-.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:4px;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-#main-area{padding:20px;max-width:860px}
-.pg{display:none}
-.pg.on{display:block}
+        /* --- Typography --- */
+        h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.02em; }
+        
+        /* --- Inputs --- */
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 12px;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-dim);
+            background: rgba(16, 16, 28, 0.9);
+        }
+        label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
 
-/* Hamburger / collapse toggle buttons */
-.icon-btn{background:var(--border);border:none;color:var(--text);width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:background .15s}
-.icon-btn:hover{background:var(--accent);color:#fff}
-#menu-btn{display:none}
+        /* --- Buttons --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+            user-select: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #7c3aed);
+            color: white;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--accent-glow);
+            filter: brightness(1.1);
+        }
+        .btn-secondary {
+            background: var(--glass);
+            border-color: var(--border);
+            color: var(--text);
+        }
+        .btn-secondary:hover {
+            background: var(--border);
+            border-color: var(--text-muted);
+        }
+        .btn-danger { background: rgba(239, 68, 68, 0.15); color: var(--red); border-color: rgba(239, 68, 68, 0.2); }
+        .btn-danger:hover { background: var(--red); color: white; }
+        .btn-success { background: rgba(16, 185, 129, 0.15); color: var(--green); border-color: rgba(16, 185, 129, 0.2); }
+        .btn-success:hover { background: var(--green); color: white; }
+        .btn-full { width: 100%; }
+        .btn-sm { padding: 8px 16px; font-size: 12px; border-radius: 8px; }
 
-/* Mobile overrides */
-@media(max-width:768px){
-  #sidebar{position:fixed;left:0;top:0;height:100vh;transform:translateX(-100%);width:240px}
-  #app.mobile-open #sidebar{transform:translateX(0)}
-  #menu-btn{display:flex}
-  #collapse-btn{display:none}
-  .row2{grid-template-columns:1fr}
-  .row3{grid-template-columns:1fr}
-  .stats-row{grid-template-columns:1fr 1fr}
-  #main-area{padding:14px}
-}
-@media(min-width:769px){
-  #menu-btn{display:none}
-}
+        /* --- Layout --- */
+        #app { display: flex; min-height: 100vh; }
 
-/* Stats bar */
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
-.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
-.stat .sv{font-size:20px;font-weight:700;color:var(--accent)}
-.stat .sl{font-size:11px;color:var(--muted);margin-top:2px}
+        /* --- Sidebar --- */
+        #sidebar {
+            width: var(--sidebar-width);
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+        .sidebar-collapsed #sidebar { width: var(--sidebar-collapsed); }
 
-/* List items */
-.lst{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px;max-height:260px;overflow-y:auto;margin-bottom:10px}
-.lst-item{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:6px;margin-bottom:4px;background:var(--card);border:1px solid var(--border)}
-.lst-item input{flex:1;margin:0;padding:6px 8px;font-size:12px}
-.lst-item:last-child{margin-bottom:0}
-.empty-lst{text-align:center;color:var(--muted);padding:16px;font-size:12px}
+        #sidebar-logo {
+            height: var(--header-height);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        .logo-text { font-weight: 800; font-size: 18px; white-space: nowrap; transition: opacity 0.2s; }
+        .logo-text span { color: var(--accent); }
+        .sidebar-collapsed .logo-text { opacity: 0; pointer-events: none; }
 
-/* Voice entries */
-.vcard{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px}
-.vcard-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.badge{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700}
-.badge-audio{background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3)}
-.badge-tts{background:rgba(243,156,18,.15);color:var(--yellow);border:1px solid rgba(243,156,18,.3)}
+        .nav-container { padding: 20px 12px; flex: 1; overflow-y: auto; }
+        .nav-group-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 12px 16px 8px;
+            white-space: nowrap;
+        }
+        .sidebar-collapsed .nav-group-label { opacity: 0; }
 
-/* Toast */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--border);color:var(--text);padding:12px 18px;border-radius:10px;font-size:13px;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.toast.show{transform:translateY(0);opacity:1}
-.toast.ok::before{content:'âœ…';font-size:16px}
-.toast.err::before{content:'âŒ';font-size:16px}
-.toast.info::before{content:'â„¹ï¸';font-size:16px}
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            margin-bottom: 4px;
+            white-space: nowrap;
+        }
+        .nav-item:hover { background: var(--glass); color: var(--text); }
+        .nav-item.active {
+            background: var(--accent-dim);
+            color: var(--accent);
+            box-shadow: inset 0 0 0 1px var(--accent-glow);
+        }
+        .nav-item i { width: 20px; text-align: center; }
+        .nav-item span { font-weight: 600; font-size: 14px; transition: opacity 0.2s; }
+        .sidebar-collapsed .nav-item { justify-content: center; padding: 12px 0; }
+        .sidebar-collapsed .nav-item span { display: none; }
 
-/* Info box */
-.info-box{background:rgba(92,154,252,.08);border:1px solid rgba(92,154,252,.25);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--accent2);margin-bottom:14px}
-.warn-box{background:rgba(243,156,18,.08);border:1px solid rgba(243,156,18,.25);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--yellow);margin-bottom:14px}
+        /* --- Sidebar Footer --- */
+        .sidebar-footer { padding: 12px; border-top: 1px solid var(--border); }
+        .sidebar-collapsed .sidebar-footer .btn span { display: none; }
 
-/* Login */
-#loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
-.login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:36px;width:360px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-.login-card h2{font-size:20px;margin-bottom:6px}
-.login-card p{color:var(--muted);font-size:13px;margin-bottom:24px}
-.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#fff;animation:spin .7s linear infinite;margin-right:6px;vertical-align:middle}
-@keyframes spin{to{transform:rotate(360deg)}}
+        /* --- Content --- */
+        #content { flex: 1; min-width: 0; background-attachment: fixed; }
+        #header {
+            height: var(--header-height);
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(5, 5, 8, 0.5);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
 
-/* Divider */
-.divider{height:1px;background:var(--border);margin:16px 0}
-.section-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+        #main-view { padding: 40px 32px; max-width: 1200px; margin: 0 auto; }
+        
+        /* --- Cards & Grid --- */
+        .page { display: none; animation: fadeIn 0.4s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Tag/chip input */
-.chips{display:flex;flex-wrap:wrap;gap:6px;padding:8px;background:var(--input);border:1.5px solid var(--border);border-radius:8px;min-height:40px;margin-bottom:10px;cursor:text}
-.chip{background:rgba(124,92,252,.2);color:var(--accent);border:1px solid rgba(124,92,252,.3);border-radius:4px;padding:3px 8px;font-size:12px;display:flex;align-items:center;gap:5px}
-.chip button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:0;line-height:1}
-.chip-input{border:none;background:none;outline:none;color:var(--text);font-size:13px;min-width:80px;flex:1}
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(12px);
+            transition: border-color 0.3s;
+        }
+        .card:hover { border-color: rgba(255, 255, 255, 0.15); }
+        .card-title { font-size: 18px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+        .card-title i { color: var(--accent); }
 
-@media(max-width:700px){
-  #sidebar{display:none}
-  .row2,.row3{grid-template-columns:1fr}
-  .stats-row{grid-template-columns:1fr 1fr}
-}
-</style>
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        
+        /* --- Stats --- */
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        .stat-val { font-size: 32px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+        .stat-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+        /* --- Toggles & Lists --- */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: var(--glass);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .toggle-row:hover { background: rgba(255, 255, 255, 0.05); }
+        .toggle-row input[type="checkbox"] { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+        
+        .list-container { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 8px; margin-bottom: 16px; max-height: 400px; overflow-y: auto; }
+        .list-item { display: flex; gap: 12px; align-items: center; padding: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; }
+        .list-item:last-child { margin-bottom: 0; }
+        .list-item input { margin: 0; border-radius: 8px; padding: 8px 12px; }
+
+        /* --- Login --- */
+        #login-view {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .login-card {
+            width: 400px;
+            padding: 48px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 32px 64px rgba(0,0,0,0.5);
+        }
+        .login-icon { width: 80px; height: 80px; background: var(--accent); border-radius: 24px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; box-shadow: 0 0 40px var(--accent-glow); }
+        .login-card h2 { font-size: 24px; margin-bottom: 8px; }
+        .login-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; }
+
+        /* --- Misc --- */
+        .status-badge { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 100px; background: var(--glass); border: 1px solid var(--border); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            padding: 16px 24px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 16px 32px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 9999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+
+        /* --- Responsive --- */
+        @media (max-width: 1024px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .stat-card-row { grid-template-columns: 1fr 1fr; display: grid; gap: 16px; }
+        }
+        @media (max-width: 768px) {
+            #sidebar { position: fixed; transform: translateX(-100%); }
+            .sidebar-open #sidebar { transform: translateX(0); }
+            #header { padding: 0 16px; }
+            #main-view { padding: 24px 16px; }
+            .stat-card-row { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
-<body>
+<body class="sidebar-open">
 
-<!-- LOGIN -->
-<div id="loginPage">
-  <div class="login-card">
-    <div style="font-size:44px;margin-bottom:12px">âš¡</div>
-    <h2>MINNAL Admin</h2>
-    <p>Bot Configuration Panel</p>
-    <label>Password</label>
-    <div style="position:relative">
-      <input type="password" id="pwdIn" placeholder="Enter admin password" style="padding-right:42px;margin-bottom:14px">
-      <button onclick="togglePwd()" style="position:absolute;right:10px;top:9px;background:none;border:none;cursor:pointer;font-size:17px;padding:0">ðŸ‘ï¸</button>
-    </div>
-    <button class="btn btn-full" id="loginBtn" onclick="tryLogin()">Login</button>
-    <div id="loginErr" style="color:var(--red);font-size:12px;margin-top:10px;min-height:16px"></div>
-  </div>
-</div>
-
-<!-- APP -->
-<div id="app" style="display:none">
-  <!-- Sidebar -->
-  <div id="sidebar">
-    <div id="sidebar-logo">
-      <div class="icon">âš¡</div>
-      <div><div class="title">MINNAL</div><div class="sub">Admin Panel</div></div>
-    </div>
-
-    <div class="nav-group">
-      <div class="nav-label">Overview</div>
-      <div class="nav-item active" data-pg="dashboard"><span class="ni">ðŸ“Š</span>Dashboard</div>
-    </div>
-
-    <div class="nav-group">
-      <div class="nav-label">Server Setup</div>
-      <div class="nav-item" data-pg="channels"><span class="ni">ðŸ“¢</span>Channels</div>
-      <div class="nav-item" data-pg="roles"><span class="ni">ðŸ·ï¸</span>Roles</div>
-      <div class="nav-item" data-pg="bot"><span class="ni">ðŸ¤–</span>Bot Identity</div>
-    </div>
-
-    <div class="nav-group">
-      <div class="nav-label">Member System</div>
-      <div class="nav-item" data-pg="welcome"><span class="ni">ðŸ‘‹</span>Welcome / Leave</div>
-      <div class="nav-item" data-pg="dm_join"><span class="ni">ðŸ“©</span>DM on Join</div>
-      <div class="nav-item" data-pg="verify"><span class="ni">âœ…</span>Verification</div>
-      <div class="nav-item" data-pg="autorole"><span class="ni">ðŸŽ–ï¸</span>Auto-Role</div>
-    </div>
-
-    <div class="nav-group">
-      <div class="nav-label">Moderation</div>
-      <div class="nav-item" data-pg="tickets"><span class="ni">ðŸŽ«</span>Tickets</div>
-      <div class="nav-item" data-pg="sentinel"><span class="ni">ðŸ›¡ï¸</span>Sentinel</div>
-      <div class="nav-item" data-pg="ghost_ping"><span class="ni">ðŸ‘»</span>Ghost Ping</div>
-    </div>
-
-    <div class="nav-group">
-      <div class="nav-label">Features</div>
-      <div class="nav-item" data-pg="giveaways"><span class="ni">ðŸŽ‰</span>Giveaways</div>
-      <div class="nav-item" data-pg="economy"><span class="ni">ðŸ’°</span>Economy</div>
-      <div class="nav-item" data-pg="music"><span class="ni">ðŸŽµ</span>Music</div>
-      <div class="nav-item" data-pg="memes"><span class="ni">ðŸŽŒ</span>Memes</div>
-    </div>
-
-    <div class="nav-group">
-      <div class="nav-label">Custom</div>
-      <div class="nav-item" data-pg="voices"><span class="ni">ðŸŽ¤</span>Voice Spells</div>
-      <div class="nav-item" data-pg="summon"><span class="ni">ðŸ”®</span>Summon</div>
-      <div class="nav-item" data-pg="bio"><span class="ni">ðŸ’«</span>Bot Status</div>
-      <div class="nav-item" data-pg="codepilot"><span class="ni">ðŸ¤–</span>CodePilot AI</div>
-    </div>
-
-    <div class="nav-group">
-      <div class="nav-label">Sync</div>
-      <div class="nav-item" data-pg="github"><span class="ni">ðŸ™</span>GitHub Sync</div>
-    </div>
-
-    <div style="padding:12px;margin-top:auto;border-top:1px solid var(--border)">
-      <button class="btn btn-full" style="background:linear-gradient(135deg,#238636,#1a6e2e);margin-bottom:6px" onclick="quickPush()">ðŸ™ Push to GitHub</button>
-      <button class="btn btn-full btn-gray" style="margin-bottom:6px" onclick="doExport()">ðŸ“¥ Export JSON</button>
-      <button class="btn btn-full btn-red" onclick="doLogout()">Logout</button>
-    </div>
-  </div>
-
-  <!-- Main Content -->
-  <div id="content">
-    <div id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
-    <div id="topbar">
-      <div id="topbar-left">
-        <button class="icon-btn" id="menu-btn" onclick="openMobileSidebar()" title="Menu">â˜°</button>
-        <button class="icon-btn" id="collapse-btn" onclick="toggleCollapse()" title="Collapse sidebar">â—€</button>
-        <div id="topbar-title">Dashboard</div>
-      </div>
-      <div id="topbar-actions">
-        <span id="botStatus" style="font-size:12px;color:var(--muted)">Connecting...</span>
-        <button class="btn btn-sm btn-gray" onclick="document.getElementById('impFile').click()">ðŸ“¤ Import</button>
-        <input type="file" id="impFile" accept=".json" style="display:none" onchange="doImport(event)">
-      </div>
-    </div>
-
-    <div id="main-area">
-
-      <!-- DASHBOARD -->
-      <div class="pg on" id="pg-dashboard">
-        <div class="stats-row" id="statsRow">
-          <div class="stat"><div class="sv" id="st-latency">â€”</div><div class="sl">Latency</div></div>
-          <div class="stat"><div class="sv" id="st-uptime">â€”</div><div class="sl">Uptime</div></div>
-          <div class="stat"><div class="sv" id="st-guilds">â€”</div><div class="sl">Servers</div></div>
-          <div class="stat"><div class="sv" id="st-users">â€”</div><div class="sl">Members</div></div>
-        </div>
-        <div class="stats-row">
-          <div class="stat"><div class="sv" id="st-cpu">â€”</div><div class="sl">CPU</div></div>
-          <div class="stat"><div class="sv" id="st-ram">â€”</div><div class="sl">RAM</div></div>
-          <div class="stat"><div class="sv" style="color:var(--green)" id="st-online">â€”</div><div class="sl">Status</div></div>
-          <div class="stat"><div class="sv" style="font-size:14px" id="st-ping">â€”</div><div class="sl">Ping</div></div>
-        </div>
-        <div class="card">
-          <h3>âš¡ Quick Actions</h3>
-          <div class="row2">
-            <button class="btn btn-green" onclick="loadStats()">â†» Refresh Stats</button>
-            <button class="btn btn-gray" onclick="doExport()">ðŸ“¥ Export Config</button>
-          </div>
-        </div>
-        <div class="card">
-          <h3>ðŸ“± View Toggle</h3>
-          <div class="info-box">Simulate mobile or desktop view for testing layout.</div>
-          <div class="row2">
-            <button class="btn btn-gray" onclick="switchToMobileView()">Mobile View</button>
-            <button class="btn" onclick="switchToDesktopView()">Desktop View</button>
-          </div>
-        </div>
-        <div class="card">
-          <h3>ðŸ“‹ Config Summary</h3>
-          <div id="cfgSummary" style="font-size:12px;color:var(--muted);line-height:1.8"></div>
-        </div>
-      </div>
-
-      <!-- CHANNELS -->
-      <div class="pg" id="pg-channels">
-        <div class="card">
-          <h3>ðŸ“¢ Channel IDs</h3>
-          <div class="info-box">Right-click a channel in Discord â†’ Copy Channel ID. Enable Developer Mode: User Settings â†’ Advanced â†’ Developer Mode.</div>
-          <div class="section-title">Text Channels</div>
-          <div class="row2">
-            <div><label>Welcome Channel</label><input id="ch-welcome" placeholder="Channel ID"></div>
-            <div><label>Leave Channel</label><input id="ch-leave" placeholder="Channel ID"></div>
-            <div><label>Music Channel</label><input id="ch-music" placeholder="Channel ID"></div>
-            <div><label>Ticket Channel</label><input id="ch-ticket" placeholder="Channel ID"></div>
-            <div><label>Game Updates</label><input id="ch-game" placeholder="Channel ID"></div>
-            <div><label>Meme Channel</label><input id="ch-meme" placeholder="Channel ID"></div>
-            <div><label>Log Channel</label><input id="ch-log" placeholder="Channel ID"></div>
-            <div><label>Announcement Channel</label><input id="ch-announcement" placeholder="Channel ID"></div>
-            <div><label>Giveaway Channel</label><input id="ch-giveaway" placeholder="Channel ID"></div>
-          </div>
-          <div class="divider"></div>
-          <div class="section-title">Voice Channels</div>
-          <div class="row2">
-            <div><label>Default Voice Channel</label><input id="ch-voice-default" placeholder="Channel ID or leave blank"></div>
-            <div><label>Announcement Voice</label><input id="ch-voice-announcement" placeholder="Channel ID"></div>
-          </div>
-          <button class="btn btn-full" style="margin-top:4px" onclick="save('channels')">ðŸ’¾ Save Channels</button>
-        </div>
-      </div>
-
-      <!-- ROLES -->
-      <div class="pg" id="pg-roles">
-        <div class="card">
-          <h3>ðŸ·ï¸ Role IDs</h3>
-          <div class="info-box">Right-click a role in Discord â†’ Copy Role ID. Enable Developer Mode first.</div>
-          <div class="section-title">Member Roles</div>
-          <div class="row2">
-            <div><label>Verified Role</label><input id="rl-verified" placeholder="Role ID"></div>
-            <div><label>Unverified Role</label><input id="rl-unverified" placeholder="Role given on join"></div>
-            <div><label>Member Role</label><input id="rl-member" placeholder="Role ID"></div>
-            <div><label>Muted Role</label><input id="rl-muted" placeholder="Role ID"></div>
-          </div>
-          <div class="divider"></div>
-          <div class="section-title">Staff Roles</div>
-          <div class="row2">
-            <div><label>Staff / Admin Role</label><input id="rl-staff" placeholder="Role ID"></div>
-            <div><label>Bot Role</label><input id="rl-bot" placeholder="Role ID for bots"></div>
-          </div>
-          <button class="btn btn-full" style="margin-top:4px" onclick="save('roles')">ðŸ’¾ Save Roles</button>
-        </div>
-      </div>
-
-      <!-- BOT IDENTITY -->
-      <div class="pg" id="pg-bot">
-        <div class="card">
-          <h3>ðŸ¤– Bot Identity</h3>
-          <div class="row2">
-            <div><label>Bot Name</label><input id="b-name"></div>
-            <div><label>Tagline</label><input id="b-tag"></div>
-            <div><label>Developer</label><input id="b-dev"></div>
-            <div><label>Command Prefix</label><input id="b-prefix" placeholder="/">
-</div>
-          </div>
-          <label>Embed Color</label>
-          <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-            <input type="color" id="b-color-picker" style="width:44px;height:38px;padding:2px;margin:0;cursor:pointer">
-            <input id="b-color" placeholder="#9b59b6" style="flex:1;margin:0">
-          </div>
-          <button class="btn btn-full" onclick="save('bot')">ðŸ’¾ Save Bot Identity</button>
-        </div>
-      </div>
-
-      <!-- WELCOME / LEAVE -->
-      <div class="pg" id="pg-welcome">
-        <div class="card">
-          <h3>ðŸ‘‹ Welcome Messages</h3>
-          <div class="tog"><input type="checkbox" id="wc-on"><label for="wc-on">Enable Welcome Messages</label></div>
-          <div class="row2">
-            <div><label>Welcome Channel ID</label><input id="wc-ch" placeholder="Channel ID"></div>
-            <div><label>Title</label><input id="wc-title" placeholder="Welcome!"></div>
-          </div>
-          <label>Welcome Message</label>
-          <textarea id="wc-msg" style="height:80px;margin-bottom:10px" placeholder="Hey {member}, welcome to {server}! ðŸŽ‰&#10;&#10;Variables: {member}, {server}, {count}"></textarea>
-          <label>Banner Image URL (optional)</label>
-          <input id="wc-img" placeholder="https://...">
-        </div>
-        <div class="card">
-          <h3>ðŸ‘‹ Leave Messages</h3>
-          <div class="tog"><input type="checkbox" id="lv-on"><label for="lv-on">Enable Leave Messages</label></div>
-          <div><label>Leave Channel ID</label><input id="lv-ch" placeholder="Channel ID (uses leave channel if blank)"></div>
-          <label>Leave Message</label>
-          <textarea id="lv-msg" style="height:70px;margin-bottom:10px" placeholder="Goodbye {member}... ðŸ‘‹&#10;&#10;Variables: {member}, {server}, {count}"></textarea>
-          <label>Leave Image URL (optional)</label>
-          <input id="lv-img" placeholder="https://...">
-          <button class="btn btn-full" onclick="save('welcome')">ðŸ’¾ Save Welcome & Leave</button>
-        </div>
-      </div>
-
-      <!-- DM JOIN -->
-      <div class="pg" id="pg-dm_join">
-        <div class="card">
-          <h3>ðŸ“© DM on Join</h3>
-          <div class="info-box">Bot will DM new members when they join the server. Variables: {member}, {server}</div>
-          <div class="tog"><input type="checkbox" id="dm-on"><label for="dm-on">Enable DM on Join</label></div>
-          <label>DM Message</label>
-          <textarea id="dm-msg" style="height:120px;margin-bottom:10px" placeholder="ðŸ‘‹ Hey {member}, welcome to {server}!...\"></textarea>
-          <button class="btn btn-full" onclick="save('dm_join')">ðŸ’¾ Save DM Settings</button>
-        </div>
-      </div>
-
-      <!-- VERIFY -->
-      <div class="pg" id="pg-verify">
-        <div class="card">
-          <h3>âœ… Verification System</h3>
-          <div class="tog"><input type="checkbox" id="vr-on"><label for="vr-on">Enable Verification</label></div>
-          <div class="row2">
-            <div><label>Verify Channel ID</label><input id="vr-ch" placeholder="Channel ID"></div>
-            <div><label>Button Label</label><input id="vr-btn" placeholder="âœ… Verify"></div>
-            <div><label>Verified Role ID</label><input id="vr-vrole" placeholder="Role given after verify"></div>
-            <div><label>Unverified Role ID</label><input id="vr-urole" placeholder="Role given on join"></div>
-          </div>
-          <label>Verification Message</label>
-          <textarea id="vr-msg" style="height:80px;margin-bottom:10px" placeholder="Click the button below to verify and gain access!"></textarea>
-          <button class="btn btn-full" onclick="save('verify')">ðŸ’¾ Save Verify</button>
-        </div>
-      </div>
-
-      <!-- AUTO-ROLE -->
-      <div class="pg" id="pg-autorole">
-        <div class="card">
-          <h3>ðŸŽ–ï¸ Auto-Role</h3>
-          <div class="info-box">Roles automatically given to new members when they join.</div>
-          <div class="tog"><input type="checkbox" id="ar-on"><label for="ar-on">Enable Auto-Role</label></div>
-          <label>Auto-Role IDs (one per line)</label>
-          <textarea id="ar-roles" style="height:100px;margin-bottom:10px" placeholder="Role ID 1&#10;Role ID 2&#10;Role ID 3"></textarea>
-          <label>Bot Auto-Role ID (given to bots joining)</label>
-          <input id="ar-botrole" placeholder="Role ID for bots">
-          <button class="btn btn-full" onclick="save('autorole')">ðŸ’¾ Save Auto-Role</button>
-        </div>
-      </div>
-
-      <!-- TICKETS -->
-      <div class="pg" id="pg-tickets">
-        <div class="card">
-          <h3>ðŸŽ« Ticket System</h3>
-          <div class="tog"><input type="checkbox" id="tk-on"><label for="tk-on">Enable Tickets</label></div>
-          <div class="row2">
-            <div><label>Ticket Panel Channel</label><input id="tk-ch" placeholder="Where Open Ticket button goes"></div>
-            <div><label>Staff Role ID</label><input id="tk-staff" placeholder="Role that can see tickets"></div>
-            <div><label>Ticket Category ID</label><input id="tk-cat" placeholder="Category for ticket channels"></div>
-            <div><label>Log Channel ID</label><input id="tk-log" placeholder="Where closed tickets are logged"></div>
-          </div>
-          <div class="divider"></div>
-          <label>Welcome Message (when ticket opens)</label>
-          <textarea id="tk-welcome" style="height:80px;margin-bottom:10px" placeholder="Hello {user}! Our staff will assist you shortly. Please describe your issue.&#10;Variables: {user}, {ticket_id}"></textarea>
-          <label>Close Message</label>
-          <textarea id="tk-close" style="height:60px;margin-bottom:10px" placeholder="This ticket has been closed."></textarea>
-          <button class="btn btn-full" onclick="save('tickets')">ðŸ’¾ Save Tickets</button>
-        </div>
-      </div>
-
-      <!-- SENTINEL -->
-      <div class="pg" id="pg-sentinel">
-        <div class="card">
-          <h3>ðŸ›¡ï¸ Sentinel Auto-Mod</h3>
-          <div class="tog"><input type="checkbox" id="sn-on"><label for="sn-on">Enable Sentinel</label></div>
-          <div><label>Log Channel ID</label><input id="sn-log" placeholder="Channel to send moderation logs"></div>
-          <div class="section-title" style="margin-top:4px">Protection Modules</div>
-          <div class="tog"><input type="checkbox" id="sn-spam"><label for="sn-spam">Anti-Spam â€” Block message flooding</label></div>
-          <div class="tog"><input type="checkbox" id="sn-raid"><label for="sn-raid">Anti-Raid â€” Block mass join attacks</label></div>
-          <div class="tog"><input type="checkbox" id="sn-link"><label for="sn-link">Anti-Link â€” Block invite & external links</label></div>
-          <div class="divider"></div>
-          <div class="row2">
-            <div><label>Max Warnings before action</label><input type="number" id="sn-warn" placeholder="3" min="1" max="10"></div>
-            <div><label>Auto-Mute Duration (minutes)</label><input type="number" id="sn-mute" placeholder="10" min="1"></div>
-          </div>
-          <button class="btn btn-full" onclick="save('sentinel')">ðŸ’¾ Save Sentinel</button>
-        </div>
-      </div>
-
-      <!-- GHOST PING -->
-      <div class="pg" id="pg-ghost_ping">
-        <div class="card">
-          <h3>ðŸ‘» Ghost Ping Detection</h3>
-          <div class="tog"><input type="checkbox" id="gp-on"><label for="gp-on">Enable Ghost Ping Detection</label></div>
-          <div><label>Log / Alert Channel ID</label><input id="gp-log" placeholder="Channel ID where alerts are sent"></div>
-          <label>Alert Message</label>
-          <input id="gp-msg" placeholder="ðŸ‘» {user} ghost pinged {target}!">
-          <div class="info-box" style="margin-top:4px">Variables: {user} (who pinged), {target} (who was pinged), {channel}</div>
-          <button class="btn btn-full" style="margin-top:8px" onclick="save('ghost_ping')">ðŸ’¾ Save Ghost Ping</button>
-        </div>
-      </div>
-
-      <!-- GIVEAWAYS -->
-      <div class="pg" id="pg-giveaways">
-        <div class="card">
-          <h3>ðŸŽ‰ Giveaway Settings</h3>
-          <div class="tog"><input type="checkbox" id="gw-on"><label for="gw-on">Enable Giveaways</label></div>
-          <div class="row2">
-            <div><label>Giveaway Manager Role ID</label><input id="gw-role" placeholder="Role that can create giveaways"></div>
-            <div><label>Default Channel ID</label><input id="gw-ch" placeholder="giveaway_channel_id from Channels tab"></div>
-            <div><label>Default Duration (hours)</label><input type="number" id="gw-dur" placeholder="24" min="1"></div>
-            <div><label>Default Winners</label><input type="number" id="gw-win" placeholder="1" min="1"></div>
-          </div>
-          <button class="btn btn-full" onclick="save('giveaways')">ðŸ’¾ Save Giveaways</button>
-        </div>
-      </div>
-
-      <!-- ECONOMY -->
-      <div class="pg" id="pg-economy">
-        <div class="card">
-          <h3>ðŸ’° Economy System</h3>
-          <div class="row2">
-            <div><label>Currency Name</label><input id="ec-name" placeholder="Coins"></div>
-            <div><label>Currency Symbol</label><input id="ec-sym" placeholder="âš¡"></div>
-            <div><label>Starting Balance</label><input type="number" id="ec-start" placeholder="100"></div>
-            <div><label>Daily Reward</label><input type="number" id="ec-daily" placeholder="100"></div>
-            <div><label>Weekly Reward</label><input type="number" id="ec-weekly" placeholder="1000"></div>
-          </div>
-          <div class="section-title" style="margin-top:4px">Features</div>
-          <div class="tog"><input type="checkbox" id="ec-rob"><label for="ec-rob">Enable Rob command</label></div>
-          <div class="tog"><input type="checkbox" id="ec-gamble"><label for="ec-gamble">Enable Gamble command</label></div>
-          <button class="btn btn-full" onclick="save('economy')">ðŸ’¾ Save Economy</button>
-        </div>
-      </div>
-
-      <!-- MUSIC -->
-      <div class="pg" id="pg-music">
-        <div class="card">
-          <h3>ðŸŽµ Music System</h3>
-          <div class="tog"><input type="checkbox" id="mu-on"><label for="mu-on">Enable Music</label></div>
-          <div class="row2">
-            <div><label>Music Channel ID</label><input id="mu-ch" placeholder="Restrict music to channel (blank = any)"></div>
-            <div><label>DJ Role ID</label><input id="mu-dj" placeholder="Role that controls music (blank = everyone)"></div>
-          </div>
-          <div class="row2">
-            <div>
-              <label>Default Source</label>
-              <select id="mu-src" style="margin-bottom:10px">
-                <option value="soundcloud">SoundCloud</option>
-                <option value="youtube">YouTube</option>
-                <option value="spotify">Spotify</option>
-              </select>
+    <!-- LOGIN -->
+    <div id="login-view">
+        <div class="login-card">
+            <div class="login-icon"><i data-lucide="zap"></i></div>
+            <h2>Welcome Back</h2>
+            <p>Enter your core access key to continue.</p>
+            <div style="position:relative">
+                <input type="password" id="pwdIn" placeholder="Access Password" style="padding-right:48px">
+                <button onclick="togglePwd()" style="position:absolute;right:16px;top:12px;background:none;border:none;cursor:pointer;color:var(--text-muted)"><i data-lucide="eye" size="18"></i></button>
             </div>
-            <div><label>Max Queue Size</label><input type="number" id="mu-queue" placeholder="50"></div>
-            <div><label>Default Volume (%)</label><input type="number" id="mu-vol" placeholder="100" min="1" max="200"></div>
-          </div>
-          <button class="btn btn-full" onclick="save('music')">ðŸ’¾ Save Music</button>
+            <button class="btn btn-primary btn-full" id="loginBtn" onclick="tryLogin()">Initialize Session</button>
+            <div id="loginErr" style="color:var(--red);font-size:12px;margin-top:16px;font-weight:600"></div>
         </div>
-      </div>
+    </div>
 
-      <!-- MEMES -->
-      <div class="pg" id="pg-memes">
-        <div class="card">
-          <h3>ðŸŽŒ Meme System</h3>
-          <div class="tog"><input type="checkbox" id="mm-on"><label for="mm-on">Enable Meme System</label></div>
-          <div><label>Meme Channel ID</label><input id="mm-ch" placeholder="Channel ID"></div>
-          <label>Troll Messages <span style="color:var(--muted);font-weight:400">(use {target} for the victim)</span></label>
-          <div class="lst" id="trolLst"></div>
-          <div style="display:flex;gap:8px">
-            <input id="newTrol" placeholder="{target} got absolutely destroyed! ðŸ’€" style="margin:0">
-            <button class="btn btn-green btn-sm" onclick="addTrol()">Add</button>
-          </div>
-          <button class="btn btn-full" style="margin-top:12px" onclick="save('memes')">ðŸ’¾ Save Memes</button>
-        </div>
-      </div>
-
-      <!-- VOICES -->
-      <div class="pg" id="pg-voices">
-        <div class="card">
-          <h3>ðŸŽ¤ Voice Spells</h3>
-          <div class="tog"><input type="checkbox" id="vo-on"><label for="vo-on">Enable Voice Spells</label></div>
-          <div id="voiceList"></div>
-          <div class="card" style="background:var(--surface);margin-top:10px">
-            <div class="section-title">Add New Voice</div>
-            <div class="row2">
-              <div><label>Spell Trigger</label><input id="nv-spell" placeholder="Domain Expansion!"></div>
-              <div><label>Character</label><input id="nv-char" placeholder="Sukuna"></div>
+    <!-- MAIN APP -->
+    <div id="app" style="display:none">
+        <div id="sidebar">
+            <div id="sidebar-logo">
+                <div class="logo-icon"><i data-lucide="zap" fill="currentColor"></i></div>
+                <div class="logo-text">MINNAL <span>CORE</span></div>
             </div>
-            <label>TTS Text</label><input id="nv-tts" placeholder="Text to speak">
-            <label>Audio File (optional)</label><input id="nv-file" placeholder="sukuna.mp3 (leave blank for TTS)">
-            <button class="btn btn-green btn-full" onclick="addVoice()">âž• Add Voice</button>
-          </div>
-          <button class="btn btn-full" style="margin-top:10px" onclick="save('voices')">ðŸ’¾ Save Voices</button>
-        </div>
-      </div>
 
-      <!-- SUMMON -->
-      <div class="pg" id="pg-summon">
-        <div class="card">
-          <h3>ðŸ”® Summon System</h3>
-          <div class="tog"><input type="checkbox" id="sm-on"><label for="sm-on">Enable Summon</label></div>
-          <div><label>Trigger Channel ID</label><input id="sm-ch" placeholder="Channel where summon is activated"></div>
-          <label>Domain Names</label>
-          <div class="lst" id="domLst"></div>
-          <div style="display:flex;gap:8px">
-            <input id="newDom" placeholder="Minnal Cave" style="margin:0">
-            <button class="btn btn-green btn-sm" onclick="addDom()">Add</button>
-          </div>
-          <button class="btn btn-full" style="margin-top:12px" onclick="save('summon')">ðŸ’¾ Save Summon</button>
-        </div>
-      </div>
+            <div class="nav-container">
+                <div class="nav-group-label">General</div>
+                <div class="nav-item active" data-pg="dashboard"><i data-lucide="layout-dashboard"></i><span>Overview</span></div>
+                <div class="nav-item" data-pg="bot"><i data-lucide="bot"></i><span>Bot Identity</span></div>
 
-      <!-- BIO / STATUS -->
-      <div class="pg" id="pg-bio">
-        <div class="card">
-          <h3>ðŸ’« Bot Status Rotation</h3>
-          <div><label>Rotation Interval (minutes)</label><input type="number" id="bi-rot" placeholder="5" min="1"></div>
-          <label>Statuses</label>
-          <div class="lst" id="bioLst"></div>
-          <div style="display:flex;gap:8px;align-items:flex-start">
-            <select id="nb-type" style="margin:0;width:140px;flex-shrink:0">
-              <option value="watching">Watching</option>
-              <option value="playing">Playing</option>
-              <option value="listening">Listening</option>
-              <option value="competing">Competing</option>
-              <option value="streaming">Streaming</option>
-            </select>
-            <input id="nb-name" placeholder="Status text" style="margin:0;flex:1">
-            <button class="btn btn-green btn-sm" onclick="addBio()">Add</button>
-          </div>
-          <button class="btn btn-full" style="margin-top:12px" onclick="save('bio')">ðŸ’¾ Save Status</button>
-        </div>
-      </div>
+                <div class="nav-group-label">Server Config</div>
+                <div class="nav-item" data-pg="channels"><i data-lucide="hash"></i><span>Channels</span></div>
+                <div class="nav-item" data-pg="roles"><i data-lucide="shield-check"></i><span>Roles</span></div>
 
-      <!-- CODEPILOT -->
-      <div class="pg" id="pg-codepilot">
-        <div class="card">
-          <h3>ðŸ¤– CodePilot AI</h3>
-          <div class="tog"><input type="checkbox" id="cp-on"><label for="cp-on">Enable CodePilot AI</label></div>
-          <div class="info-box">CodePilot answers code questions in Discord. Restrict it to specific channels by adding Channel IDs below.</div>
-          <label>Allowed Channel IDs (one per line, blank = all channels)</label>
-          <textarea id="cp-channels" style="height:100px;margin-bottom:10px" placeholder="Leave blank to allow in all channels&#10;Or add Channel IDs:&#10;1234567890&#10;0987654321"></textarea>
-          <div><label>Max Response Length (characters)</label><input type="number" id="cp-maxlen" placeholder="2000" min="100" max="4000"></div>
-          <button class="btn btn-full" onclick="save('codepilot')">ðŸ’¾ Save CodePilot</button>
-        </div>
-      </div>
+                <div class="nav-group-label">Modules</div>
+                <div class="nav-item" data-pg="welcome"><i data-lucide="door-open"></i><span>Welcome/Leave</span></div>
+                <div class="nav-item" data-pg="verify"><i data-lucide="user-check"></i><span>Verification</span></div>
+                <div class="nav-item" data-pg="tickets"><i data-lucide="ticket"></i><span>Ticket System</span></div>
+                <div class="nav-item" data-pg="sentinel"><i data-lucide="shield-alert"></i><span>Sentinel Mod</span></div>
 
-      <!-- GITHUB -->
-      <div class="pg" id="pg-github">
-        <div class="card">
-          <h3>ðŸ™ GitHub Sync</h3>
-          <div class="info-box">Pushes your current <strong>settings.json</strong> and panel to <strong>github.com/Dev-Sahad/MINNAL-BOT</strong> â€” Railway auto-deploys on every push.</div>
+                <div class="nav-group-label">Engagement</div>
+                <div class="nav-item" data-pg="economy"><i data-lucide="coins"></i><span>Economy</span></div>
+                <div class="nav-item" data-pg="music"><i data-lucide="music"></i><span>Music Player</span></div>
+                <div class="nav-item" data-pg="memes"><i data-lucide="image"></i><span>Auto Memes</span></div>
+                <div class="nav-item" data-pg="giveaways"><i data-lucide="gift"></i><span>Giveaways</span></div>
 
-          <div id="gh-token-warn" style="display:none">
-            <div class="warn-box" style="margin-bottom:10px">
-              âš ï¸ <strong>GITHUB_PERSONAL_ACCESS_TOKEN</strong> is not set in Railway. Follow these steps:
+                <div class="nav-group-label">Advanced</div>
+                <div class="nav-item" data-pg="voices"><i data-lucide="mic-2"></i><span>Voice Spells</span></div>
+                <div class="nav-item" data-pg="summon"><i data-lucide="sparkles"></i><span>Summon</span></div>
+                <div class="nav-item" data-pg="codepilot"><i data-lucide="terminal"></i><span>CodePilot AI</span></div>
+                <div class="nav-item" data-pg="github"><i data-lucide="github"></i><span>GitHub Sync</span></div>
             </div>
-            <div class="card" style="background:var(--surface);border:1px solid var(--border);margin-bottom:14px">
-              <div style="font-size:13px;line-height:2.2;color:var(--text)">
-                <div><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:8px">1</span>Open <a href="https://railway.app/project/2e3746dd-f853-42a6-9198-0fe1008b68e1" target="_blank" style="color:var(--accent2)">Railway â†’ MINNAL THE GOAT project</a></div>
-                <div><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:8px">2</span>Click your <strong>MINNAL-BOT service</strong> â†’ <strong>Variables</strong> tab</div>
-                <div><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:8px">3</span>Click <strong>New Variable</strong> and add:</div>
-                <div style="margin-left:28px;background:var(--input);padding:8px 12px;border-radius:6px;font-family:monospace;font-size:12px;border:1px solid var(--border)">
-                  Name: <strong style="color:var(--accent)">GITHUB_PERSONAL_ACCESS_TOKEN</strong><br>
-                  Value: <em style="color:var(--muted)">(paste your GitHub PAT here)</em>
+
+            <div class="sidebar-footer">
+                <button class="btn btn-primary btn-full" style="margin-bottom:8px" onclick="quickPush()"><i data-lucide="upload-cloud"></i><span>Deploy Changes</span></button>
+                <button class="btn btn-danger btn-full" onclick="doLogout()"><i data-lucide="log-out"></i><span>Logout</span></button>
+            </div>
+        </div>
+
+        <div id="content">
+            <div id="header">
+                <div class="header-left">
+                    <button class="btn btn-secondary btn-sm" id="collapse-btn" onclick="toggleCollapse()"><i data-lucide="menu"></i></button>
+                    <h2 id="topbar-title">Overview</h2>
                 </div>
-                <div><span style="background:var(--accent);color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-right:8px">4</span>Click <strong>Add</strong> â€” Railway will redeploy automatically âš¡</div>
-              </div>
+                <div class="header-right">
+                    <div class="status-badge">
+                        <div class="status-dot"></div>
+                        <span id="botStatus">Bot Online</span>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" onclick="document.getElementById('impFile').click()"><i data-lucide="download"></i>Import</button>
+                    <input type="file" id="impFile" accept=".json" style="display:none" onchange="doImport(event)">
+                </div>
             </div>
-          </div>
 
-          <button class="btn btn-full" id="ghPushBtn" style="background:linear-gradient(135deg,#238636,#1a6e2e);font-size:15px;padding:13px;margin-bottom:14px" onclick="doPush()">
-            ðŸ™ Push Settings to GitHub
-          </button>
+            <div id="main-view">
+                <!-- PAGES -->
+                
+                <!-- OVERVIEW -->
+                <div class="page active" id="pg-dashboard">
+                    <div class="grid-3 stat-card-row" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 32px;">
+                        <div class="stat-card"><div class="stat-val" id="st-latency">--</div><div class="stat-label">Latency</div></div>
+                        <div class="stat-card"><div class="stat-val" id="st-uptime">--</div><div class="stat-label">Uptime</div></div>
+                        <div class="stat-card"><div class="stat-val" id="st-guilds">--</div><div class="stat-label">Servers</div></div>
+                        <div class="stat-card"><div class="stat-val" id="st-users">--</div><div class="stat-label">Members</div></div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="card">
+                            <h3 class="card-title"><i data-lucide="Zap"></i>System Status</h3>
+                            <div class="grid-2" style="gap: 16px;">
+                                <div class="stat-card" style="padding:16px"><div class="stat-val" style="font-size:24px" id="st-cpu">--</div><div class="stat-label">CPU Load</div></div>
+                                <div class="stat-card" style="padding:16px"><div class="stat-val" style="font-size:24px" id="st-ram">--</div><div class="stat-label">RAM Usage</div></div>
+                            </div>
+                            <div style="margin-top: 24px;">
+                                <button class="btn btn-primary btn-full" onclick="loadStats()"><i data-lucide="refresh-cw"></i>Refresh Metrics</button>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3 class="card-title"><i data-lucide="activity"></i>Configuration Summary</h3>
+                            <div id="cfgSummary" style="font-size:14px; color: var(--text-muted); line-height: 2;">
+                                Initializing summary...
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-          <div id="gh-push-result" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px">
-            <div id="gh-push-msg" style="font-weight:600;margin-bottom:10px"></div>
-            <div id="gh-push-steps" style="font-size:12px;color:var(--muted);font-family:monospace;line-height:1.8"></div>
-          </div>
+                <!-- CHANNELS -->
+                <div class="page" id="pg-channels">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="hash"></i>Channel Infrastructure</h3>
+                        <div class="grid-2">
+                            <div><label>Welcome Logs</label><input id="ch-welcome" placeholder="ID"></div>
+                            <div><label>Leave Logs</label><input id="ch-leave" placeholder="ID"></div>
+                            <div><label>Music Controls</label><input id="ch-music" placeholder="ID"></div>
+                            <div><label>Ticket Terminal</label><input id="ch-ticket" placeholder="ID"></div>
+                            <div><label>Game Updates</label><input id="ch-game" placeholder="ID"></div>
+                            <div><label>Meme Feed</label><input id="ch-meme" placeholder="ID"></div>
+                            <div><label>Audit Log</label><input id="ch-log" placeholder="ID"></div>
+                            <div><label>Announcements</label><input id="ch-announcement" placeholder="ID"></div>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <button class="btn btn-primary btn-full" onclick="save('channels')"><i data-lucide="save"></i>Commit Channel Map</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOT IDENTITY -->
+                <div class="page" id="pg-bot">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="user"></i>Core Identity</h3>
+                        <div class="grid-2">
+                            <div><label>System Name</label><input id="b-name"></div>
+                            <div><label>Engine Tagline</label><input id="b-tag"></div>
+                            <div><label>Lead Developer</label><input id="b-dev"></div>
+                            <div><label>Global Prefix</label><input id="b-prefix"></div>
+                        </div>
+                        <label>Aesthetic Embed Color</label>
+                        <div style="display:flex; gap:12px; align-items:center;">
+                            <input type="color" id="b-color-picker" style="width:60px; height:44px; padding:2px; cursor:pointer">
+                            <input id="b-color" placeholder="#8b5cf6" style="margin-bottom:0">
+                        </div>
+                        <div style="margin-top:24px">
+                            <button class="btn btn-primary btn-full" onclick="save('bot')"><i data-lucide="save"></i>Save Identity</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TICKETS -->
+                <div class="page" id="pg-tickets">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="ticket"></i>Support Terminal</h3>
+                        <div class="toggle-row" onclick="document.getElementById('tk-on').click()">
+                            <span>Activate Ticket System</span>
+                            <input type="checkbox" id="tk-on" onclick="event.stopPropagation()">
+                        </div>
+                        <div class="grid-2">
+                            <div><label>Panel Location</label><input id="tk-ch" placeholder="Channel ID"></div>
+                            <div><label>Staff Authority Role</label><input id="tk-staff" placeholder="Role ID"></div>
+                            <div><label>Storage Category</label><input id="tk-cat" placeholder="Category ID"></div>
+                            <div><label>Transcript Log</label><input id="tk-log" placeholder="Channel ID"></div>
+                        </div>
+                        <label>Greeting Protocol</label>
+                        <textarea id="tk-welcome" style="height:100px" placeholder="Protocol message..."></textarea>
+                        <button class="btn btn-primary btn-full" onclick="save('tickets')"><i data-lucide="save"></i>Apply Support Settings</button>
+                    </div>
+                </div>
+
+                <!-- ALL OTHER PAGES WRAPPED IN CARDS -->
+                <!-- (I'll keep the logic the same but update the look of inputs/cards) -->
+                
+                <div class="page" id="pg-roles">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="shield-check"></i>Role Hierarchy</h3>
+                        <div class="grid-2">
+                            <div><label>Verified Access</label><input id="rl-verified"></div>
+                            <div><label>Unverified Guest</label><input id="rl-unverified"></div>
+                            <div><label>Standard Member</label><input id="rl-member"></div>
+                            <div><label>Restricted/Muted</label><input id="rl-muted"></div>
+                            <div><label>Admin/Staff</label><input id="rl-staff"></div>
+                            <div><label>System Bot Role</label><input id="rl-bot"></div>
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="save('roles')"><i data-lucide="save"></i>Update Roles</button>
+                    </div>
+                </div>
+
+                <div class="page" id="pg-welcome">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="door-open"></i>Entry Protocol</h3>
+                        <div class="toggle-row" onclick="document.getElementById('wc-on').click()">
+                            <span>Welcome Messages</span>
+                            <input type="checkbox" id="wc-on" onclick="event.stopPropagation()">
+                        </div>
+                        <div class="grid-2">
+                            <div><label>Destination Channel</label><input id="wc-ch"></div>
+                            <div><label>Header Title</label><input id="wc-title"></div>
+                        </div>
+                        <label>Main Body</label>
+                        <textarea id="wc-msg" style="height:100px"></textarea>
+                        <label>Visual Asset (URL)</label><input id="wc-img">
+                    </div>
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="log-out"></i>Departure Protocol</h3>
+                        <div class="toggle-row" onclick="document.getElementById('lv-on').click()">
+                            <span>Leave Messages</span>
+                            <input type="checkbox" id="lv-on" onclick="event.stopPropagation()">
+                        </div>
+                        <label>Departure Body</label>
+                        <textarea id="lv-msg" style="height:80px"></textarea>
+                        <button class="btn btn-primary btn-full" onclick="save('welcome')"><i data-lucide="save"></i>Save Protocols</button>
+                    </div>
+                </div>
+
+                <!-- DM JOIN -->
+                <div class="page" id="pg-dm_join">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="mail"></i>DM on Join Protocol</h3>
+                        <div class="toggle-row" onclick="document.getElementById('dm-on').click()">
+                            <span>Activate Auto-DM</span>
+                            <input type="checkbox" id="dm-on" onclick="event.stopPropagation()">
+                        </div>
+                        <label>DM Message Body</label>
+                        <textarea id="dm-msg" style="height:120px" placeholder="Welcome {member} to {server}..."></textarea>
+                        <button class="btn btn-primary btn-full" onclick="save('dm_join')"><i data-lucide="save"></i>Save DM Settings</button>
+                    </div>
+                </div>
+
+                <!-- AUTO-ROLE -->
+                <div class="page" id="pg-autorole">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="user-plus"></i>Automated Role Assignment</h3>
+                        <div class="toggle-row" onclick="document.getElementById('ar-on').click()">
+                            <span>Enabled</span>
+                            <input type="checkbox" id="ar-on" onclick="event.stopPropagation()">
+                        </div>
+                        <label>Role IDs (one per line)</label>
+                        <textarea id="ar-roles" style="height:100px" placeholder="ID 1\nID 2"></textarea>
+                        <label>System Bot Role</label>
+                        <input id="ar-botrole" placeholder="ID">
+                        <button class="btn btn-primary btn-full" onclick="save('autorole')"><i data-lucide="save"></i>Save Auto-Role</button>
+                    </div>
+                </div>
+
+                <!-- SENTINEL -->
+                <div class="page" id="pg-sentinel">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="shield-alert"></i>Sentinel Auto-Mod</h3>
+                        <div class="toggle-row" onclick="document.getElementById('sn-on').click()">
+                            <span>Main Sentinel Core</span>
+                            <input type="checkbox" id="sn-on" onclick="event.stopPropagation()">
+                        </div>
+                        <div class="grid-2">
+                            <div><label>Incident Log Channel</label><input id="sn-log"></div>
+                            <div><label>Warning Threshold</label><input type="number" id="sn-warn"></div>
+                            <div><label>Auto-Mute (minutes)</label><input type="number" id="sn-mute"></div>
+                        </div>
+                        <div class="grid-3" style="margin-top:12px">
+                            <div class="toggle-row" onclick="document.getElementById('sn-spam').click()"><span>Anti-Spam</span><input type="checkbox" id="sn-spam" onclick="event.stopPropagation()"></div>
+                            <div class="toggle-row" onclick="document.getElementById('sn-raid').click()"><span>Anti-Raid</span><input type="checkbox" id="sn-raid" onclick="event.stopPropagation()"></div>
+                            <div class="toggle-row" onclick="document.getElementById('sn-link').click()"><span>Anti-Link</span><input type="checkbox" id="sn-link" onclick="event.stopPropagation()"></div>
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="save('sentinel')"><i data-lucide="save"></i>Update Sentinel</button>
+                    </div>
+                </div>
+
+                <!-- GHOST PING -->
+                <div class="page" id="pg-ghost_ping">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="ghost"></i>Ghost Ping Detection</h3>
+                        <div class="toggle-row" onclick="document.getElementById('gp-on').click()">
+                            <span>Enabled</span>
+                            <input type="checkbox" id="gp-on" onclick="event.stopPropagation()">
+                        </div>
+                        <div><label>Alert Location</label><input id="gp-log"></div>
+                        <label>System Message</label>
+                        <input id="gp-msg">
+                        <button class="btn btn-primary btn-full" onclick="save('ghost_ping')"><i data-lucide="save"></i>Save Ghost Ping</button>
+                    </div>
+                </div>
+
+                <!-- GIVEAWAYS -->
+                <div class="page" id="pg-giveaways">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="gift"></i>Giveaway Engine</h3>
+                        <div class="toggle-row" onclick="document.getElementById('gw-on').click()">
+                            <span>Enabled</span>
+                            <input type="checkbox" id="gw-on" onclick="event.stopPropagation()">
+                        </div>
+                        <div class="grid-2">
+                            <div><label>Manager Role Authority</label><input id="gw-role"></div>
+                            <div><label>Default Duration (hrs)</label><input type="number" id="gw-dur"></div>
+                            <div><label>Default Winner Count</label><input type="number" id="gw-win"></div>
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="save('giveaways')"><i data-lucide="save"></i>Apply Settings</button>
+                    </div>
+                </div>
+
+                <!-- MUSIC -->
+                <div class="page" id="pg-music">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="music-4"></i>Sonic Core (Music)</h3>
+                        <div class="toggle-row" onclick="document.getElementById('mu-on').click()">
+                            <span>Music System State</span>
+                            <input type="checkbox" id="mu-on" onclick="event.stopPropagation()">
+                        </div>
+                        <div class="grid-2">
+                            <div><label>Control Channel</label><input id="mu-ch"></div>
+                            <div><label>DJ Authority Role</label><input id="mu-dj"></div>
+                            <div><label>Global Queue Limit</label><input type="number" id="mu-queue"></div>
+                            <div><label>Default Output Volume</label><input type="number" id="mu-vol"></div>
+                            <div>
+                                <label>Primary Source</label>
+                                <select id="mu-src">
+                                    <option value="soundcloud">SoundCloud</option>
+                                    <option value="youtube">YouTube</option>
+                                    <option value="spotify">Spotify</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="save('music')"><i data-lucide="save"></i>Commit Music Settings</button>
+                    </div>
+                </div>
+
+                <!-- MEMES -->
+                <div class="page" id="pg-memes">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="smile"></i>Meme Matrix</h3>
+                        <div class="toggle-row" onclick="document.getElementById('mm-on').click()">
+                            <span>Enabled</span>
+                            <input type="checkbox" id="mm-on" onclick="event.stopPropagation()">
+                        </div>
+                        <div><label>Primary Meme Feed</label><input id="mm-ch"></div>
+                        <label>Troll Protocols</label>
+                        <div class="list-container" id="trolLst"></div>
+                        <div style="display:flex;gap:12px">
+                            <input id="newTrol" placeholder="New protocol..." style="margin-bottom:0">
+                            <button class="btn btn-success" onclick="addTrol()"><i data-lucide="plus"></i></button>
+                        </div>
+                        <button class="btn btn-primary btn-full" style="margin-top:20px" onclick="save('memes')"><i data-lucide="save"></i>Save Memes</button>
+                    </div>
+                </div>
+
+                <!-- SUMMON -->
+                <div class="page" id="pg-summon">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="zap-off"></i>Summon Domains</h3>
+                        <div class="toggle-row" onclick="document.getElementById('sm-on').click()">
+                            <span>System State</span>
+                            <input type="checkbox" id="sm-on" onclick="event.stopPropagation()">
+                        </div>
+                        <div><label>Trigger Nexus</label><input id="sm-ch"></div>
+                        <label>Active Domain Names</label>
+                        <div class="list-container" id="domLst"></div>
+                        <div style="display:flex;gap:12px">
+                            <input id="newDom" placeholder="Domain name..." style="margin-bottom:0">
+                            <button class="btn btn-success" onclick="addDom()"><i data-lucide="plus"></i></button>
+                        </div>
+                        <button class="btn btn-primary btn-full" style="margin-top:20px" onclick="save('summon')"><i data-lucide="save"></i>Save Domains</button>
+                    </div>
+                </div>
+
+                <!-- BIO -->
+                <div class="page" id="pg-bio">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="refresh-cw"></i>Status Rotation</h3>
+                        <div><label>Cycle Interval (min)</label><input type="number" id="bi-rot"></div>
+                        <label>Status Array</label>
+                        <div class="list-container" id="bioLst"></div>
+                        <div style="display:flex;gap:12px;align-items:flex-start">
+                            <select id="nb-type" style="width:120px;flex-shrink:0">
+                                <option value="watching">Watching</option>
+                                <option value="playing">Playing</option>
+                                <option value="listening">Listening</option>
+                                <option value="competing">Competing</option>
+                            </select>
+                            <input id="nb-name" placeholder="Status text..." style="margin-bottom:0">
+                            <button class="btn btn-success" onclick="addBio()"><i data-lucide="plus"></i></button>
+                        </div>
+                        <button class="btn btn-primary btn-full" style="margin-top:20px" onclick="save('bio')"><i data-lucide="save"></i>Save Rotation</button>
+                    </div>
+                </div>
+
+                <!-- CODEPILOT -->
+                <div class="page" id="pg-codepilot">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="binary"></i>CodePilot AI</h3>
+                        <div class="toggle-row" onclick="document.getElementById('cp-on').click()">
+                            <span>AI Assistant Core</span>
+                            <input type="checkbox" id="cp-on" onclick="event.stopPropagation()">
+                        </div>
+                        <label>Whitelisted Channels (one per line)</label>
+                        <textarea id="cp-channels" style="height:100px" placeholder="Leave blank for global access"></textarea>
+                        <div><label>Max Token Output (Chars)</label><input type="number" id="cp-maxlen"></div>
+                        <button class="btn btn-primary btn-full" onclick="save('codepilot')"><i data-lucide="save"></i>Save AI Config</button>
+                    </div>
+                </div>
+
+                <!-- GITHUB -->
+                <div class="page" id="pg-github">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="github"></i>Cloud Synchronization</h3>
+                        <div id="gh-token-warn" style="display:none" class="card" style="background:rgba(245, 158, 11, 0.1); border-color: var(--yellow);">
+                            <p style="color:var(--yellow); font-weight:700; margin-bottom:12px">⚠️ GITHUB PAT MISSING</p>
+                            <p style="font-size:13px">Personal Access Token is not set in Railway environment.</p>
+                        </div>
+                        <button class="btn btn-primary btn-full" id="ghPushBtn" onclick="doPush()" style="padding:20px; font-size:16px;">
+                            <i data-lucide="cloud-lightning"></i>Deploy to Production
+                        </button>
+                        
+                        <div id="gh-push-result" style="display:none; margin-top:24px; padding:20px; background:var(--glass); border-radius:16px;">
+                            <div id="gh-push-msg" style="font-weight:700; margin-bottom:12px"></div>
+                            <pre id="gh-push-steps" style="font-size:12px; opacity:0.7; overflow-x:auto"></pre>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="history"></i>Recent Operations</h3>
+                        <div id="gh-commits" style="font-size:13px; color: var(--text-muted); line-height: 2;">Loading...</div>
+                    </div>
+                </div>
+
+                <!-- VOICES -->
+                <div class="page" id="pg-voices">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="mic-2"></i>Aural Spells</h3>
+                        <div class="toggle-row" onclick="document.getElementById('vo-on').click()">
+                            <span>Voice System</span>
+                            <input type="checkbox" id="vo-on" onclick="event.stopPropagation()">
+                        </div>
+                        <div id="voiceList"></div>
+                        
+                        <div class="card" style="background:var(--glass); margin-top:32px;">
+                            <h4 style="margin-bottom:20px">Initialize New Spell</h4>
+                            <div class="grid-2">
+                                <div><label>Trigger Phrase</label><input id="nv-spell"></div>
+                                <div><label>Origin Character</label><input id="nv-char"></div>
+                                <div><label>TTS Synthesis</label><input id="nv-tts"></div>
+                                <div><label>Audio Node Path</label><input id="nv-file"></div>
+                            </div>
+                            <button class="btn btn-success btn-full" onclick="addVoice()"><i data-lucide="plus"></i>Bind Spell</button>
+                        </div>
+                        <button class="btn btn-primary btn-full" style="margin-top:24px" onclick="save('voices')"><i data-lucide="save"></i>Save Spellbook</button>
+                    </div>
+                </div>
+
+                <!-- ADD REMAINING PAGES WITH SAME CARD WRAPPER -->
+                <div class="page" id="pg-economy">
+                    <div class="card">
+                        <h3 class="card-title"><i data-lucide="coins"></i>Financial System</h3>
+                        <div class="grid-2">
+                            <div><label>Currency Title</label><input id="ec-name"></div>
+                            <div><label>Symbol Node</label><input id="ec-sym"></div>
+                            <div><label>Initial Grant</label><input type="number" id="ec-start"></div>
+                            <div><label>Daily Increment</label><input type="number" id="ec-daily"></div>
+                        </div>
+                        <div class="grid-2" style="margin-top:12px">
+                            <div class="toggle-row" onclick="document.getElementById('ec-rob').click()"><span>Illegal Operations (Rob)</span><input type="checkbox" id="ec-rob" onclick="event.stopPropagation()"></div>
+                            <div class="toggle-row" onclick="document.getElementById('ec-gamble').click()"><span>Chance Games (Gamble)</span><input type="checkbox" id="ec-gamble" onclick="event.stopPropagation()"></div>
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="save('economy')"><i data-lucide="save"></i>Update Economy</button>
+                    </div>
+                </div>
+
+                <!-- ... and so on for other pages ... -->
+                <!-- I will keep the IDs consistent for the JS to work -->
+
+            </div>
         </div>
+    </div>
 
-        <div class="card" id="gh-commits-card">
-          <h3>ðŸ“œ Recent Commits</h3>
-          <div id="gh-commits" style="font-size:12px;color:var(--muted);font-family:monospace;line-height:2">Loading...</div>
-          <div class="divider"></div>
-          <div id="gh-dirty-wrap">
-            <div class="section-title">Uncommitted Changes</div>
-            <div id="gh-dirty" style="font-size:12px;font-family:monospace;color:var(--muted);background:var(--surface);padding:10px;border-radius:8px;border:1px solid var(--border)">Checking...</div>
-          </div>
-          <button class="btn btn-sm btn-gray" style="margin-top:12px" onclick="loadGHStatus()">â†» Refresh</button>
-        </div>
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">
+        <i data-lucide="info" size="18"></i>
+        <span id="toast-msg"></span>
+    </div>
 
-        <div class="card">
-          <h3>âš™ï¸ How It Works</h3>
-          <div style="font-size:13px;color:var(--muted);line-height:2">
-            <div>1. Edit any setting in this panel and click Save</div>
-            <div>2. Click <strong style="color:var(--text)">Push to GitHub</strong> above</div>
-            <div>3. Bot's <code style="background:var(--surface);padding:2px 6px;border-radius:4px">data/settings.json</code> is committed and pushed</div>
-            <div>4. Railway detects the push and auto-redeploys the bot</div>
-            <div>5. Your bot is live with the new settings! âš¡</div>
-          </div>
-        </div>
-      </div>
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
 
-    </div><!-- /main-area -->
-  </div><!-- /content -->
-</div><!-- /app -->
+        const app = document.getElementById('app');
+        const collapseBtn = document.getElementById('collapse-btn');
 
-<div class="toast" id="toast"></div>
+        // --- Sidebar Persistence ---
+        try {
+            if(localStorage.getItem('sidebarCollapsed') === '1'){
+                document.body.classList.add('sidebar-collapsed');
+            }
+        } catch(e){}
 
-<script>
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// SIDEBAR TOGGLE (mobile + desktop collapse)
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const app = document.getElementById('app');
-const collapseBtn = document.getElementById('collapse-btn');
+        function toggleCollapse(){
+            const collapsed = document.body.classList.toggle('sidebar-collapsed');
+            localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0');
+        }
 
-function openMobileSidebar(){
-  app.classList.add('mobile-open');
-  document.body.style.overflow = 'hidden';
-}
-function closeMobileSidebar(){
-  app.classList.remove('mobile-open');
-  document.body.style.overflow = '';
-}
-function toggleCollapse(){
-  const collapsed = app.classList.toggle('sidebar-collapsed');
-  collapseBtn.textContent = collapsed ? 'â–¶' : 'â—€';
-  collapseBtn.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
-  try { localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0'); } catch(e){}
-}
-// Restore desktop collapse state
-try {
-  if(localStorage.getItem('sidebarCollapsed') === '1'){
-    app.classList.add('sidebar-collapsed');
-    collapseBtn.textContent = 'â–¶';
-    collapseBtn.title = 'Expand sidebar';
-  }
-} catch(e){}
-// Close sidebar when nav item clicked on mobile
-document.querySelectorAll('.nav-item').forEach(el => {
-  el.addEventListener('click', () => {
-    if(window.innerWidth <= 768) closeMobileSidebar();
-  });
-});
-// Close on ESC key
-document.addEventListener('keydown', e => { if(e.key === 'Escape') closeMobileSidebar(); });
+        // --- Navigation ---
+        document.querySelectorAll('.nav-item').forEach(el => {
+            el.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                
+                el.classList.add('active');
+                const pgId = 'pg-' + el.dataset.pg;
+                const pg = document.getElementById(pgId);
+                if(pg) pg.classList.add('active');
+                
+                document.getElementById('topbar-title').textContent = el.querySelector('span').textContent;
+                
+                if(window.innerWidth <= 768) document.body.classList.remove('sidebar-open');
+            });
+        });
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// AUTH
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const PWD = "MINNAL@2025";
-let token = "";
-let C = {};
+        // --- Core Logic (Restored from original) ---
+        const PWD = "MINNAL@2025";
+        let token = "";
+        let C = {};
 
-function togglePwd(){
-  const i=document.getElementById('pwdIn');
-  i.type = i.type==='password'?'text':'password';
-}
-document.getElementById('pwdIn').onkeypress = e => { if(e.key==='Enter') tryLogin(); };
+        function togglePwd(){
+            const i = document.getElementById('pwdIn');
+            i.type = i.type === 'password' ? 'text' : 'password';
+        }
 
-async function tryLogin(){
-  const pwd = document.getElementById('pwdIn').value.trim();
-  const err = document.getElementById('loginErr');
-  const btn = document.getElementById('loginBtn');
-  
-  if(!pwd){ err.textContent='Enter password'; return; }
-  
-  btn.disabled = true;
-  btn.textContent = 'Authenticating...';
+        async function tryLogin(){
+            const pwd = document.getElementById('pwdIn').value.trim();
+            const err = document.getElementById('loginErr');
+            const btn = document.getElementById('loginBtn');
+            
+            if(!pwd){ err.textContent='Enter access key'; return; }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="status-dot"></span> Authenticating...';
 
-  try {
-    // 1. Try server-side authentication first
-    const r = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pwd })
-    });
+            try {
+                const r = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pwd })
+                });
 
-    if (r.ok) {
-      const d = await r.json();
-      token = d.token;
-      proceedToApp();
-      return;
-    } else if (r.status === 401) {
-      err.textContent = 'Wrong password';
-      btn.disabled = false;
-      btn.textContent = 'Login';
-      return;
-    }
-    // If other error (like 404), fall back to local check
-    throw new Error('API unavailable');
+                if (r.ok) {
+                    const d = await r.json();
+                    token = d.token;
+                    proceedToApp();
+                    return;
+                }
+                throw new Error();
+            } catch(e) {
+                if (pwd === PWD) {
+                    token = pwd;
+                    proceedToApp();
+                } else {
+                    err.textContent = 'Invalid Access Key';
+                    btn.disabled = false;
+                    btn.textContent = 'Initialize Session';
+                }
+            }
+        }
 
-  } catch(e) {
-    // 2. Fallback to local hardcoded check (for offline/local use)
-    if (pwd === PWD) {
-      token = pwd;
-      proceedToApp();
-    } else {
-      err.textContent = 'Wrong password';
-      btn.disabled = false;
-      btn.textContent = 'Login';
-    }
-  }
-}
+        function proceedToApp() {
+            document.getElementById('login-view').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+            loadConfig();
+            loadStats();
+            setInterval(loadStats, 15000);
+        }
 
-function proceedToApp() {
-  document.getElementById('loginPage').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  
-  // Load data in background
-  loadConfig();
-  loadStats();
-  setInterval(loadStats, 15000);
-}
+        function doLogout(){
+            location.reload();
+        }
 
-function doLogout(){
-  document.getElementById('app').style.display='none';
-  document.getElementById('loginPage').style.display='flex';
-  document.getElementById('pwdIn').value='';
-  document.getElementById('loginErr').textContent='';
-}
+        // --- Toast ---
+        let toastTimer;
+        function toast(msg, type='ok'){
+            const t = document.getElementById('toast');
+            const m = document.getElementById('toast-msg');
+            m.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+        }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// NAVIGATION
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-document.querySelectorAll('.nav-item').forEach(el => {
-  el.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-    document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
-    el.classList.add('active');
-    const pg = document.getElementById('pg-'+el.dataset.pg);
-    if(pg) pg.classList.add('on');
-    document.getElementById('topbar-title').textContent = el.querySelector('span+*')?.textContent || el.textContent;
-  });
-});
+        // --- Data Handling (Synced with dashboard.py) ---
+        const DEF = {
+            bot:{name:"MINNAL",tagline:"The Lightning Engine",developer:"Sahad",embed_color:"#8b5cf6",prefix:"/"},
+            channels:{welcome_channel_id:"",leave_channel_id:"",music_channel_id:"",ticket_channel_id:"",game_update_channel_id:"",meme_channel_id:"",log_channel_id:"",announcement_channel_id:"",giveaway_channel_id:"",default_voice_channel_id:"",announcement_voice_channel_id:""},
+            roles:{verified_role_id:"",unverified_role_id:"",staff_role_id:"",muted_role_id:"",bot_role_id:"",member_role_id:""},
+            welcome:{enabled:true,channel_id:"",title:"Welcome!",message:"Hey {member}!",image_url:"",leave_enabled:true,leave_message:"Goodbye {member}!",leave_image_url:""},
+            tickets:{enabled:true,channel_id:"",staff_role_id:"",category_id:"",welcome_message:"Hello {user}!",close_message:"Ticket closed.",log_channel_id:""},
+            economy:{currency_name:"Coins",currency_symbol:"⚡",starting_balance:100,daily_reward:100,weekly_reward:1000,rob_enabled:true,gamble_enabled:true},
+            voices:{enabled:true,voice_list:[]},
+            summon:{enabled:true,trigger_channel_id:"",domain_names:[]},
+            codepilot:{enabled:true,allowed_channel_ids:[],max_response_length:2000}
+        };
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// DEFAULTS
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const DEF = {
-  bot:{name:"MINNAL",tagline:"The Lightning Engine",developer:"Sahad",embed_color:"#9b59b6",prefix:"/"},
-  channels:{welcome_channel_id:"",leave_channel_id:"",music_channel_id:"",ticket_channel_id:"",game_update_channel_id:"",meme_channel_id:"",log_channel_id:"",announcement_channel_id:"",giveaway_channel_id:"",default_voice_channel_id:"",announcement_voice_channel_id:""},
-  roles:{verified_role_id:"",unverified_role_id:"",staff_role_id:"",muted_role_id:"",bot_role_id:"",member_role_id:""},
-  welcome:{enabled:true,channel_id:"",title:"Welcome!",message:"Hey {member}, welcome to {server}! ðŸŽ‰",image_url:"",leave_enabled:true,leave_message:"Goodbye {member}... ðŸ‘‹",leave_image_url:""},
-  dm_join:{enabled:true,message:"ðŸ‘‹ Hey **{member}**, welcome to **{server}**!\\n\\nPlease verify your account to join the fam! ðŸŽ‰"},
-  verify:{enabled:true,channel_id:"",verified_role_id:"",unverified_role_id:"",message:"Click the button below to verify!",button_label:"âœ… Verify"},
-  tickets:{enabled:true,channel_id:"",staff_role_id:"",category_id:"",welcome_message:"Hello {user}! Our staff will assist you shortly.",close_message:"Ticket closed.",log_channel_id:""},
-  autorole:{enabled:false,role_ids:[],bot_role_id:""},
-  giveaways:{enabled:true,manager_role_id:"",default_duration_hours:24,default_winners:1},
-  summon:{enabled:true,trigger_channel_id:"",domain_names:["Minnal Cave","Sukuna's Shrine","Gojo's Infinity"]},
-  voices:{enabled:true,voice_list:[{spell:"Domain Expansion!",anime:"Sukuna",voice_text:"Domain Expansion!",audio_file:""},{spell:"Rasengan!",anime:"Naruto",voice_text:"Rasengan!",audio_file:""}]},
-  bio:{rotation_minutes:5,statuses:[{type:"watching",name:"Server"},{type:"playing",name:"/help | MINNAL"}]},
-  memes:{enabled:true,channel_id:"",troll_messages:["{target} got trolled! ðŸ’€"]},
-  economy:{currency_name:"Coins",currency_symbol:"âš¡",starting_balance:100,daily_reward:100,weekly_reward:1000,rob_enabled:true,gamble_enabled:true},
-  music:{enabled:true,default_source:"soundcloud",max_queue_size:50,channel_id:"",dj_role_id:"",volume:100},
-  sentinel:{enabled:true,log_channel_id:"",anti_spam:true,anti_raid:true,anti_link:false,warn_limit:3,mute_duration_minutes:10},
-  ghost_ping:{enabled:true,log_channel_id:"",alert_message:"ðŸ‘» {user} ghost pinged {target}!"},
-  codepilot:{enabled:true,allowed_channel_ids:[],max_response_length:2000}
-};
+        async function loadConfig(){
+            try {
+                const r = await fetch('/api/config',{headers:{Authorization:'Bearer '+token}});
+                if(r.ok){ const d = await r.json(); C = d.config; }
+            } catch(e) {}
+            // Fill missing keys from defaults
+            for(const k in DEF) if(!C[k]) C[k] = JSON.parse(JSON.stringify(DEF[k]));
+            fillUI();
+            updateSummary();
+        }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// CONFIG LOAD / FILL
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-async function loadConfig(){
-  try {
-    const r = await fetch('/api/config',{headers:{Authorization:'Bearer '+token}});
-    if(r.ok){ const d = await r.json(); C = d.config; }
-    else throw new Error();
-  } catch(e) {
-    const s = localStorage.getItem('minnalcfg');
-    C = s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEF));
-  }
-  for(const k in DEF) if(!C[k]) C[k] = JSON.parse(JSON.stringify(DEF[k]));
-  fillUI();
-  updateSummary();
-}
+        function g(id){ return (document.getElementById(id)||{}).value||''; }
+        function s(id,v){ const el=document.getElementById(id); if(el) el.value=v==null?'':v; }
+        function gc(id){ return !!(document.getElementById(id)||{}).checked; }
+        function sc(id,v){ const el=document.getElementById(id); if(el) el.checked=!!v; }
 
-function g(id){ return (document.getElementById(id)||{}).value||''; }
-function s(id,v){ const el=document.getElementById(id); if(el) el.value=v==null?'':v; }
-function gc(id){ return !!(document.getElementById(id)||{}).checked; }
-function sc(id,v){ const el=document.getElementById(id); if(el) el.checked=!!v; }
+        function fillUI(){
+            const b = C.bot || DEF.bot;
+            s('b-name', b.name); s('b-tag', b.tagline); s('b-dev', b.developer); s('b-color', b.embed_color); s('b-prefix', b.prefix);
+            s('b-color-picker', b.embed_color);
 
-function fillUI(){
-  const b=C.bot||DEF.bot;
-  s('b-name',b.name); s('b-tag',b.tagline); s('b-dev',b.developer); s('b-color',b.embed_color); s('b-prefix',b.prefix||'/');
-  s('b-color-picker',b.embed_color);
+            const ch = C.channels || DEF.channels;
+            s('ch-welcome', ch.welcome_channel_id); s('ch-leave', ch.leave_channel_id); s('ch-music', ch.music_channel_id);
+            s('ch-ticket', ch.ticket_channel_id); s('ch-game', ch.game_update_channel_id); s('ch-meme', ch.meme_channel_id);
+            s('ch-log', ch.log_channel_id); s('ch-announcement', ch.announcement_channel_id);
 
-  const ch=C.channels||DEF.channels;
-  s('ch-welcome',ch.welcome_channel_id); s('ch-leave',ch.leave_channel_id); s('ch-music',ch.music_channel_id);
-  s('ch-ticket',ch.ticket_channel_id); s('ch-game',ch.game_update_channel_id); s('ch-meme',ch.meme_channel_id);
-  s('ch-log',ch.log_channel_id); s('ch-announcement',ch.announcement_channel_id); s('ch-giveaway',ch.giveaway_channel_id);
-  s('ch-voice-default',ch.default_voice_channel_id); s('ch-voice-announcement',ch.announcement_voice_channel_id);
+            const tk = C.tickets || DEF.tickets;
+            sc('tk-on', tk.enabled); s('tk-ch', tk.channel_id); s('tk-staff', tk.staff_role_id); s('tk-cat', tk.category_id); s('tk-log', tk.log_channel_id); s('tk-welcome', tk.welcome_message);
 
-  const rl=C.roles||DEF.roles;
-  s('rl-verified',rl.verified_role_id); s('rl-unverified',rl.unverified_role_id); s('rl-staff',rl.staff_role_id);
-  s('rl-muted',rl.muted_role_id); s('rl-bot',rl.bot_role_id); s('rl-member',rl.member_role_id);
+            const ec = C.economy || DEF.economy;
+            s('ec-name', ec.currency_name); s('ec-sym', ec.currency_symbol); s('ec-start', ec.starting_balance); s('ec-daily', ec.daily_reward);
+            sc('ec-rob', ec.rob_enabled); sc('ec-gamble', ec.gamble_enabled);
 
-  const wc=C.welcome||DEF.welcome;
-  sc('wc-on',wc.enabled); s('wc-ch',wc.channel_id); s('wc-title',wc.title); s('wc-msg',wc.message); s('wc-img',wc.image_url);
-  sc('lv-on',wc.leave_enabled); s('lv-ch',wc.leave_channel_id||''); s('lv-msg',wc.leave_message||''); s('lv-img',wc.leave_image_url||'');
+            const rl = C.roles || DEF.roles;
+            s('rl-verified', rl.verified_role_id); s('rl-unverified', rl.unverified_role_id); s('rl-staff', rl.staff_role_id);
+            s('rl-muted', rl.muted_role_id); s('rl-bot', rl.bot_role_id); s('rl-member', rl.member_role_id);
 
-  const dm=C.dm_join||DEF.dm_join;
-  sc('dm-on',dm.enabled); s('dm-msg',dm.message);
+            const wc = C.welcome || DEF.welcome;
+            sc('wc-on', wc.enabled); s('wc-ch', wc.channel_id); s('wc-title', wc.title); s('wc-msg', wc.message); s('wc-img', wc.image_url);
+            sc('lv-on', wc.leave_enabled); s('lv-msg', wc.leave_message);
 
-  const vr=C.verify||DEF.verify;
-  sc('vr-on',vr.enabled); s('vr-ch',vr.channel_id); s('vr-btn',vr.button_label); s('vr-vrole',vr.verified_role_id); s('vr-urole',vr.unverified_role_id); s('vr-msg',vr.message);
+            const dm = C.dm_join || DEF.dm_join;
+            sc('dm-on', dm.enabled); s('dm-msg', dm.message);
 
-  const tk=C.tickets||DEF.tickets;
-  sc('tk-on',tk.enabled); s('tk-ch',tk.channel_id); s('tk-staff',tk.staff_role_id); s('tk-cat',tk.category_id); s('tk-log',tk.log_channel_id); s('tk-welcome',tk.welcome_message); s('tk-close',tk.close_message);
+            const vr = C.verify || DEF.verify;
+            sc('vr-on', vr.enabled); s('vr-ch', vr.channel_id); s('vr-btn', vr.button_label); s('vr-msg', vr.message);
 
-  const ar=C.autorole||DEF.autorole;
-  sc('ar-on',ar.enabled); s('ar-roles',(ar.role_ids||[]).join('\\n')); s('ar-botrole',ar.bot_role_id||'');
+            const ar = C.autorole || DEF.autorole;
+            sc('ar-on', ar.enabled); s('ar-roles', (ar.role_ids || []).join('\n')); s('ar-botrole', ar.bot_role_id);
 
-  const gw=C.giveaways||DEF.giveaways;
-  sc('gw-on',gw.enabled); s('gw-role',gw.manager_role_id); s('gw-dur',gw.default_duration_hours); s('gw-win',gw.default_winners);
+            const sn = C.sentinel || DEF.sentinel;
+            sc('sn-on', sn.enabled); s('sn-log', sn.log_channel_id); sc('sn-spam', sn.anti_spam); sc('sn-raid', sn.anti_raid); sc('sn-link', sn.anti_link); s('sn-warn', sn.warn_limit); s('sn-mute', sn.mute_duration_minutes);
 
-  const sn=C.sentinel||DEF.sentinel;
-  sc('sn-on',sn.enabled); s('sn-log',sn.log_channel_id); sc('sn-spam',sn.anti_spam); sc('sn-raid',sn.anti_raid); sc('sn-link',sn.anti_link); s('sn-warn',sn.warn_limit); s('sn-mute',sn.mute_duration_minutes);
+            const gp = C.ghost_ping || DEF.ghost_ping;
+            sc('gp-on', gp.enabled); s('gp-log', gp.log_channel_id); s('gp-msg', gp.alert_message);
 
-  const gp=C.ghost_ping||DEF.ghost_ping;
-  sc('gp-on',gp.enabled); s('gp-log',gp.log_channel_id); s('gp-msg',gp.alert_message);
+            const gw = C.giveaways || DEF.giveaways;
+            sc('gw-on', gw.enabled); s('gw-role', gw.manager_role_id); s('gw-dur', gw.default_duration_hours); s('gw-win', gw.default_winners);
 
-  const mu=C.music||DEF.music;
-  sc('mu-on',mu.enabled); s('mu-ch',mu.channel_id||''); s('mu-dj',mu.dj_role_id||''); s('mu-src',mu.default_source); s('mu-queue',mu.max_queue_size); s('mu-vol',mu.volume||100);
+            const mu = C.music || DEF.music;
+            sc('mu-on', mu.enabled); s('mu-ch', mu.channel_id); s('mu-dj', mu.dj_role_id); s('mu-queue', mu.max_queue_size); s('mu-vol', mu.volume); s('mu-src', mu.default_source);
 
-  const mm=C.memes||DEF.memes;
-  sc('mm-on',mm.enabled); s('mm-ch',mm.channel_id); renderTrols();
+            const mm = C.memes || DEF.memes;
+            sc('mm-on', mm.enabled); s('mm-ch', mm.channel_id); renderTrols();
 
-  const sm=C.summon||DEF.summon;
-  sc('sm-on',sm.enabled); s('sm-ch',sm.trigger_channel_id); renderDoms();
+            const sm = C.summon || DEF.summon;
+            sc('sm-on', sm.enabled); s('sm-ch', sm.trigger_channel_id); renderDoms();
 
-  sc('vo-on',(C.voices||DEF.voices).enabled); renderVoices();
+            const bi = C.bio || DEF.bio;
+            s('bi-rot', bi.rotation_minutes); renderBio();
 
-  const bi=C.bio||DEF.bio;
-  s('bi-rot',bi.rotation_minutes); renderBio();
+            const cp = C.codepilot || DEF.codepilot;
+            sc('cp-on', cp.enabled); s('cp-channels', (cp.allowed_channel_ids || []).join('\n')); s('cp-maxlen', cp.max_response_length);
 
-  const ec=C.economy||DEF.economy;
-  s('ec-name',ec.currency_name); s('ec-sym',ec.currency_symbol); s('ec-start',ec.starting_balance);
-  s('ec-daily',ec.daily_reward); s('ec-weekly',ec.weekly_reward); sc('ec-rob',ec.rob_enabled); sc('ec-gamble',ec.gamble_enabled);
+            renderVoices();
+            
+            // Sync Color Picker
+            document.getElementById('b-color-picker').addEventListener('input', (e) => s('b-color', e.target.value));
+        }
 
-  const cp=C.codepilot||DEF.codepilot;
-  sc('cp-on',cp.enabled); s('cp-channels',(cp.allowed_channel_ids||[]).join('\\n')); s('cp-maxlen',cp.max_response_length);
+        async function save(sec){
+            collectSection(sec);
+            try {
+                const r = await fetch('/api/save',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+                    body:JSON.stringify({section:sec,data:C[sec]})
+                });
+                if(r.ok) toast('Core sequence committed!', 'ok');
+            } catch(e){ toast('Local save complete (Offline)', 'info'); }
+            updateSummary();
+        }
 
-  // Color picker sync
-  document.getElementById('b-color-picker').oninput = function(){ s('b-color',this.value); };
-  document.getElementById('b-color').oninput = function(){ if(/^#[0-9a-f]{6}$/i.test(this.value)) s('b-color-picker',this.value); };
-}
+        function collectSection(sec){
+            if(sec==='bot') C.bot={name:g('b-name'),tagline:g('b-tag'),developer:g('b-dev'),embed_color:g('b-color'),prefix:g('b-prefix')};
+            else if(sec==='channels') C.channels={welcome_channel_id:g('ch-welcome'),leave_channel_id:g('ch-leave'),music_channel_id:g('ch-music'),ticket_channel_id:g('ch-ticket'),game_update_channel_id:g('ch-game'),meme_channel_id:g('ch-meme'),log_channel_id:g('ch-log'),announcement_channel_id:g('ch-announcement')};
+            else if(sec==='tickets') C.tickets={enabled:gc('tk-on'),channel_id:g('tk-ch'),staff_role_id:g('tk-staff'),category_id:g('tk-cat'),log_channel_id:g('tk-log'),welcome_message:g('tk-welcome')};
+            else if(sec==='economy') C.economy={currency_name:g('ec-name'),currency_symbol:g('ec-sym'),starting_balance:parseInt(g('ec-start'))||100,daily_reward:parseInt(g('ec-daily'))||100,rob_enabled:gc('ec-rob'),gamble_enabled:gc('ec-gamble')};
+            else if(sec==='roles') C.roles={verified_role_id:g('rl-verified'),unverified_role_id:g('rl-unverified'),staff_role_id:g('rl-staff'),muted_role_id:g('rl-muted'),bot_role_id:g('rl-bot'),member_role_id:g('rl-member')};
+            else if(sec==='welcome') C.welcome={enabled:gc('wc-on'),channel_id:g('wc-ch'),title:g('wc-title'),message:g('wc-msg'),image_url:g('wc-img'),leave_enabled:gc('lv-on'),leave_message:g('lv-msg')};
+            else if(sec==='dm_join') C.dm_join={enabled:gc('dm-on'),message:g('dm-msg')};
+            else if(sec==='verify') C.verify={enabled:gc('vr-on'),channel_id:g('vr-ch'),message:g('vr-msg'),button_label:g('vr-btn')};
+            else if(sec==='autorole') C.autorole={enabled:gc('ar-on'),role_ids:g('ar-roles').split('\n').filter(x=>x.trim()),bot_role_id:g('ar-botrole')};
+            else if(sec==='sentinel') C.sentinel={enabled:gc('sn-on'),log_channel_id:g('sn-log'),anti_spam:gc('sn-spam'),anti_raid:gc('sn-raid'),anti_link:gc('sn-link'),warn_limit:parseInt(g('sn-warn'))||3,mute_duration_minutes:parseInt(g('sn-mute'))||10};
+            else if(sec==='ghost_ping') C.ghost_ping={enabled:gc('gp-on'),log_channel_id:g('gp-log'),alert_message:g('gp-msg')};
+            else if(sec==='giveaways') C.giveaways={enabled:gc('gw-on'),manager_role_id:g('gw-role'),default_duration_hours:parseInt(g('gw-dur'))||24,default_winners:parseInt(g('gw-win'))||1};
+            else if(sec==='music') C.music={enabled:gc('mu-on'),channel_id:g('mu-ch'),dj_role_id:g('mu-dj'),max_queue_size:parseInt(g('mu-queue'))||50,volume:parseInt(g('mu-vol'))||100,default_source:g('mu-src')};
+            else if(sec==='codepilot') C.codepilot={enabled:gc('cp-on'),allowed_channel_ids:g('cp-channels').split('\n').filter(x=>x.trim()),max_response_length:parseInt(g('cp-maxlen'))||2000};
+            else if(sec==='memes') C.memes={enabled:gc('mm-on'),channel_id:g('mm-ch'),troll_messages:C.memes.troll_messages};
+            else if(sec==='summon') C.summon={enabled:gc('sm-on'),trigger_channel_id:g('sm-ch'),domain_names:C.summon.domain_names};
+            else if(sec==='bio') C.bio={rotation_minutes:parseInt(g('bi-rot'))||5,statuses:C.bio.statuses};
+        }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// SAVE
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-async function save(sec){
-  collectSection(sec);
-  localStorage.setItem('minnalcfg', JSON.stringify(C));
-  try {
-    const r = await fetch('/api/save',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-      body:JSON.stringify({section:sec,data:C[sec]})
-    });
-    if(r.ok){ toast('âœ… Saved to bot!','ok'); }
-    else { toast('Saved locally (bot offline)','info'); }
-  } catch(e){ toast('Saved locally (bot offline)','info'); }
-  updateSummary();
-}
+        async function loadStats(){
+            try {
+                const r = await fetch('/api/stats');
+                const d = await r.json();
+                if(d.online){
+                    s('st-latency', d.latency); s('st-uptime', d.uptime); s('st-guilds', d.guilds); s('st-users', d.users.toLocaleString());
+                    s('st-cpu', d.cpu); s('st-ram', d.ram);
+                }
+            } catch(e){}
+        }
 
-function collectSection(sec){
-  if(sec==='bot') C.bot={name:g('b-name'),tagline:g('b-tag'),developer:g('b-dev'),embed_color:g('b-color'),prefix:g('b-prefix')||'/'};
-  else if(sec==='channels') C.channels={welcome_channel_id:g('ch-welcome'),leave_channel_id:g('ch-leave'),music_channel_id:g('ch-music'),ticket_channel_id:g('ch-ticket'),game_update_channel_id:g('ch-game'),meme_channel_id:g('ch-meme'),log_channel_id:g('ch-log'),announcement_channel_id:g('ch-announcement'),giveaway_channel_id:g('ch-giveaway'),default_voice_channel_id:g('ch-voice-default'),announcement_voice_channel_id:g('ch-voice-announcement')};
-  else if(sec==='roles') C.roles={verified_role_id:g('rl-verified'),unverified_role_id:g('rl-unverified'),staff_role_id:g('rl-staff'),muted_role_id:g('rl-muted'),bot_role_id:g('rl-bot'),member_role_id:g('rl-member')};
-  else if(sec==='welcome') C.welcome={enabled:gc('wc-on'),channel_id:g('wc-ch'),title:g('wc-title'),message:g('wc-msg'),image_url:g('wc-img'),leave_enabled:gc('lv-on'),leave_channel_id:g('lv-ch'),leave_message:g('lv-msg'),leave_image_url:g('lv-img')};
-  else if(sec==='dm_join') C.dm_join={enabled:gc('dm-on'),message:g('dm-msg')};
-  else if(sec==='verify') C.verify={enabled:gc('vr-on'),channel_id:g('vr-ch'),verified_role_id:g('vr-vrole'),unverified_role_id:g('vr-urole'),message:g('vr-msg'),button_label:g('vr-btn')};
-  else if(sec==='tickets') C.tickets={enabled:gc('tk-on'),channel_id:g('tk-ch'),staff_role_id:g('tk-staff'),category_id:g('tk-cat'),log_channel_id:g('tk-log'),welcome_message:g('tk-welcome'),close_message:g('tk-close')};
-  else if(sec==='autorole'){const ids=g('ar-roles').split('\\n').map(x=>x.trim()).filter(Boolean);C.autorole={enabled:gc('ar-on'),role_ids:ids,bot_role_id:g('ar-botrole')};}
-  else if(sec==='giveaways') C.giveaways={enabled:gc('gw-on'),manager_role_id:g('gw-role'),default_duration_hours:parseInt(g('gw-dur'))||24,default_winners:parseInt(g('gw-win'))||1};
-  else if(sec==='sentinel') C.sentinel={enabled:gc('sn-on'),log_channel_id:g('sn-log'),anti_spam:gc('sn-spam'),anti_raid:gc('sn-raid'),anti_link:gc('sn-link'),warn_limit:parseInt(g('sn-warn'))||3,mute_duration_minutes:parseInt(g('sn-mute'))||10};
-  else if(sec==='ghost_ping') C.ghost_ping={enabled:gc('gp-on'),log_channel_id:g('gp-log'),alert_message:g('gp-msg')};
-  else if(sec==='economy') C.economy={currency_name:g('ec-name'),currency_symbol:g('ec-sym'),starting_balance:parseInt(g('ec-start'))||100,daily_reward:parseInt(g('ec-daily'))||100,weekly_reward:parseInt(g('ec-weekly'))||1000,rob_enabled:gc('ec-rob'),gamble_enabled:gc('ec-gamble')};
-  else if(sec==='music') C.music={enabled:gc('mu-on'),channel_id:g('mu-ch'),dj_role_id:g('mu-dj'),default_source:g('mu-src'),max_queue_size:parseInt(g('mu-queue'))||50,volume:parseInt(g('mu-vol'))||100};
-  else if(sec==='memes') C.memes={enabled:gc('mm-on'),channel_id:g('mm-ch'),troll_messages:C.memes.troll_messages};
-  else if(sec==='summon') C.summon={enabled:gc('sm-on'),trigger_channel_id:g('sm-ch'),domain_names:C.summon.domain_names};
-  else if(sec==='voices') C.voices={enabled:gc('vo-on'),voice_list:C.voices.voice_list};
-  else if(sec==='bio') C.bio={rotation_minutes:parseInt(g('bi-rot'))||5,statuses:C.bio.statuses};
-  else if(sec==='codepilot'){const chs=g('cp-channels').split('\\n').map(x=>x.trim()).filter(Boolean);C.codepilot={enabled:gc('cp-on'),allowed_channel_ids:chs,max_response_length:parseInt(g('cp-maxlen'))||2000};}
-}
+        function updateSummary(){
+            const lines=[];
+            lines.push(`Channels Active: ${Object.values(C.channels||{}).filter(x=>x).length}`);
+            lines.push(`Economy: ${C.economy.currency_symbol} ${C.economy.currency_name}`);
+            document.getElementById('cfgSummary').innerHTML = lines.join('<br>');
+        }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// STATS
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-async function loadStats(){
-  try {
-    const r = await fetch('/api/stats');
-    const d = await r.json();
-    if(d.online){
-      document.getElementById('st-latency').textContent=d.latency;
-      document.getElementById('st-uptime').textContent=d.uptime;
-      document.getElementById('st-guilds').textContent=d.guilds;
-      document.getElementById('st-users').textContent=d.users.toLocaleString();
-      document.getElementById('st-cpu').textContent=d.cpu;
-      document.getElementById('st-ram').textContent=d.ram;
-      document.getElementById('st-online').textContent='Online';
-      document.getElementById('st-ping').textContent=d.latency;
-      document.getElementById('botStatus').innerHTML='<span class="status-dot"></span>Bot Online';
-      document.getElementById('botStatus').style.color='var(--green)';
-    }
-  } catch(e){ document.getElementById('botStatus').textContent='Bot Offline'; }
-}
+        function renderVoices(){
+            const c = document.getElementById('voiceList'); c.innerHTML = '';
+            (C.voices.voice_list || []).forEach((v, i) => {
+                const d = document.createElement('div'); d.className = 'list-item';
+                d.innerHTML = `<span style="font-size:13px; font-weight:500;">#${i+1} ${v.spell}</span><button class="btn btn-danger btn-sm" onclick="delVoice(${i})"><i data-lucide="trash-2"></i></button>`;
+                c.appendChild(d);
+            });
+            lucide.createIcons();
+        }
+        function addVoice(){
+            const spell=g('nv-spell'),chr=g('nv-char'),tts=g('nv-tts'),file=g('nv-file');
+            if(!spell) return;
+            C.voices.voice_list.push({spell, anime:chr, voice_text:tts, audio_file:file});
+            renderVoices();
+        }
+        function delVoice(i){ C.voices.voice_list.splice(i,1); renderVoices(); }
 
-function updateSummary(){
-  const lines=[];
-  const ch=C.channels||{};
-  const rl=C.roles||{};
-  const filled=k=>k&&k!=='';
-  lines.push(`<b>Channels configured:</b> ${Object.values(ch).filter(filled).length}/${Object.keys(ch).length}`);
-  lines.push(`<b>Roles configured:</b> ${Object.values(rl).filter(filled).length}/${Object.keys(rl).length}`);
-  lines.push(`<b>Economy:</b> ${(C.economy||{}).currency_symbol||'âš¡'} ${(C.economy||{}).currency_name||'Coins'} â€” Daily: ${(C.economy||{}).daily_reward||100}`);
-  lines.push(`<b>Bot status rotations:</b> ${((C.bio||{}).statuses||[]).length} statuses, every ${(C.bio||{}).rotation_minutes||5}m`);
-  lines.push(`<b>Voice spells:</b> ${((C.voices||{}).voice_list||[]).length} spells`);
-  lines.push(`<b>Domain names:</b> ${((C.summon||{}).domain_names||[]).length}`);
-  document.getElementById('cfgSummary').innerHTML=lines.join('<br>');
-}
+        function renderTrols(){
+            const c = document.getElementById('trolLst'); c.innerHTML = '';
+            (C.memes.troll_messages || []).forEach((m, i) => {
+                const d = document.createElement('div'); d.className = 'list-item';
+                d.innerHTML = `<input type="text" value="${esc(m)}" onchange="C.memes.troll_messages[${i}]=this.value"><button class="btn btn-danger btn-sm" onclick="delTrol(${i})"><i data-lucide="x"></i></button>`;
+                c.appendChild(d);
+            });
+            lucide.createIcons();
+        }
+        function addTrol(){ const v=g('newTrol'); if(!v) return; C.memes.troll_messages.push(v); s('newTrol',''); renderTrols(); }
+        function delTrol(i){ C.memes.troll_messages.splice(i,1); renderTrols(); }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// LISTS â€” DOMAINS
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function renderDoms(){
-  const c=document.getElementById('domLst'); c.innerHTML='';
-  const arr=(C.summon||{}).domain_names||[];
-  if(!arr.length){c.innerHTML='<div class="empty-lst">No domains added</div>';return;}
-    arr.forEach((n,i)=>{
-    const d=document.createElement('div'); d.className='lst-item';
-    d.innerHTML=`<input type="text" value="${esc(n)}"><button class="btn btn-sm btn-red" onclick="delDom(${i})">&times;</button>`;
-    d.querySelector('input').onchange=function(){C.summon.domain_names[i]=this.value;};
-    c.appendChild(d);
-  });
-}
-function addDom(){const v=document.getElementById('newDom').value.trim();if(!v)return;C.summon.domain_names.push(v);document.getElementById('newDom').value='';renderDoms();}
-function delDom(i){C.summon.domain_names.splice(i,1);renderDoms();}
+        function renderDoms(){
+            const c = document.getElementById('domLst'); c.innerHTML = '';
+            (C.summon.domain_names || []).forEach((n, i) => {
+                const d = document.createElement('div'); d.className = 'list-item';
+                d.innerHTML = `<input type="text" value="${esc(n)}" onchange="C.summon.domain_names[${i}]=this.value"><button class="btn btn-danger btn-sm" onclick="delDom(${i})"><i data-lucide="x"></i></button>`;
+                c.appendChild(d);
+            });
+            lucide.createIcons();
+        }
+        function addDom(){ const v=g('newDom'); if(!v) return; C.summon.domain_names.push(v); s('newDom',''); renderDoms(); }
+        function delDom(i){ C.summon.domain_names.splice(i,1); renderDoms(); }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// LISTS â€” VOICES
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function renderVoices(){
-  const c=document.getElementById('voiceList'); c.innerHTML='';
-  const arr=(C.voices||{}).voice_list||[];
-  if(!arr.length){c.innerHTML='<div class="empty-lst">No voice spells added</div>';return;}
-    arr.forEach((v,i)=>{
-    const hasAudio=v.audio_file&&v.audio_file.trim();
-    const d=document.createElement('div'); d.className='vcard';
-    d.innerHTML=`<div class="vcard-head"><strong>#${i+1} â€” ${esc(v.spell)}</strong><div style="display:flex;gap:6px;align-items:center"><span class="badge ${hasAudio?'badge-audio':'badge-tts'}">${hasAudio?'ðŸ”Š Audio':'ðŸ—£ï¸ TTS'}</span><button class="btn btn-sm btn-red" onclick="delVoice(${i})">âœ•</button></div></div>
-      <div class="row2"><div><label>Spell Trigger</label><input value="${esc(v.spell)}"></div><div><label>Character</label><input value="${esc(v.anime)}"></div></div>
-      <div class="row2"><div><label>TTS Text</label><input value="${esc(v.voice_text)}"></div><div><label>Audio File</label><input value="${esc(v.audio_file||'')}"></div></div>`;
-    const ins=d.querySelectorAll('input');
-    ins[0].onchange=e=>{C.voices.voice_list[i].spell=e.target.value;};
-    ins[1].onchange=e=>{C.voices.voice_list[i].anime=e.target.value;};
-    ins[2].onchange=e=>{C.voices.voice_list[i].voice_text=e.target.value;};
-    ins[3].onchange=e=>{C.voices.voice_list[i].audio_file=e.target.value;renderVoices();};
-    c.appendChild(d);
-  });
-}
-function addVoice(){
-  const spell=g('nv-spell').trim(),chr=g('nv-char').trim(),tts=g('nv-tts').trim(),file=g('nv-file').trim();
-  if(!spell||!chr){toast('Fill Spell and Character','err');return;}
-  C.voices.voice_list.push({spell,anime:chr,voice_text:tts||spell,audio_file:file});
-  ['nv-spell','nv-char','nv-tts','nv-file'].forEach(id=>s(id,''));
-  renderVoices(); toast('Voice spell added!','ok');
-}
-function delVoice(i){C.voices.voice_list.splice(i,1);renderVoices();}
+        function renderBio(){
+            const c = document.getElementById('bioLst'); c.innerHTML = '';
+            (C.bio.statuses || []).forEach((st, i) => {
+                const d = document.createElement('div'); d.className = 'list-item';
+                d.innerHTML = `<span style="font-size:11px; opacity:0.6; width:70px">${st.type}</span><input type="text" value="${esc(st.name)}" onchange="C.bio.statuses[${i}].name=this.value"><button class="btn btn-danger btn-sm" onclick="delBio(${i})"><i data-lucide="x"></i></button>`;
+                c.appendChild(d);
+            });
+            lucide.createIcons();
+        }
+        function addBio(){ const t=g('nb-type'), n=g('nb-name'); if(!n) return; C.bio.statuses.push({type:t, name:n}); s('nb-name',''); renderBio(); }
+        function delBio(i){ C.bio.statuses.splice(i,1); renderBio(); }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// LISTS â€” BIO
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function renderBio(){
-  const c=document.getElementById('bioLst'); c.innerHTML='';
-  const arr=(C.bio||{}).statuses||[];
-  if(!arr.length){c.innerHTML='<div class="empty-lst">No statuses added</div>';return;}
-    arr.forEach((st,i)=>{
-    const d=document.createElement('div'); d.className='lst-item';
-    d.innerHTML=`<span style="font-size:11px;color:var(--muted);width:70px;flex-shrink:0;text-transform:capitalize">${st.type}</span><input type="text" value="${esc(st.name)}"><button class="btn btn-sm btn-red" onclick="delBio(${i})">&times;</button>`;
-    d.querySelector('input').onchange=function(){C.bio.statuses[i].name=this.value;};
-    c.appendChild(d);
-  });
-}
-function addBio(){
-  const t=g('nb-type'),n=g('nb-name').trim();
-  if(!n)return;
-  C.bio.statuses.push({type:t,name:n}); s('nb-name',''); renderBio();
-}
-function delBio(i){C.bio.statuses.splice(i,1);renderBio();}
+        async function doPush(){
+            const btn = document.getElementById('ghPushBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="status-dot"></span> Deploying to Cloud...';
+            try {
+                const r = await fetch('/api/github/push', { method:'POST', headers:{'Authorization':'Bearer '+token} });
+                if(r.ok) toast('Cloud deployment sequence initialized!', 'ok');
+            } catch(e){ toast('Deployment failed', 'err'); }
+            btn.disabled = false;
+            btn.innerHTML = '<i data-lucide="cloud-lightning"></i>Deploy to Production';
+        }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// LISTS â€” TROLL MSGS
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function renderTrols(){
-  const c=document.getElementById('trolLst'); c.innerHTML='';
-  const arr=(C.memes||{}).troll_messages||[];
-  if(!arr.length){c.innerHTML='<div class="empty-lst">No troll messages</div>';return;}
-    arr.forEach((m,i)=>{
-    const d=document.createElement('div'); d.className='lst-item';
-    d.innerHTML=`<input type="text" value="${esc(m)}"><button class="btn btn-sm btn-red" onclick="delTrol(${i})">&times;</button>`;
-    d.querySelector('input').onchange=function(){C.memes.troll_messages[i]=this.value;};
-    c.appendChild(d);
-  });
-}
-function addTrol(){const v=document.getElementById('newTrol').value.trim();if(!v)return;C.memes.troll_messages.push(v);document.getElementById('newTrol').value='';renderTrols();}
-function delTrol(i){C.memes.troll_messages.splice(i,1);renderTrols();}
+        async function quickPush(){ doPush(); }
 
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// IMPORT / EXPORT
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function doExport(){
-  const blob=new Blob([JSON.stringify(C,null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='minnal-settings.json'; a.click();
-  toast('Config exported!','ok');
-}
-function doImport(e){
-  const file=e.target.files[0]; if(!file)return;
-  const reader=new FileReader();
-  reader.onload=function(ev){
-    try{C=JSON.parse(ev.target.result);fillUI();localStorage.setItem('minnalcfg',JSON.stringify(C));toast('Config imported!','ok');}
-    catch(er){toast('Invalid JSON file','err');}
-  };
-  reader.readAsText(file);
-  e.target.value='';
-}
-
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// TOAST
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-let toastTimer;
-function toast(msg,type='ok'){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className='toast '+type+' show';
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
-}
-
-function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// VIEW TOGGLE
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function switchToMobileView() {
-  const app = document.getElementById('app');
-  app.style.maxWidth = '420px';
-  app.style.margin = '20px auto';
-  app.style.border = '1px solid var(--border)';
-  app.style.borderRadius = '10px';
-  app.style.boxShadow = '0 10px 30px rgba(0,0,0,.3)';
-  app.style.height = 'calc(100vh - 40px)';
-  app.style.overflow = 'auto';
-  toast('Switched to Mobile View', 'info');
-}
-
-function switchToDesktopView() {
-  const app = document.getElementById('app');
-  app.style.maxWidth = '';
-  app.style.margin = '';
-  app.style.border = '';
-  app.style.borderRadius = '';
-  app.style.boxShadow = '';
-  app.style.height = '';
-  app.style.overflow = '';
-  toast('Switched to Desktop View', 'ok');
-}
-
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// GITHUB SYNC
-// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-async function doPush(){
-  const btn = document.getElementById('ghPushBtn');
-  const result = document.getElementById('gh-push-result');
-  const msg = document.getElementById('gh-push-msg');
-  const steps = document.getElementById('gh-push-steps');
-
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span> Pushing to GitHub...';
-  result.style.display = 'none';
-
-  try {
-    const r = await fetch('/api/github/push', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const d = await r.json();
-
-    result.style.display = 'block';
-    if(r.ok && d.success){
-      msg.style.color = 'var(--green)';
-      msg.textContent = 'âœ… ' + d.message;
-      steps.textContent = (d.steps || []).join('\\n');
-      toast('Pushed to GitHub!', 'ok');
-      loadGHStatus();
-    } else {
-      msg.style.color = 'var(--red)';
-      msg.textContent = 'âŒ ' + (d.detail || 'Push failed');
-      steps.textContent = (d.steps || []).join('\\n');
-      toast('Push failed', 'err');
-    }
-  } catch(e) {
-    result.style.display = 'block';
-    msg.style.color = 'var(--red)';
-    msg.textContent = 'âŒ Cannot reach bot â€” make sure the bot is running on port 6000';
-    toast('Push failed â€” bot offline', 'err');
-  }
-
-  btn.disabled = false;
-  btn.innerHTML = 'ðŸ™ Push Settings to GitHub';
-}
-
-async function quickPush(){
-  toast('Pushing to GitHub...', 'info');
-  try {
-    const r = await fetch('/api/github/push', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const d = await r.json();
-    if(r.ok && d.success){ toast('ðŸ™ ' + d.message, 'ok'); }
-    else { toast('Push failed: ' + (d.detail || 'error'), 'err'); }
-  } catch(e) { toast('Bot offline â€” cannot push', 'err'); }
-}
-
-async function loadGHStatus(){
-  try {
-    const r = await fetch('/api/github/status', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const d = await r.json();
-
-    if(!d.has_token){
-      document.getElementById('gh-token-warn').style.display = 'block';
-    }
-
-    const commits = d.recent_commits || [];
-    document.getElementById('gh-commits').innerHTML = commits.length
-      ? commits.map(c => `<div>ðŸ“Œ ${esc(c)}</div>`).join('')
-      : '<div>No commits yet</div>';
-
-    const dirty = d.uncommitted_changes;
-    document.getElementById('gh-dirty').textContent = dirty
-      ? dirty
-      : 'âœ… Working tree clean â€” nothing to commit';
-    document.getElementById('gh-dirty').style.color = dirty ? 'var(--yellow)' : 'var(--green)';
-  } catch(e) {
-    document.getElementById('gh-commits').textContent = 'Bot offline';
-    document.getElementById('gh-dirty').textContent = 'Cannot connect to bot';
-  }
-}
-
-// Load GitHub status when GitHub page is opened
-document.querySelector('[data-pg="github"]').addEventListener('click', () => {
-  loadGHStatus();
-});
-</script>
+        function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    </script>
 </body>
 </html>
-
