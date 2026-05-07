@@ -128,6 +128,21 @@ class TicketModal(discord.ui.Modal):
         user   = interaction.user
         cat    = self.category
 
+        if not isinstance(interaction.channel, (discord.TextChannel, discord.ForumChannel)):
+            return await interaction.followup.send(
+                "❌ Tickets can only be opened from a regular text channel or forum.",
+                ephemeral=True
+            )
+
+        # ── Duplicate Ticket Check ──
+        # Check for existing open threads in this channel for this user
+        existing = discord.utils.get(interaction.channel.threads, name=f"🎫 {user.name} — {cat}", archived=False)
+        if existing:
+            return await interaction.followup.send(
+                f"❌ You already have an open ticket in this category: {existing.mention}",
+                ephemeral=True
+            )
+
         try:
             # Create private thread from the ticket channel
             thread = await interaction.channel.create_thread(
@@ -172,6 +187,18 @@ class TicketModal(discord.ui.Modal):
         # Ping staff roles
         staff_mentions = " ".join(f"<@&{r}>" for r in STAFF_ROLE_IDS)
         await thread.send(content=staff_mentions, embed=embed, view=TicketControlView())
+
+        # ── Logging ──
+        if TICKET_LOG_ID:
+            log_chan = guild.get_channel(TICKET_LOG_ID)
+            if log_chan:
+                log_embed = discord.Embed(
+                    title="🎫 Ticket Opened",
+                    description=f"**User:** {user.mention} ({user.id})\n**Category:** {cat}\n**Thread:** {thread.mention}",
+                    color=OPEN_COLOR,
+                    timestamp=datetime.now(timezone.utc)
+                )
+                await log_chan.send(embed=log_embed)
 
         # ── Confirm to user ──
         done = discord.Embed(
@@ -231,6 +258,20 @@ class ConfirmCloseView(discord.ui.View):
     @discord.ui.button(label="Yes, Close it", style=discord.ButtonStyle.danger, emoji="🔒")
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer()
+        
+        # ── Logging ──
+        if TICKET_LOG_ID:
+            guild = interaction.guild
+            log_chan = guild.get_channel(TICKET_LOG_ID)
+            if log_chan:
+                log_embed = discord.Embed(
+                    title="🔒 Ticket Closed",
+                    description=f"**Thread:** {interaction.channel.name}\n**Closed by:** {interaction.user.mention} ({interaction.user.id})",
+                    color=CLOSE_COLOR,
+                    timestamp=datetime.now(timezone.utc)
+                )
+                await log_chan.send(embed=log_embed)
+
         closing = discord.Embed(
             title="🔒 Ticket Closed",
             description=f"Closed by **{interaction.user.mention}**. Deleting in 5 seconds…",
@@ -299,6 +340,28 @@ class MinnalTickets(commands.Cog):
         embed = build_panel_embed(interaction.guild)
         await interaction.channel.send(embed=embed, view=CategoryView())
         await interaction.response.send_message("✅ Ticket panel posted!", ephemeral=True)
+
+    @ticket.command(name="setup", description="Configure the ticket system settings")
+    @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.describe(staff_role="The role that handles tickets", log_channel="Channel for ticket logs")
+    async def setup(self, interaction: discord.Interaction, staff_role: discord.Role = None, log_channel: discord.TextChannel = None):
+        global STAFF_ROLE_IDS, TICKET_LOG_ID
+        
+        if not staff_role and not log_channel:
+            return await interaction.response.send_message("❌ Please provide at least one setting to update.", ephemeral=True)
+            
+        if staff_role:
+            if staff_role.id not in STAFF_ROLE_IDS:
+                STAFF_ROLE_IDS.append(staff_role.id)
+            msg = f"✅ Added {staff_role.mention} to staff roles."
+        else:
+            msg = "✅ Updated settings."
+            
+        if log_channel:
+            TICKET_LOG_ID = log_channel.id
+            msg += f"\n✅ Ticket logs will now be sent to {log_channel.mention}."
+            
+        await interaction.response.send_message(msg, ephemeral=True)
 
     @ticket.command(name="add", description="Add a user to the current ticket thread")
     @app_commands.describe(user="User to add")
