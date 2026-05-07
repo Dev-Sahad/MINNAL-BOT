@@ -747,8 +747,8 @@ async function tryLogin(){
   if(!pwd){ err.textContent=\'Enter password\'; return; }
   if(pwd !== PWD){ err.textContent=\'Wrong password\'; return; }
   token = pwd;
-  document.getElementById(\'loginPage\').style.display=\'none\';
-  document.getElementById(\'app\').style.display=\'flex\';
+  document.getElementById(\'loginPage\').style.display = \'none\';
+  document.getElementById(\'app\').style.display = \'flex\';
   await loadConfig();
   loadStats();
   setInterval(loadStats, 15000);
