@@ -156,10 +156,13 @@ async def on_ready():
     # Wire up global interaction check
     bot.tree.interaction_check = global_interaction_check
 
-    if all([CategoryView, TicketControlView, ConfirmCloseView, MinnalVerifyView]):
+    if CategoryView:
         bot.add_view(CategoryView())
+    if TicketControlView:
         bot.add_view(TicketControlView())
+    if ConfirmCloseView:
         bot.add_view(ConfirmCloseView())
+    if MinnalVerifyView:
         bot.add_view(MinnalVerifyView())
 
     try:

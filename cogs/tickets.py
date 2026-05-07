@@ -13,9 +13,14 @@ import asyncio
 
 # ── Config ─────────────────────────────────────────────────────────────────
 import config
+from config_manager import get_setting, set_setting
 
-STAFF_ROLE_IDS  = [config.STAFF_ROLE_ID, 1477254538313470096, 1499490549621850184]   # Use config + defaults
-TICKET_LOG_ID   = getattr(config, 'TICKET_LOG_ID', 0)    # Fallback to 0 if not defined
+# Load settings from config_manager
+STAFF_ROLE_IDS = get_setting('tickets.staff_role_ids', [config.STAFF_ROLE_ID, 1477254538313470096, 1499490549621850184])
+try:
+    TICKET_LOG_ID = int(get_setting('tickets.log_channel_id', getattr(config, 'TICKET_LOG_ID', 0)))
+except (ValueError, TypeError):
+    TICKET_LOG_ID = 0
 
 BRAND_COLOR  = 0x5865F2   # Discord blurple
 OPEN_COLOR   = 0x57F287   # green
@@ -361,12 +366,14 @@ class MinnalTickets(commands.Cog):
         if staff_role:
             if staff_role.id not in STAFF_ROLE_IDS:
                 STAFF_ROLE_IDS.append(staff_role.id)
+                set_setting('tickets.staff_role_ids', STAFF_ROLE_IDS)
             msg = f"✅ Added {staff_role.mention} to staff roles."
         else:
             msg = "✅ Updated settings."
             
         if log_channel:
             TICKET_LOG_ID = log_channel.id
+            set_setting('tickets.log_channel_id', TICKET_LOG_ID)
             msg += f"\n✅ Ticket logs will now be sent to {log_channel.mention}."
             
         await interaction.response.send_message(msg, ephemeral=True)

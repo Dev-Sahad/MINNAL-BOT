@@ -149,6 +149,12 @@ class ConfigManager:
                 "leaderboard_size": 10
             },
             
+            # Ticket System
+            "tickets": {
+                "staff_role_ids": [1477254538313470096, 1499490549621850184],
+                "log_channel_id": 1500510668418191510
+            },
+            
             # Game Updates
             "game_updates": {
                 "enabled": True,
