@@ -8,6 +8,8 @@ from discord.ext import commands
 from datetime import datetime
 import config
 import asyncio
+import json
+import os
 
 # Check if is_admin check exists, otherwise we define a simple version
 try:
@@ -39,6 +41,17 @@ class AdminPanelView(ui.View):
         super().__init__(timeout=None)
         self.guild_id = guild_id
 
+    def load_settings(self, key: str):
+        config_file = "data/settings.json"
+        try:
+            if os.path.exists(config_file):
+                with open(config_file, 'r', encoding='utf-8') as f:
+                    full_config = json.load(f)
+                    return full_config.get(key, {})
+        except Exception as e:
+            print(f"⚠️ Config Load Error: {e}")
+        return {}
+
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         if interaction.user.id in config.DEVELOPER_IDS: return True
         guild = interaction.guild or interaction.client.get_guild(self.guild_id)
@@ -60,18 +73,30 @@ class AdminPanelView(ui.View):
     # ── Row 1: Core Channel Setup ──
     @ui.button(label="👋 Welcome Ch", style=discord.ButtonStyle.secondary, row=1)
     async def set_welcome(self, interaction: discord.Interaction, button: ui.Button):
-        await interaction.response.send_message("Use `/welcome #channel` to update permanently.", ephemeral=True)
+        await interaction.response.send_message("Use `/setchannel welcome #channel` to update permanently.", ephemeral=True)
 
     @ui.button(label="🎮 Game Ch", style=discord.ButtonStyle.secondary, row=1)
     async def set_game(self, interaction: discord.Interaction, button: ui.Button):
-        await interaction.response.send_message("Use `/gamechannel #channel` to update permanently.", ephemeral=True)
+        await interaction.response.send_message("Use `/setchannel game #channel` to update permanently.", ephemeral=True)
+        
+    @ui.button(label="🎫 Ticket Ch", style=discord.ButtonStyle.secondary, row=1)
+    async def set_ticket(self, interaction: discord.Interaction, button: ui.Button):
+        await interaction.response.send_message("Use `/setchannel ticket #channel` to update permanently.", ephemeral=True)
+
 
     # ── Row 2: MINNAL Security Deployment ──
     @ui.button(label="⚡ Deploy Verify", style=discord.ButtonStyle.success, row=2, emoji="🛡️")
     async def deploy_verify(self, interaction: discord.Interaction, button: ui.Button):
         guild = interaction.guild or interaction.client.get_guild(self.guild_id)
-        channel = guild.get_channel(config.WELCOME_CHANNEL_ID)
-        if not channel: return await interaction.response.send_message("❌ Welcome channel not set.", ephemeral=True)
+        
+        channels_conf = self.load_settings('channels')
+        channel_id = channels_conf.get('welcome_channel_id')
+        
+        if not channel_id:
+             return await interaction.response.send_message("❌ Welcome channel not set.", ephemeral=True)
+        
+        channel = guild.get_channel(int(channel_id))
+        if not channel: return await interaction.response.send_message(f"❌ Welcome channel with ID `{channel_id}` not found.", ephemeral=True)
         
         from cogs.verify import VerifyView
         embed = discord.Embed(title="` 💠 ` **IDENTITY VERIFICATION**", description="Click below to gain access.", color=0x2f3136)
@@ -81,18 +106,37 @@ class AdminPanelView(ui.View):
     @ui.button(label="🎫 Deploy Tickets", style=discord.ButtonStyle.primary, row=2, emoji="🎫")
     async def deploy_tickets(self, interaction: discord.Interaction, button: ui.Button):
         guild = interaction.guild or interaction.client.get_guild(self.guild_id)
-        channel = guild.get_channel(getattr(config, 'TICKET_CHANNEL_ID', config.WELCOME_CHANNEL_ID))
+
+        channels_conf = self.load_settings('channels')
+        channel_id = channels_conf.get('ticket_channel_id')
+
+        if not channel_id:
+            return await interaction.response.send_message("❌ Ticket channel not set in settings. Use `/setchannel ticket #channel`.", ephemeral=True)
+
+        channel = guild.get_channel(int(channel_id))
+        if not channel:
+            return await interaction.response.send_message(f"❌ Could not find ticket channel with ID `{channel_id}`.", ephemeral=True)
         
-        from cogs.tickets import TicketStarter
-        embed = discord.Embed(title="🎫 **SUPPORT CENTER**", description="Click to open a private ticket.", color=0x2f3136)
-        await channel.send(embed=embed, view=TicketStarter())
+        from cogs.tickets import CategoryView, build_panel_embed
+        embed = build_panel_embed(guild)
+        await channel.send(embed=embed, view=CategoryView())
         await interaction.response.send_message(f"✅ Tickets deployed to {channel.mention}", ephemeral=True)
 
     # ── Row 3: Emergency Lockdown ──
     @ui.button(label="🚨 GLOBAL LOCKDOWN", style=discord.ButtonStyle.danger, row=3)
     async def lockdown(self, interaction: discord.Interaction, button: ui.Button):
         guild = interaction.guild or interaction.client.get_guild(self.guild_id)
-        channel = guild.get_channel(config.WELCOME_CHANNEL_ID)
+        
+        channels_conf = self.load_settings('channels')
+        channel_id = channels_conf.get('welcome_channel_id')
+
+        if not channel_id:
+             return await interaction.response.send_message("❌ Welcome channel not set for lockdown.", ephemeral=True)
+
+        channel = guild.get_channel(int(channel_id))
+        if not channel:
+             return await interaction.response.send_message(f"❌ Welcome channel with ID `{channel_id}` not found.", ephemeral=True)
+
         await channel.set_permissions(guild.default_role, send_messages=False)
         await interaction.response.send_message(f"⚠️ **LOCKDOWN ACTIVE:** {channel.mention} restricted.", ephemeral=True)
 

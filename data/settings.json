@@ -8,7 +8,7 @@
   "welcome": {
     "enabled": true,
     "channel_id": "1463854523935359115",
-    "title": "**`#———————————————————————————————#`** ✨ **WELCOME TO THE {server}**",
+    "title": "** ✨ **WELCOME TO THE {server}**",
     "message": "**`|`** 👋 **IDENTITY:** {member}\n**`|`** 📑 **REGISTRY:** `Member #{member guild.member_count}`\n**`|`** 📡 **LOCATION:** `{member guild.name}`\n**`#———————————————————————————————#`**\n\n**`|`** 📜 **CORE PROTOCOLS:**\n**`|`** 1️⃣ Respect the ` Community`.\n**`|`** 2️⃣ Stay active and have ` Fun `.\n**`|`** 3️⃣ Enjoy your ` Stay `\n\n**`#———————————————————————————————#`**\n**` STATUS: ACCESS GRANTED `**",
     "avatar_x": 25,
     "avatar_y": 35,
