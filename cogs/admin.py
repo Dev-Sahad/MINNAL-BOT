@@ -98,9 +98,9 @@ class AdminPanelView(ui.View):
         channel = guild.get_channel(int(channel_id))
         if not channel: return await interaction.response.send_message(f"❌ Welcome channel with ID `{channel_id}` not found.", ephemeral=True)
         
-        from cogs.verify import VerifyView
+        from cogs.verify import MinnalVerifyView
         embed = discord.Embed(title="` 💠 ` **IDENTITY VERIFICATION**", description="Click below to gain access.", color=0x2f3136)
-        await channel.send(embed=embed, view=VerifyView())
+        await channel.send(embed=embed, view=MinnalVerifyView())
         await interaction.response.send_message(f"✅ Verification deployed to {channel.mention}", ephemeral=True)
 
     @ui.button(label="🎫 Deploy Tickets", style=discord.ButtonStyle.primary, row=2, emoji="🎫")

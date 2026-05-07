@@ -341,6 +341,14 @@ class MinnalTickets(commands.Cog):
         await interaction.channel.send(embed=embed, view=CategoryView())
         await interaction.response.send_message("✅ Ticket panel posted!", ephemeral=True)
 
+    @app_commands.command(name="ticket_panel", description="Post the ticket panel in this channel (Alias)")
+    @app_commands.checks.has_permissions(administrator=True)
+    async def ticket_panel_alias(self, interaction: discord.Interaction):
+        """Direct alias for /ticket panel"""
+        embed = build_panel_embed(interaction.guild)
+        await interaction.channel.send(embed=embed, view=CategoryView())
+        await interaction.response.send_message("✅ Ticket panel posted!", ephemeral=True)
+
     @ticket.command(name="setup", description="Configure the ticket system settings")
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.describe(staff_role="The role that handles tickets", log_channel="Channel for ticket logs")
