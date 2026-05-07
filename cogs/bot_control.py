@@ -31,7 +31,6 @@ FEATURES = {
     "giveaways": "Giveaway system",
     "fun":       "Fun commands",
     "watchlist": "Anime watchlist",
-    "log_relay": "Railway log relay",
     "tickets":   "Ticket system",
     "stats":     "Server statistics",
 }

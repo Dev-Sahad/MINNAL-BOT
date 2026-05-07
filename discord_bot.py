@@ -32,7 +32,7 @@ COGS = [
     'cogs.voice_features', 'cogs.memes',
     'cogs.verify', 'cogs.autorole', 'cogs.ghostping',
     'cogs.stats', 'cogs.tickets', 'cogs.sentinel', 'cogs.codepilot',
-    'cogs.log_relay', 'cogs.welcome', 'cogs.anime', 'cogs.levels', 'cogs.help',
+    'cogs.welcome', 'cogs.anime', 'cogs.levels', 'cogs.help',
     'cogs.watchlist',
     'cogs.ai_chat',
 ]
@@ -59,7 +59,6 @@ COG_DESC = {
     'cogs.tickets':        'Ticket system',
     'cogs.sentinel':       'Server sentinel guard',
     'cogs.codepilot':      'AI code assistant',
-    'cogs.log_relay':      'Railway → Discord log relay',
     'cogs.welcome':        'Welcome & goodbye system',
     'cogs.anime':          'Anime search & daily posts',
     'cogs.levels':         'XP & level system',
