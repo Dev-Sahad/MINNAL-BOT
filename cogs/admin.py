@@ -171,10 +171,13 @@ class AdminCog(commands.Cog):
     @app_commands.command(name="clear", description="Purge messages")
     @is_admin()
     async def clear(self, interaction: discord.Interaction, amount: int):
+        # Using interaction.channel.purge requires deferring if it takes long
+        await interaction.response.defer(ephemeral=True)
         await interaction.channel.purge(limit=amount)
-        await interaction.response.send_message(f"⚡ Purged `{amount}` messages.", ephemeral=True)
+        await interaction.followup.send(f"⚡ Purged `{amount}` messages.", ephemeral=True)
     
-    @app_commands.command(name="hidden_command", description="This is a hidden command", hidden=True)
+    # FIX: Removed invalid 'hidden=True' parameter from app_commands.command
+    @app_commands.command(name="hidden_command", description="This is a hidden command")
     @is_admin()
     async def hidden_command(self, interaction: discord.Interaction):
         await interaction.response.send_message("You found the hidden command!", ephemeral=True)
