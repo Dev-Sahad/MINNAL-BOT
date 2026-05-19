@@ -59,6 +59,7 @@ COG_DESC = {
     'cogs.bot_control':    'Admin lock · feature toggles · audit log',
     'cogs.dashboard':      'Web admin panel & API server',
     'cogs.admin':          'Server control center',
+    'cogs.setup_commands': 'Server setup & configuration',
     'cogs.music':          'Voice & music player',
     'cogs.fun':            'Fun commands & games',
     'cogs.info':           'Bot info & command directory',
