@@ -17,7 +17,13 @@ try:
 except ImportError:
     def is_admin():
         async def predicate(interaction: discord.Interaction) -> bool:
-            return interaction.user.id in config.DEVELOPER_IDS or interaction.permissions.administrator
+            if not interaction.guild:
+                return True
+            user = interaction.user
+            is_dev = user.id in config.DEVELOPER_IDS
+            is_owner = interaction.guild.owner_id == user.id
+            is_admin_role = user.guild_permissions.administrator
+            return is_dev or is_owner or is_admin_role
         return app_commands.check(predicate)
 
 # ── Modals ──────────────────────────────────────────────────────────────────
