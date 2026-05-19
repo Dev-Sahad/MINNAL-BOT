@@ -1,5 +1,5 @@
 # =============================================================================
-#  cogs/music.py — SoundCloud Music Player (with FFmpeg path fix)
+#  cogs/music.py — SoundCloud Music Player (with FFmpeg path fix + Channel Restriction)
 # =============================================================================
 
 import discord
@@ -9,6 +9,7 @@ import asyncio
 import yt_dlp
 import shutil
 import os
+import json
 from collections import deque
 
 
@@ -63,6 +64,31 @@ class MusicCog(commands.Cog):
         if guild_id not in self.queues:
             self.queues[guild_id] = deque()
         return self.queues[guild_id]
+    
+    def load_config(self):
+        """Load settings.json"""
+        try:
+            if os.path.exists("data/settings.json"):
+                with open("data/settings.json", 'r') as f:
+                    return json.load(f)
+        except:
+            pass
+        return {}
+
+    def is_music_channel(self, interaction):
+        """Check if command is in music channel"""
+        config = self.load_config()
+        music_config = config.get("music", {})
+        
+        if not music_config.get("channel_id"):
+            return True
+        
+        required_channel_id = int(music_config.get("channel_id"))
+        
+        if interaction.channel.id == required_channel_id:
+            return True
+        
+        return False
     
     async def search_song(self, query):
         """Search SoundCloud for a song"""
@@ -134,6 +160,24 @@ class MusicCog(commands.Cog):
     async def play(self, interaction: discord.Interaction, query: str):
         await interaction.response.defer()
         
+        # CHECK MUSIC CHANNEL
+        if not self.is_music_channel(interaction):
+            config = self.load_config()
+            channel_id = config.get("music", {}).get("channel_id")
+            channel = self.bot.get_channel(int(channel_id)) if channel_id else None
+            
+            if channel:
+                await interaction.followup.send(
+                    f"❌ Music commands only work in {channel.mention}!",
+                    ephemeral=True
+                )
+            else:
+                await interaction.followup.send(
+                    "❌ Music channel not configured. Admin: use `/setmusic_channel`",
+                    ephemeral=True
+                )
+            return
+        
         if not interaction.user.voice:
             await interaction.followup.send("❌ Join a voice channel first!", ephemeral=True)
             return
@@ -186,6 +230,24 @@ class MusicCog(commands.Cog):
     
     @app_commands.command(name="skip", description="⏭️ Skip current song")
     async def skip(self, interaction: discord.Interaction):
+        # CHECK MUSIC CHANNEL
+        if not self.is_music_channel(interaction):
+            config = self.load_config()
+            channel_id = config.get("music", {}).get("channel_id")
+            channel = self.bot.get_channel(int(channel_id)) if channel_id else None
+            
+            if channel:
+                await interaction.response.send_message(
+                    f"❌ Music commands only work in {channel.mention}!",
+                    ephemeral=True
+                )
+            else:
+                await interaction.response.send_message(
+                    "❌ Music channel not configured. Admin: use `/setmusic_channel`",
+                    ephemeral=True
+                )
+            return
+        
         if not interaction.guild.voice_client:
             await interaction.response.send_message("❌ Not connected!", ephemeral=True)
             return
@@ -199,6 +261,24 @@ class MusicCog(commands.Cog):
     
     @app_commands.command(name="queue", description="📋 Show music queue")
     async def show_queue(self, interaction: discord.Interaction):
+        # CHECK MUSIC CHANNEL
+        if not self.is_music_channel(interaction):
+            config = self.load_config()
+            channel_id = config.get("music", {}).get("channel_id")
+            channel = self.bot.get_channel(int(channel_id)) if channel_id else None
+            
+            if channel:
+                await interaction.response.send_message(
+                    f"❌ Music commands only work in {channel.mention}!",
+                    ephemeral=True
+                )
+            else:
+                await interaction.response.send_message(
+                    "❌ Music channel not configured. Admin: use `/setmusic_channel`",
+                    ephemeral=True
+                )
+            return
+        
         queue = self.get_queue(interaction.guild.id)
         now_playing = self.now_playing.get(interaction.guild.id)
         
@@ -221,6 +301,24 @@ class MusicCog(commands.Cog):
     
     @app_commands.command(name="pause", description="⏸️ Pause music")
     async def pause(self, interaction: discord.Interaction):
+        # CHECK MUSIC CHANNEL
+        if not self.is_music_channel(interaction):
+            config = self.load_config()
+            channel_id = config.get("music", {}).get("channel_id")
+            channel = self.bot.get_channel(int(channel_id)) if channel_id else None
+            
+            if channel:
+                await interaction.response.send_message(
+                    f"❌ Music commands only work in {channel.mention}!",
+                    ephemeral=True
+                )
+            else:
+                await interaction.response.send_message(
+                    "❌ Music channel not configured. Admin: use `/setmusic_channel`",
+                    ephemeral=True
+                )
+            return
+        
         if not interaction.guild.voice_client:
             await interaction.response.send_message("❌ Not connected!", ephemeral=True)
             return
@@ -233,6 +331,24 @@ class MusicCog(commands.Cog):
     
     @app_commands.command(name="resume", description="▶️ Resume music")
     async def resume(self, interaction: discord.Interaction):
+        # CHECK MUSIC CHANNEL
+        if not self.is_music_channel(interaction):
+            config = self.load_config()
+            channel_id = config.get("music", {}).get("channel_id")
+            channel = self.bot.get_channel(int(channel_id)) if channel_id else None
+            
+            if channel:
+                await interaction.response.send_message(
+                    f"❌ Music commands only work in {channel.mention}!",
+                    ephemeral=True
+                )
+            else:
+                await interaction.response.send_message(
+                    "❌ Music channel not configured. Admin: use `/setmusic_channel`",
+                    ephemeral=True
+                )
+            return
+        
         if not interaction.guild.voice_client:
             await interaction.response.send_message("❌ Not connected!", ephemeral=True)
             return
@@ -245,6 +361,24 @@ class MusicCog(commands.Cog):
     
     @app_commands.command(name="stop", description="⏹️ Stop and disconnect")
     async def stop(self, interaction: discord.Interaction):
+        # CHECK MUSIC CHANNEL
+        if not self.is_music_channel(interaction):
+            config = self.load_config()
+            channel_id = config.get("music", {}).get("channel_id")
+            channel = self.bot.get_channel(int(channel_id)) if channel_id else None
+            
+            if channel:
+                await interaction.response.send_message(
+                    f"❌ Music commands only work in {channel.mention}!",
+                    ephemeral=True
+                )
+            else:
+                await interaction.response.send_message(
+                    "❌ Music channel not configured. Admin: use `/setmusic_channel`",
+                    ephemeral=True
+                )
+            return
+        
         if not interaction.guild.voice_client:
             await interaction.response.send_message("❌ Not connected!", ephemeral=True)
             return
@@ -302,4 +436,4 @@ class MusicCog(commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(MusicCog(bot)) 
+    await bot.add_cog(MusicCog(bot))
