@@ -34,7 +34,7 @@ COGS = [
     'cogs.stats', 'cogs.tickets', 'cogs.sentinel', 'cogs.codepilot',
     'cogs.welcome', 'cogs.anime', 'cogs.levels', 'cogs.help',
     'cogs.watchlist',
-    'cogs.ai_chat',
+    'cogs.ai_chat', 'cogs.setup_commands',
 ]
 
 COG_DESC = {
